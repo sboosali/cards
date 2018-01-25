@@ -177,7 +177,7 @@ test-suite documentation
  else
     build-depends:
        base
-     , cards-frontend
+     , cards-common
      , doctest
 
 

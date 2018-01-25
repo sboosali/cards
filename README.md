@@ -1,6 +1,6 @@
 # Cards
 
-Search through cards with smart queries and a nice UI 
+Search through cards with smart queries and a nice UI. 
 
 For card games like Magic The Gathering.
 

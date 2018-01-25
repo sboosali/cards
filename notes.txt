@@ -54,4 +54,31 @@ android-result
 └── nix-support
     └── hydra-build-products
 
+    emulateApp
+    <nixpkgs>/pkgs/development/mobile/androidenv/emulate-app.nix
+
+    nix-env -f ~/.nix-defexpr/channels/nixpkgs/pkgs/development/mobile/androidenv -i '.*'
+    error: cannot auto-call a function that has an argument without a default value (‘pkgs’)
+
+    $ nix-env -qaP '.*android.*'
+    nixpkgs.androidndk              android-ndk-r10e
+    nixpkgs.androidsdk              android-sdk-25.2.5
+    nixpkgs.androidsdk_extras       android-sdk-25.2.5
+    nixpkgs.android-studio          android-studio-3.0.1.0
+    nixpkgs.android-studio-preview  android-studio-preview-3.1.0.6
+    nixpkgs.android-udev-rules      android-udev-rules-20171113
+    nixpkgs.minijail                minijail-android-8.0.0_r34
+
+    # emulateApp
+    {androidenv, kitchensink}:
+    androidenv.emulateApp {
+      name = "emulate-${kitchensink.name}";
+      app = kitchensink;
+      platformVersion = "16";
+      useGoogleAPIs = true;
+      package = "com.appcelerator.kitchensink";
+      activity = ".KitchensinkActivity";
+    }
+
+
 ========================================

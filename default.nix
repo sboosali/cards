@@ -1,4 +1,3 @@
-# also see ./notes.txt
 
 ########################################
 let 
@@ -37,4 +36,5 @@ reflex-platform.project ({ pkgs, ... }: {
 
 ########################################
 /*
+also see ./notes.txt
 */

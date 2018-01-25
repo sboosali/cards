@@ -107,6 +107,8 @@ library
              , spiros
 --              , enumerate 
 
+-- reflex
+             , reflex
 -- ghcjs
              , reflex-dom
              , reflex-dom-core
