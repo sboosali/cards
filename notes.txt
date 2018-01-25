@@ -54,6 +54,7 @@ android-result
 └── nix-support
     └── hydra-build-products
 
+
     emulateApp
     <nixpkgs>/pkgs/development/mobile/androidenv/emulate-app.nix
 
@@ -80,5 +81,86 @@ android-result
       activity = ".KitchensinkActivity";
     }
 
+
+You need to install the APK on the emulator. You can do this with the adb command line tool that is included in the Android SDK.
+
+    adb -e install -r yourapp.apk
+
+Once you've done that you should be able to run the app.
+
+The -e and -r flags might not be necessary. They just specify that you are using an emulator (if you also have a device connected) and that you want to replace the app if it already exists.
+
+
+e.g.
+
+    adb -e install -r android-result/android-app-debug.apk 
+    # error: no emulators found
+
+    time nix-build emulate.nix
+    # building path(s) ‘/nix/store/fm8ik5krpgh5qz31vqc5pz3dciy0zhs6-android-app’
+    # building path(s) ‘/nix/store/c1dckq54dnq1h6yq1gk623rh14cs62c0-emulate-example-cards-frontend’
+    # /nix/store/c1dckq54dnq1h6yq1gk623rh14cs62c0-emulate-example-cards-frontend
+    # real	1m6.303s
+
+    /nix/store/c1dckq54dnq1h6yq1gk623rh14cs62c0-emulate-example-cards-frontend/bin/run-test-emulator 
+    # Looking for a free TCP port in range 5554-5584
+    # We have a free TCP port: 5554
+    # Error: Target id is not valid. Use 'android list targets' to get the target ids.
+
+    android list targets
+    # Available Android targets:
+    # ----------
+    # id: 1 or "android-26"
+    #      Name: Android 8.0.0
+    #      Type: Platform
+    #      API level: 26
+    #      Revision: 2
+    #      Skins: HVGA, QVGA, WQVGA400, WQVGA432, WSVGA, WVGA800 (default), WVGA854, WXGA720, WXGA800,     # WXGA800-7in
+    #  Tag/ABIs : no ABIs.
+
+
+    $ cat android-result/bin/deploy
+    /nix/store/srgawlc7ksmvsibzimnr3rdyf84vqayw-android-sdk-25.2.5/bin/adb install -r     "/nix/store/2lmi97hzssx10w067jiza4pzzi7dh6xw-android-app/android-app-debug.apk"
+
+no device connected
+
+    # android-result/bin/deploy
+    # error: no devices/emulators found
+    # adb: error: failed to get feature set: no devices/emulators found
+
+android device plugged in, with "USB debugging connected"
+
+    android-result/bin/deploy
+    # error: insufficient permissions for device: verify udev rules.
+
+https://developer.android.com/studio/run/device.html
+
+my user is already in the right group
+
+    id -Gn 
+    # sboo adm cdrom sudo dip plugdev lpadmin sambashare
+
+dont' need
+
+    # sudo usermod -aG plugdev $LOGNAME
+
+
+========================================
+Manually Install App On Android Phone
+
+    du -h android-result/android-app-debug.apk | cut -f1
+    # 4.4M
+
+    nautilus android-result
+    # popup a file browser GUI
+
+On the phone, under the USB options drop down, select transfer files.
+On my computer, a filesystem browser popped up, and I just dragged the APK into it.
+
+Then on my phone, using an app like File Manager, I just double-clicked on the file. 
+So I clicked `install`, it installed, I clicked `open`, and it worked!
+
+These `Activity`-killing actions preserved the application state: rotating the phone between landscape and portrait modes; pressing the right button (to list all open apps); and "alt-tabbing"; pressing the home button (to leave the app, then return).  
+Pressing the left button (the back button) reset the state. 
 
 ========================================

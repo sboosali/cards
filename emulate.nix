@@ -32,6 +32,14 @@ androidenv.emulateApp {
   # package         = cards-frontend.applicationId;
   # app             = cards-android-app;
 
+  # platformVersion = "26";
+  #   # $ android list targets
+  #   # Available Android targets:
+  #   # ----------
+  #   # id: 1 or "android-26"
+  #   #      Name: Android 8.0.0
+  #   #      Type: Platform
+
   platformVersion = "25";
     # $ nix-env -iA androidenv
     # installing ‘android-sdk-25.2.5’
