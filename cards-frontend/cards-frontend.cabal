@@ -1,0 +1,253 @@
+name:                cards-frontend
+version:             0.0.0
+cabal-version:       >=1.24
+build-type:          Simple 
+category:            Data 
+synopsis:            TODO 
+description:         
+ .
+ TODO
+ . 
+ see the source of "Cards.Frontend.Example" for an example.
+ .
+ transitive dependencies:
+ .
+ <<cards-frontend.png>>
+
+homepage:            http://github.com/sboosali/cards-frontend#readme
+bug-reports:         http://github.com/sboosali/cards-frontend/issues
+author:              Spiros Boosalis
+maintainer:          samboosalis@gmail.com
+copyright:           2018 Spiros Boosalis
+license:             BSD3
+license-file:        LICENSE
+stability:           provisional
+tested-with:         GHC == 8.0.2
+
+----------------------------------------
+
+-- PVP
+-- https://wiki.haskell.org/Package_versioning_policy
+-- "A.B is known as the major version number, and C the minor version number."
+
+extra-source-files:
+  README.md
+  stack.yaml
+  .travis.yml
+  HLint.hs
+
+-- data-files:
+--   data/
+
+source-repository head
+  type:     git
+  location: https://github.com/sboosali/cards-frontend
+
+----------------------------------------
+
+flag dump-splices
+  default:     False
+  description: make the `template` test suite dump its template-haskell splices
+  manual:      True
+
+flag jsaddle-warp
+  default:     False
+  description: use `jsaddle-warp` for development
+  manual:      True
+
+----------------------------------------
+
+library
+ hs-source-dirs:      sources
+
+ ghc-options:
+  -Wall
+-- disable
+  -fno-warn-unticked-promoted-constructors
+-- enable
+  -fwarn-incomplete-uni-patterns
+  -fwarn-incomplete-record-updates
+  -fwarn-identities
+  -fwarn-missing-fields
+
+ default-language:   Haskell2010
+ default-extensions: PackageImports AutoDeriveTypeable DeriveDataTypeable DeriveGeneric
+                     DeriveFunctor DeriveFoldable DeriveTraversable
+                     LambdaCase EmptyCase TypeOperators PostfixOperators
+                     ViewPatterns BangPatterns KindSignatures
+                     NamedFieldPuns RecordWildCards TupleSections
+                     MultiWayIf DoAndIfThenElse EmptyDataDecls
+                     MultiParamTypeClasses FlexibleContexts FlexibleInstances
+                     TypeFamilies FunctionalDependencies
+                     ScopedTypeVariables StandaloneDeriving
+
+ exposed-modules:
+                 Cards.Frontend
+                 Cards.Frontend.Types
+                 Cards.Frontend.Core		
+                 Cards.Frontend.Example                
+ other-modules:
+
+                 Cards.Frontend.Extra            
+                 -- Paths_cards-frontend
+-- autogen-modules:
+                 -- Paths_cards-frontend
+
+
+ if impl(ghc) && flag(jsaddle-warp)
+    build-depends:
+               jsaddle-warp
+
+ build-depends:
+               base >=4.7 && <5
+
+-- project
+             , cards-common
+-- mine 
+             , spiros
+--              , enumerate 
+
+-- ghcjs
+             , reflex-dom
+             , reflex-dom-core
+
+-- (extended) standard library 
+             , deepseq
+             , hashable
+             , containers
+             , unordered-containers
+             , text 
+             , bytestring
+             , transformers
+             , mtl
+
+-- ekmett 
+             , exceptions
+             , lens
+
+-- other packages 
+
+----------------------------------------
+
+executable example-cards-frontend
+ hs-source-dirs:      executables
+ main-is:             Main.hs
+
+ default-language:    Haskell2010
+ ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+
+ build-depends:
+    base
+  , cards-frontend
+
+----------------------------------------
+
+-- $ stack test unit
+test-suite unit
+ hs-source-dirs:      tests
+ main-is:             UnitTests.hs
+ type:                exitcode-stdio-1.0
+
+ default-language:    Haskell2010
+ ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+
+ other-modules:
+  Cards.Frontend.Test
+
+ build-depends:
+    base
+  , cards-frontend 
+  , tasty
+  
+
+-- $ stack test properties 
+test-suite properties 
+ hs-source-dirs:      tests
+ main-is:             PropertyTests.hs
+
+ type:                exitcode-stdio-1.0
+ default-language:    Haskell2010
+ ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+
+ other-modules:
+  Cards.Frontend.Property 
+
+ build-depends:
+    base
+  , cards-frontend
+  , QuickCheck 
+  , tasty
+  , tasty-quickcheck
+
+
+-- $ stack test documentation
+test-suite documentation 
+ hs-source-dirs:      tests
+ main-is:             DocTests.hs
+ type:                exitcode-stdio-1.0
+
+ default-language:    Haskell2010
+ ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+
+ -- ghcjsi doesn't work, or `doctest` needs the GHC API more tightly?
+ if impl(ghcjs)
+    buildable: False
+ else
+    build-depends:
+       base
+     , cards-frontend
+     , doctest
+
+
+-- $ stack test templates 
+-- Template Haskell 
+-- Verify that Template Haskell expansion works
+test-suite templates
+  hs-source-dirs:      tests
+  main-is:             TemplateHaskellTests.hs
+
+  type:             exitcode-stdio-1.0
+  default-language: Haskell2010
+  ghc-options:      -Wall -threaded
+
+  if flag(dump-splices)
+    ghc-options: -ddump-splices
+
+  build-depends:
+      base
+    , cards-frontend
+    , lens
+
+----------------------------------------
+
+-- $ stack bench 
+benchmark everything 
+ hs-source-dirs:      benchmarks
+ main-is:             Bench.hs
+
+ type:             exitcode-stdio-1.0
+ default-language: Haskell2010
+ ghc-options:      -Wall -O2 -threaded -fdicts-cheap -funbox-strict-fields
+ 
+ build-depends:
+    base
+  , cards-frontend
+  , criterion
+  , deepseq
+
+----------------------------------------
+
+-- originally generated with this command:  
+-- 
+-- $ stack new cards-frontend https://raw.githubusercontent.com/sboosali/configuration/master/stack/templates/spirosboosalis.hsfiles -p "module:Cards.Frontend" -p "filepath:Cards/Frontend"
+-- 
+-- given this configuration in `~/.stack/config.yaml`: 
+-- 
+-- templates:
+--   params:
+--     author-email:    samboosalis@gmail.com 
+--     author-name:     Spiros Boosalis 
+--     github-username: sboosali 
+--     copyright:       2018 Spiros Boosalis  
+--     synopsis:        TODO 
+

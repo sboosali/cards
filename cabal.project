@@ -1,0 +1,4 @@
+packages:
+  ./cards-common
+  ./cards-backend
+  ./cards-frontend

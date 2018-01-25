@@ -1,0 +1,233 @@
+name:                cards-common
+version:             0.0.0
+cabal-version:       >=1.24
+
+----------------------------------------
+
+build-type:          Simple 
+category:            Data 
+synopsis:            TODO 
+description:         
+ .
+ TODO
+ . 
+ see the source of "Cards.Common.Example" for an example.
+ .
+ transitive dependencies:
+ .
+ <<cards-common.png>>
+
+homepage:            http://github.com/sboosali/cards-common#readme
+bug-reports:         http://github.com/sboosali/cards-common/issues
+author:              Spiros Boosalis
+maintainer:          samboosalis@gmail.com
+copyright:           2018 Spiros Boosalis
+license:             BSD3
+license-file:        LICENSE
+stability:           provisional
+tested-with:         GHC == 8.2.2
+
+-- PVP
+-- https://wiki.haskell.org/Package_versioning_policy
+-- "A.B is known as the major version number, and C the minor version number."
+
+extra-source-files:
+  README.md
+  stack.yaml
+  .travis.yml
+  HLint.hs
+
+-- data-files:
+--   data/
+
+source-repository head
+  type:     git
+  location: https://github.com/sboosali/cards-common
+
+-- make the `template` test suite dump its template-haskell splices
+flag dump-splices
+  default: False
+  manual: True
+
+----------------------------------------
+
+library
+ hs-source-dirs:      sources
+ default-language:    Haskell2010
+ ghc-options:
+  -Wall
+-- disable
+  -fno-warn-unticked-promoted-constructors
+-- enable
+  -fwarn-incomplete-uni-patterns
+  -fwarn-incomplete-record-updates
+  -fwarn-identities
+  -fwarn-missing-fields
+
+ default-extensions: PackageImports AutoDeriveTypeable DeriveDataTypeable DeriveGeneric
+                     DeriveFunctor DeriveFoldable DeriveTraversable
+                     LambdaCase EmptyCase TypeOperators PostfixOperators
+                     ViewPatterns BangPatterns KindSignatures
+                     NamedFieldPuns RecordWildCards TupleSections
+                     MultiWayIf DoAndIfThenElse EmptyDataDecls
+                     MultiParamTypeClasses FlexibleContexts FlexibleInstances
+                     TypeFamilies FunctionalDependencies
+                     ScopedTypeVariables StandaloneDeriving
+
+ exposed-modules:
+                 Cards.Common
+                 Cards.Common.Types
+                 Cards.Common.Core		
+                 Cards.Common.Example                
+ other-modules:
+
+                 Cards.Common.Extra            
+                 -- Paths_cards-common
+-- autogen-modules:
+                 -- Paths_cards-common
+
+ build-depends:
+               base >=4.7 && <5
+
+-- mine 
+             , spiros
+--              , enumerate 
+
+-- (extended) standard library 
+             , deepseq
+             , hashable
+             , containers
+             , unordered-containers
+             , text 
+             , bytestring
+             , transformers
+             , mtl
+
+-- ekmett 
+             , exceptions
+             , lens
+
+-- other packages 
+
+----------------------------------------
+
+executable example-cards-common
+ hs-source-dirs:      executables
+ main-is:             Main.hs
+
+ default-language:    Haskell2010
+ ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+
+ build-depends:
+    base
+  , cards-common
+
+----------------------------------------
+
+-- $ stack test unit
+test-suite unit
+ hs-source-dirs:      tests
+ main-is:             UnitTests.hs
+ type:                exitcode-stdio-1.0
+
+ default-language:    Haskell2010
+ ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+
+ other-modules:
+  Cards.Common.Test
+
+ build-depends:
+    base
+  , cards-common 
+  , tasty
+  
+
+-- $ stack test properties 
+test-suite properties 
+ hs-source-dirs:      tests
+ main-is:             PropertyTests.hs
+ type:                exitcode-stdio-1.0
+
+ default-language:    Haskell2010
+ ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+
+ other-modules:
+  Cards.Common.Property 
+
+ build-depends:
+    base
+  , cards-common
+  , QuickCheck 
+  , tasty
+  , tasty-quickcheck
+
+
+-- $ stack test documentation
+test-suite documentation 
+ hs-source-dirs:      tests
+ main-is:             DocTests.hs
+ type:                exitcode-stdio-1.0
+
+ default-language:    Haskell2010
+ ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+
+-- ghcjsi doesn't work, or `doctest` needs the GHC API more tightly?
+ if impl(ghcjs)
+    buildable: False
+ else
+    build-depends:
+       base
+     , cards-frontend
+     , doctest
+
+
+-- $ stack test templates 
+-- Template Haskell 
+-- Verify that Template Haskell expansion works
+test-suite templates
+  hs-source-dirs:      tests
+  main-is:             TemplateHaskellTests.hs
+
+  type:             exitcode-stdio-1.0
+  default-language: Haskell2010
+  ghc-options:      -Wall -threaded
+
+  if flag(dump-splices)
+    ghc-options: -ddump-splices
+
+  build-depends:
+      base
+    , cards-common
+    , lens
+
+----------------------------------------
+
+-- $ stack bench 
+benchmark everything 
+ hs-source-dirs:      benchmarks
+ main-is:             Bench.hs
+ type:                exitcode-stdio-1.0
+
+ default-language: Haskell2010
+ ghc-options:      -Wall -O2 -threaded -fdicts-cheap -funbox-strict-fields
+ 
+ build-depends:
+    base
+  , cards-common
+  , criterion
+  , deepseq
+
+
+-- originally generated with this command:  
+-- 
+-- $ stack new cards-common https://raw.githubusercontent.com/sboosali/configuration/master/stack/templates/spirosboosalis.hsfiles -p "module:Cards.Common" -p "filepath:Cards/Common"
+-- 
+-- given this configuration in `~/.stack/config.yaml`: 
+-- 
+-- templates:
+--   params:
+--     author-email:    samboosalis@gmail.com 
+--     author-name:     Spiros Boosalis 
+--     github-username: sboosali 
+--     copyright:       2018 Spiros Boosalis  
+--     synopsis:        TODO 

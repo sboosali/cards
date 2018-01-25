@@ -1,0 +1,57 @@
+https://github.com/reflex-frp/reflex-platform/blob/develop/docs/project-development.md
+
+========================================
+# Installing
+
+$ nix-build && tree result
+...
+result
+├── ghc
+│   ├── backend -> /nix/store/bgraikacjv68lfcghkprj3mspwx9f2bn-backend-0.1.0.0
+│   ├── common -> /nix/store/lcgz36j77y6w7jyd39b14zp00hfaxn3s-common-0.1.0.0
+│   └── frontend -> /nix/store/fnq7vs2fnkj0hr6l0cv9pna9f0br2lln-frontend-0.1.0.0
+└── ghcjs
+    ├── common -> /nix/store/fgbmn6mjgh7gfdbgnb7a21fsb9175gmv-common-0.1.0.0
+    └── frontend -> /nix/store/khfpsla56pvqv174yzzc2y65g78bfflc-frontend-0.1.0.0
+
+$ nix-build -o backend-result  -A ghc.cards-backend
+$ nix-build -o frontend-result -A ghcjs.cards-frontend
+
+========================================
+# Build All Three Packages In A Shared Incremental Environment
+
+to build with GHC:
+
+    $ nix-shell -A shells.ghc
+    [nix-shell]$ cabal new-build all
+
+               # (`cabal` is supplied by the sandbox)
+
+to build with GHCJS:
+
+    $ nix-shell -A shells.ghcjs
+    [nix-shell]$ cabal --project-file=cabal-ghcjs.project --builddir=dist-ghcjs new-build all
+
+========================================
+# Building Frontends With GHC
+
+GHCJS can be quite slow, especially if you are using Template Haskell. Building the frontend with GHC can drastically speed up build times, and enables you to test from GHCi for even faster reloads.
+
+========================================
+# Building Mobile Apps
+
+$ # On Linux
+$ nix-build -o android-result -A android.frontend
+
+$ # On macOS
+$ nix-build -o ios-result -A ios.frontend
+
+$ tree android-result
+android-result
+├── android-app-debug.apk
+├── bin
+│   └── deploy
+└── nix-support
+    └── hydra-build-products
+
+========================================

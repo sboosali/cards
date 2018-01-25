@@ -1,0 +1,5 @@
+compiler: ghcjs
+
+packages:
+  cards-common/
+  cards-frontend/
