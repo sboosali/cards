@@ -7,4 +7,5 @@ tree android-result
 
 # Manually Install App On Android Phone
 du -h android-result/android-app-debug.apk | cut -f1
+readlink -f android-result
 nautilus android-result

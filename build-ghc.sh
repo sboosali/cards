@@ -1,2 +1,3 @@
 #!/bin/sh
-cabal new-build all
+nix-shell  -A shells.ghc  --run 'cabal new-build all'
+

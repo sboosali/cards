@@ -164,3 +164,202 @@ These `Activity`-killing actions preserved the application state: rotating the p
 Pressing the left button (the back button) reset the state. 
 
 ========================================
+MagicCards.Info Syntax
+
+https://magiccards.info/syntax.html
+
+
+Complex Queries
+====================
+
+any Simple Query can be combined with other Simple Queries via Logical Operators to make... Complex Queries! 
+
+e.g. "a or b", "a not b", "a -b", "a (b or c)", "a or (b c)", etc.
+
+
+Logical Operators
+====================
+
+_ and _
+_ _ (i.e. whitespace)
+
+_ or _
+
+not _
+- _
+
+( _ )
+
+
+Simple Queries
+====================
+
+Name
+--------------------
+Birds of Paradise
+"Birds of Paradise"
+!Anger (Match the full name)
+
+Rules Text (Oracle)
+--------------------
+o:Flying
+o:"First strike"
+o:{T} o:"add one mana of any color"
+(new) o:"whenever ~ deals combat damage"
+
+Types (Oracle)
+--------------------
+t:angel
+t:"legendary angel"
+t:basic
+t:"arcane instant"
+
+Colors
+--------------------
+c:w (Any card that is white)
+c:wu (Any card that is white or blue)
+c:wum (Any card that is white or blue, and multicolored)
+c!w (Cards that are only white)
+c!wu (Cards that are only white or blue, or both)
+c!wum (Cards that are only white and blue, and multicolored)
+c!wubrgm (Cards that are all five colors)
+c:m (Any multicolored card)
+c:l or c:c (Lands and colorless cards)
+
+Color Identity
+--------------------
+ci:wu (Any card that is white or blue, but does not contain any black, red or green mana symbols)
+Color Indicator:
+(new) in:wu (Any card that is white or blue according to the color indicator.)
+
+Mana Cost
+--------------------
+mana=3G (Spells that cost exactly 3G, or split cards that can be cast with 3G)
+mana>=2WW (Spells that cost at least two white and two colorless mana)
+mana<GGGGGG (Spells that can be cast with strictly less than six green mana)
+mana>=2RR mana<=6RR (Spells that cost two red mana and between two and six colorless mana)
+(new) mana>={2/R}
+(new) mana>={W/U}
+(new) mana>={UP}
+
+Power, Toughness, Converted Mana Cost
+--------------------
+pow>=8
+tou<pow (All combinations are possible)
+cmc=7
+(new) cmc>=*
+
+Rarity
+--------------------
+r:mythic
+
+Format
+--------------------
+f:standard (or block, extended, vintage, classic, legacy, modern, commander)
+banned:extended (or legal, restricted)
+
+Artist
+--------------------
+a:"rk post"
+
+Edition
+--------------------
+e:al/en (Uses the abbreviations that are listed on the sitemap)
+(new) e:al,be (Cards that appear in Alpha or Beta)
+(new) e:al+be (Cards that appear in Alpha and Beta)
+(new) e:al,be -e:al+be (Cards that appear in Alpha or Beta but not in both editions)
+(new) year<=1995 (Cards printed in 1995 and earlier)
+
+Is
+--------------------
+is:split, is:flip
+is:vanilla (Creatures with no card text)
+is:old, is:new, is:future (Old/new/future card face)
+is:timeshifted
+is:funny, not:funny (Unglued/Unhinged/Happy Holidays Promos)
+is:promo (Promotional cards)
+is:promo is:old (Promotional cards with the original card face)
+(new) is:permanent, is:spell
+(new) is:black-bordered, is:white-bordered, is:silver-bordered
+(new) has:foil
+
+Language
+--------------------
+l:de, l:it, l:jp (Uses the abbreviations that are listed on the sitemap)
+
+
+========================================
+Example Queries
+
+
+e.g. Saboteurs
+
+o:"whenever ~" ((o:"deals damage to a" or o:"deals combat damage to a") (o:opponent or o:player)) or o:"attacks and isn't blocked")
+
+==>
+
+Academy Raider rummages 
+Bearer Of Overwhelming Truths investigates 
+Blazing Specter has haste 
+Blizzard Specter either discards or bounces
+Cabal Executioner edicts and has morph
+Charnelhoard Wurm regrows and has trample 
+Centaur Rootcaster fetches a basic (but has no evasion) 
+Cephalid Constable bounces X 
+Daxos of Meletis draws-from-their-deck 
+Dimir Cutpurse both draws and forces discard (i.e. both a specter and ophidian) 
+Doomsday Specter coerces
+Dragonlord Ojutai anticipates and has flying 
+Drana,Liberator of Malakir is a mass-slith 
+Emperor’s Vanguard explores 
+Empyreal Voyager produces that much energy 
+Eternal of Harsh Truths draws and has afflict 
+Fiend of the Shadows steals a card from their hand and has flying 
+Ghastlord of Fugue coerces and is unblockable 
+Gishath, Sun's Avatar cheats all dinosaurs from your top X cards and has trample
+Grim Flayer mill-scries and has trample
+Hapatra places a counter, and makes a snake when you place counters; indirection
+Longtusk Cub produces energy and spends energy to grow; indirection 
+Looter il-kor: loots, has shadow 
+Mana Skimmer: freeze their land, flying 
+
+
+is:saboteur ???
+
+
+i.e.
+
+(then o:"whenever ~"
+      (or (then (or o:"deals damage to a"
+                    o:"deals combat damage to a"))
+          (or o:opponent
+              o:player))
+     o:"attacks and isn't blocked"))
+
+
+a.k.a. with regex:
+
+
+a.k.a. with BNF:
+
+o:"whenever ~ (deals [combat] damage to (an opponent | a player) | attacks and isn't blocked)"
+where "[_]", "(_)", and "_ | _" are bnf syntax and not oracle text
+
+-- pretty-printed
+o:"whenever ~ ( deals [combat] damage to ( an opponent 
+                                         | a player
+                                         ) 
+              | attacks and isn't blocked
+              )"
+
+-- distributed / flattened
+o:"whenever ~ deals        damage to an opponent
+o:"whenever ~ deals combat damage to an opponent
+o:"whenever ~ deals        damage to a  player
+o:"whenever ~ deals combat damage to a  player
+--
+o:"whenever ~ attacks and isn't blocked
+
+
+
+========================================

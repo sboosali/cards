@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
-nix-build  -o ghc-frontend-result  -A ghc.cards-frontend
+nix-build  -o desktop-result  -A ghc.cards-frontend
 
-tree ghc-frontend-result
+tree desktop-result
+
+./desktop-result/bin/example-cards-frontend 
