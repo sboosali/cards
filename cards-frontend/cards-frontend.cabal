@@ -51,8 +51,12 @@ flag dump-splices
   manual:      True
 
 flag jsaddle-warp
-  default:     False
-  description: use `jsaddle-warp` for development
+  default:     True
+  -- ^ NOTE should be False,
+  -- but reflex-platform's project.nix doesn't support cabal flags,
+  -- and cabal2nix doesn't evaluate conditionals correctly, 
+  -- thus not resolving conditional dependencies 
+  description: use `jsaddle-warp` for development. `ghc` only. 
   manual:      True
 
 ----------------------------------------
@@ -69,6 +73,12 @@ library
   -fwarn-incomplete-record-updates
   -fwarn-identities
   -fwarn-missing-fields
+
+ -- toggles between main being a `jsaddle-warp` server 
+ -- or a (?) `webkitgtk` non-server. 
+ if flag(jsaddle-warp)
+    cpp-options: -DJSADDLE_WARP
+    -- TODO check
 
  default-language:   Haskell2010
  default-extensions: PackageImports AutoDeriveTypeable DeriveDataTypeable DeriveGeneric
@@ -94,7 +104,8 @@ library
                  -- Paths_cards-frontend
 
 
- if impl(ghc) && flag(jsaddle-warp)
+ if impl(ghc)
+    -- && flag(jsaddle-warp)
     build-depends:
                jsaddle-warp
 

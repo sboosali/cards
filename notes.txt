@@ -163,6 +163,16 @@ So I clicked `install`, it installed, I clicked `open`, and it worked!
 These `Activity`-killing actions preserved the application state: rotating the phone between landscape and portrait modes; pressing the right button (to list all open apps); and "alt-tabbing"; pressing the home button (to leave the app, then return).  
 Pressing the left button (the back button) reset the state. 
 
+
+========================================
+
+conditional compilation via -fjsaddle-warp
+
+`jsaddle-warp` versus `webkitgtk` 
+
+CPP via -DJSADDLE_WARP
+
+
 ========================================
 MagicCards.Info Syntax
 
