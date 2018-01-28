@@ -16,7 +16,7 @@ PREFIX=(dist-newstyle/build/*/*/cards-frontend-0.0.0/c/example-cards-frontend/bu
 nix-shell -A shells.ghc --run "cabal new-build cards-frontend -fjsaddle-warp"
 
 # open browser
-(sleep 3 && chromium http://localhost:3911/) &
+(sleep 3 && chromium http://localhost:3911/ 2>/dev/null) &
 
 # launch development server
 # shellcheck disable=SC2086

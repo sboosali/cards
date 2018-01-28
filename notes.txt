@@ -165,12 +165,20 @@ Pressing the left button (the back button) reset the state.
 
 
 ========================================
+jsaddle-warp
 
 conditional compilation via -fjsaddle-warp
 
 `jsaddle-warp` versus `webkitgtk` 
 
 CPP via -DJSADDLE_WARP
+
+
+
+========================================
+dante, new-repl, nix-shell
+
+nix-shell -A shells.ghc 'cabal new-repl cards-frontend'
 
 
 ========================================

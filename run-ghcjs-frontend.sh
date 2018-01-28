@@ -1,9 +1,16 @@
 #!/bin/bash
 set -e
+#########################################
 
-PREFIX=./dist-ghcjs/build/x86_64-linux/ghcjs-0.2.1/cards-frontend-0.0.0/c/example-cards-frontend/build/example-cards-frontend
+PACKAGE=cards-frontend-0.0.0
 
-NAME=example-cards-frontend.jsexe
+EXECUTABLE=example-cards-frontend
+
+#########################################
+
+NAME="$EXECUTABLE.jsexe"
+
+PREFIX="./dist-ghcjs/build/x86_64-linux/ghcjs-0.2.1/$PACKAGE/c/$EXECUTABLE/build/$EXECUTABLE"
 
 echo
 echo "========================================"
@@ -19,7 +26,7 @@ echo "Copying / Post-Processing JavaScript..."
 echo "========================================"
 echo
 
-# cp "$PREFIX/example-cards-frontend.jsexe" 
+# cp "$PREFIX/$EXECUTABLE.jsexe" 
 rsync -a "$PREFIX/$NAME/" "js/$NAME"
 find "js/$NAME"
 
