@@ -37,7 +37,8 @@ result/
 \#*\#
 *.log
 TAGS
-.projectile
+#  .projectile
+#  .dir-locals.el
 
 # OS X
 .DS_Store

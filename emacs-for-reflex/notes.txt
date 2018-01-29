@@ -1,0 +1,73 @@
+========================================
+
+./emacs-result/bin/emacs -q --load emacs-for-reflex/init.el
+
+
+========================================
+emacs --eval "(progn x y ...)"
+
+./emacs.sh --eval '(progn (find-file "cards-frontend/sources/Cards/Frontend/Example.hs") (dante-mode))'
+
+$ emacs --batch --eval '(message (number-to-string (+ 2 3)))'
+5
+
+
+========================================
+dante.el
+
+(defcustom dante-repl-command-line-methods-alist
+  `((styx  . ,(lambda (root) (dante-repl-by-file root '("styx.yaml") '("styx" "repl" dante-target))))
+    (nix   . ,(lambda (root) (dante-repl-by-file root '("shell.nix" "default.nix")
+                                                      '("nix-shell" "--run" (if dante-target (concat "cabal repl " dante-target) "cabal repl")))))
+    (stack . ,(lambda (root) (dante-repl-by-file root '("stack.yaml") '("stack" "repl" dante-target))))
+    (mafia . ,(lambda (root) (dante-repl-by-file root '("mafia") '("mafia" "repl" dante-target))))
+    (new-build . ,(lambda (root) (when (or (directory-files root nil ".*\\.cabal$") (file-exists-p "cabal.project"))
+                                   '("cabal" "new-repl" dante-target))))
+    (bare  . ,(lambda (_) '("cabal" "repl" dante-target))))
+
+
+i.e.
+
+(new-build . ,(lambda (root) (when (or (directory-files root nil ".*\\.cabal$") (file-exists-p "cabal.project")) '("cabal" "new-repl" dante-target))
+
+(new-build . ,(lambda (root) (when (or (directory-files root nil ".*\\.cabal$") (file-exists-p "cabal.project")) '("cabal" "new-repl" dante-target))
+
+
+either
+
+    ((dante .
+       (dante-project-root      . "../")
+       (dante-target            . "cards-frontend")
+      )))
+
+or
+
+    ((dante .
+      ((dante-repl-command-line . ("nix-shell" "???" "-A" "shells.ghc" "--run" "cabal new-repl     cards-frontend"))
+      )))
+
+
+either
+
+    (setq-local dante-repl-command-line ("nix-shell" "-A" "shells.ghc" "--run" "cabal new-repl cards-frontend")
+
+or
+
+    (progn
+     (setq-local dante-project-root "../")
+     (setq-local dante-target       "cards-frontend"))
+
+
+
+
+    (setq-local 
+     dante-repl-command-line 
+     (list "nix-shell" "/home/sboo/haskell/cards/default.nix" "-A" "shells.ghc" "--run" "cabal new-repl cards-frontend"))
+
+
+
+
+
+
+
+========================================
