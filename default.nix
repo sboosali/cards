@@ -37,6 +37,22 @@ reflex-platform.project ({ pkgs, ... }: {
     pkgs.chromium
   ];
 
+  overrides = self: super: {
+
+    spiros = self.spiros_github;
+
+    spiros_local   = self.callPackage   ../spiros         {};
+    spiros_hackage = self.callHackage   "spiros"  "0.0.0" {};
+    spiros_github  = self.callCabal2nix "spiros"  (pkgs.fetchFromGitHub {
+      owner  = "sboosali";
+      repo   = "spiros";
+      rev    = "f6c86509cfa1b198c5deb4b89b3dadf6184ea1d0"; 
+               # "2b7517f27242863ba153bc045dd269b348df05aa" needs ghc-8.2.2
+      sha256 = "0bvxgp1mvlpwzr9qdpjs20qs4i813wnhrsl3nq25r8v68x6fblhk";
+    }) {};
+    #TODO use `super.callXXX`?
+  };
+
   withHoogle = false;
 
 })
