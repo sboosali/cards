@@ -1,8 +1,7 @@
 
 ########################################
+### "Imports"...
 let 
-
-# "Imports"...
 
 nixpkgs = import <nixpkgs> {};
 haskell = nixpkgs.haskell.lib;
@@ -12,6 +11,7 @@ reflex-platform = import ./reflex-platform {};
 
 in
 ########################################
+### Haskell Dependencies...
 let
 
 # utility functions
@@ -25,6 +25,10 @@ we can override it with newer versions of haskell packages.
 and some newly released ones are missing, 
 since `reflex-platform` pins an older `nixpkgs`, 
 and `ghcjs` uses `ghc-8.0`, the
+
+NOTE: `self` v `super`
+self.callCabal2nix amd self.callHackage both call self.callPackage,
+which is correct, since we want to mix in any siblings that are being overriden too.
 
 */
 
@@ -50,11 +54,35 @@ myOverlaysWith = pkgs: self: super: let
              #        sha256          :: String
              #      } 
 
+ # override the package without overriding any dependencies
+ cabal2nix_ = name: source:   cabal2nix name source  {};
+ hackage_   = name: version:  hackage   name version {};
+ local_     = path:           local     path         {};
+ github_    = o:              github    o            {};
+
  in
 
  {
+   ########################################
+   # Add Haskell Packages Below           #
+   ######################################## 
 
- /* # e.g.
+    spiros = github_ {
+      owner  = "sboosali";
+      repo   = "spiros";
+      rev    = "f6c86509cfa1b198c5deb4b89b3dadf6184ea1d0"; 
+      sha256 = "0bvxgp1mvlpwzr9qdpjs20qs4i813wnhrsl3nq25r8v68x6fblhk";
+    };
+      # NOTE
+      # latest needs ghc-8.2.2
+      # rev "2b7517f27242863ba153bc045dd269b348df05aa" 
+
+ /* 
+
+  # You can use `callHackage` and `callCabal2nix` 
+  # to bump package versions or build them from GitHub. 
+  # e.g.
+
     spiros = self.spiros_loose;
 
     spiros_loose   = skipTests (dropUpperBounds self.spiros_github);
@@ -76,24 +104,41 @@ myOverlaysWith = pkgs: self: super: let
 
  };
 
-  #
-  # You can use
-  # `callHackage` and `callCabal2nix` to bump package versions or
-  # build them from GitHub. e.g.
-  #
-  #     overrides = self: super: {
-  #       lens = self.callHackage "lens" "4.15.4" {};
-  #       free = self.callCabal2nix "free" (pkgs.fetchFromGitHub {
-  #         owner = "ekmett";
-  #         repo = "free";
-  #         rev = "a0c5bef18b9609377f20ac6a153a20b7b94578c9";
-  #         sha256 = "0vh3hj5rj98d448l647jc6b6q1km4nd4k01s9rajgkc2igigfp6s";
-  #       }) {};
-  #     };
+in
+########################################
+### Executables..
+let
 
+/*
+
+NOTE
+`systemExecutables` uses `nixpkgs`, not some given `pkgs`,
+because `reflex-platform` pins an older `nixpkgs`, but
+the executables of system packages don't depend on 
+haskell packages. and even those that are haskell executables,
+like pandoc or cabal-install, are build-time dependencies,
+not run-time dependencies, and thus can be looser. 
+
+*/
+myExecutablesWith = ghc: let 
+ 
+ systemExecutables = with nixpkgs; [
+  cabal-install
+  chromium
+  inotify-tools
+ ];
+
+ haskellExecutables = with ghc; [
+  
+ ];
+ 
+ in
+
+ systemExecutables ++ haskellExecutables;
 
 in
 ########################################
+### 
 reflex-platform.project ({ pkgs, ... }: {
 
   packages = {
@@ -120,10 +165,7 @@ reflex-platform.project ({ pkgs, ... }: {
     bundleName       = "Example iOS App";
   };
 
-  tools = ghc: with ghc; [
-    pkgs.cabal-install
-    pkgs.chromium
-  ];
+  tools = myExecutablesWith;
 
   withHoogle = false;
 
@@ -132,7 +174,6 @@ reflex-platform.project ({ pkgs, ... }: {
     # :: PackageSet -> PackageSet -> { <package name> :: Derivation }
 
 })
-
 ########################################
 # also see ./notes.txt
 
