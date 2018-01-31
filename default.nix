@@ -119,6 +119,9 @@ haskell packages. and even those that are haskell executables,
 like pandoc or cabal-install, are build-time dependencies,
 not run-time dependencies, and thus can be looser. 
 
+see
+
+
 */
 myExecutablesWith = ghc: let 
  
@@ -129,7 +132,8 @@ myExecutablesWith = ghc: let
  ];
 
  haskellExecutables = with ghc; [
-  
+  ghcid
+#  nix-tags-haskell  
  ];
  
  in
