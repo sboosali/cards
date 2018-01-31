@@ -1,7 +1,3 @@
-((nil .
-  ((default-directory . "/home/sboo/haskell/cards")))
-
- (dante-mode . 
+((nil . 
   ((dante-repl-command-line .
-     ("nix-shell" "/home/sboo/haskell/cards/default.nix" "-A" "shells.ghc" "--run" "cabal new-repl cards-frontend"))))
-)
+     ("nix-shell" "/home/sboo/haskell/cards/default.nix" "-A" "shells.ghc" "--run" "cabal new-repl cards-frontend")))))

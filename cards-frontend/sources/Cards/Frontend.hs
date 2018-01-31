@@ -1,10 +1,6 @@
-
 {-| 
 
 Examples prefixed by @>>> @ are @doctest@'ed. 
-
->>> stub
-"stub"
 
 -}
 module Cards.Frontend
@@ -13,4 +9,3 @@ module Cards.Frontend
  ) where
 import Cards.Frontend.Types
 import Cards.Frontend.Core
-

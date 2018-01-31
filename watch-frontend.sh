@@ -3,7 +3,7 @@
 
 ########################################
 
-nix-shell -A shells.ghc --run 'ghcid --directory="./cards-frontend/" --reload="./sources/" --restart="./cards-frontend.cabal" --project="cards-frontend" --command "cabal new-repl cards-frontend"'
+nix-shell -A shells.ghc --run 'ghcid --directory="./cards-frontend/" --reload="./sources/" --restart="./cards-frontend.cabal" --project="cards-frontend" --command "cabal new-repl cards-frontend" --outputfile=./ghcid.txt'
 
 #  -c --command=COMMAND  Command to run (defaults to ghci or cabal repl)
 #  -T --test=EXPR        Command to run after successful loading
@@ -12,6 +12,8 @@ nix-shell -A shells.ghc --run 'ghcid --directory="./cards-frontend/" --reload=".
 #     --restart=PATH     Restart the command when the given file or directory
 #                        contents change (defaults to .ghci and any .cabal file)
 #  -C --directory=DIR    Set the current directory
+#  -o --outputfile=FILE  File to write the full output to
+#     --ignore-loaded    Keep going if no files are loaded. Requires --reload
 
 
 # TARGET="cards-frontend"

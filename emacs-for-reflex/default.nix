@@ -1,6 +1,15 @@
 { nixpkgs ? import <nixpkgs> {}
 , emacs ? nixpkgs.emacs25
-}: 
+}:
+
+
+/* USAGE...
+
+Build and Launch:
+
+    ../editor.sh
+
+*/
 
 /* NOTES...
 
@@ -20,14 +29,6 @@ Building:
 Running:
 
     ./result/bin/emacs
-
-Build and Launch:
-
-    nix-build default.nix && ./result/bin/emacs
-
-    # aka
-
-    ../editor.sh
 
 See:
 
