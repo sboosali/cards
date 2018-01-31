@@ -2,11 +2,58 @@
 ########################################
 let 
 
+# imports
+nixpkgs = import <nixpkgs> {};
+haskell = nixpkgs.haskell.lib;
+
+# utility functions
+skipTests       = haskell.dontCheck; 
+dropUpperBounds = haskell.doJailbreak;
+
+# 
+# cabal2nix = nixpkgs.haskellPackages.callCabal2nix;
+# hackage   = nixpkgs.haskellPackages.callHackage
+# nixpkgs.haskellPackages.callPackage
+
+# haskell = nixpkgs.haskell.packages.ghc822;
+
+# `reflex-platform` uses a pinned/older `nixpkgs` version.
 reflex-platform = import ./reflex-platform {};
 
 in
 ########################################
+let
 
+cardsOverlays = pkgs: self: super: let
+
+ cabal2nix = name: source: 
+             self.callCabal2nix name source;
+
+ hackage   = name: version:
+             self.callHackage name version;
+
+ local     = path:
+             self.callPackage path; 
+
+ github    = o:
+             cabal2nix o.repo (pkgs.fetchFromGitHub o); 
+
+             # o ::
+             #      { owner           :: String
+             #        repo            :: String
+             #        rev             :: String
+             #        fetchSubmodules :: Bool
+             #        sha256          :: String
+             #      } 
+
+ in
+
+ {
+ 
+ };
+
+in
+########################################
 reflex-platform.project ({ pkgs, ... }: {
 
   packages = {
@@ -34,16 +81,31 @@ reflex-platform.project ({ pkgs, ... }: {
   };
 
   tools = ghc: with ghc; [
+    pkgs.cabal-install
     pkgs.chromium
   ];
 
-  overrides = self: super: {
+  withHoogle = false;
 
-    spiros = self.spiros_github;
+#  overrides = cardsOverlays pkgs self super;
 
-    spiros_local   = self.callPackage   ../spiros         {};
-    spiros_hackage = self.callHackage   "spiros"  "0.0.0" {};
-    spiros_github  = self.callCabal2nix "spiros"  (pkgs.fetchFromGitHub {
+  overrides = self: super: let
+   # cabal2nix = self.callCabal2nix;
+   # hackage   = self.callHackage;
+   # file      = self.callPackage; 
+   cabal2nix = super.callCabal2nix;
+   hackage   = super.callHackage;
+   local     = super.callPackage; 
+   github    = o: cabal2nix o.repo (pkgs.fetchFromGitHub o); 
+
+   in
+
+   {
+    spiros = skipTests (dropUpperBounds self.spiros_github);
+
+    spiros_local   = super.callPackage   ../spiros         {};
+    spiros_hackage = super.callHackage   "spiros"  "0.0.0" {};
+    spiros_github  = cabal2nix "spiros" (pkgs.fetchFromGitHub {
       owner  = "sboosali";
       repo   = "spiros";
       rev    = "f6c86509cfa1b198c5deb4b89b3dadf6184ea1d0"; 
@@ -51,9 +113,11 @@ reflex-platform.project ({ pkgs, ... }: {
       sha256 = "0bvxgp1mvlpwzr9qdpjs20qs4i813wnhrsl3nq25r8v68x6fblhk";
     }) {};
     #TODO use `super.callXXX`?
-  };
 
-  withHoogle = false;
+   # e.g. skipTests (dropUpperBounds )
+   # https://github.com/cjdev/monad-persist
+
+  };
 
 })
 
