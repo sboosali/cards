@@ -5,6 +5,8 @@
 
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE DataKinds, ConstraintKinds #-}
+-- {-# LANGUAGE GeneralizedNewtypeDeriving, DeriveAnyClass #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, StandaloneDeriving #-}
 
 {-|
 
@@ -93,13 +95,13 @@ e.g.:
 
 @
 -- the <enter> key
->>> KeyCode 32 
+> KeyCode 32 
 @
 
 -}
 newtype KeyCode = KeyCode
  { getKeyCode :: Word
- }
+ } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {- |
 
@@ -107,13 +109,13 @@ e.g.:
 
 @
 -- 30 "ticks" down?
->>> ScrollDistance (-30) 
+> ScrollDistance (-30) 
 @
 
 -}
 newtype ScrollDistance = ScrollDistance
  { getScrollDistance :: Double
- }
+ } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {- |
 
@@ -125,14 +127,16 @@ e.g.:
 
 @
 -- top left corner
->>> MousePosition 0 0 
+> MousePosition 0 0 
 @
 
 -}
 data MousePosition = MousePosition
  { getHorizontalPosition :: Int
  , getVerticalPosition   :: Int
- }
+ } deriving (Show,Read,Eq,Ord,Generic)
+instance NFData   MousePosition 
+instance Hashable MousePosition 
 
 {-| 
 
@@ -140,7 +144,7 @@ e.g.:
 
 @
 -- ?
->>> TouchEventResult ... 
+> TouchEventResult ... 
 @
 
 NOTES
@@ -673,6 +677,8 @@ onWheel = domEvent Wheel
 ----------------------------------------  
 
 {-
+
+deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
 
 Click
 Abort

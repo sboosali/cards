@@ -1,7 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
-{-# LANGUAGE CPP #-}
-
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -37,24 +35,19 @@ module Cards.Frontend.Example where
 
 import Cards.Frontend
 import Cards.Frontend.Extra
+import Cards.Frontend.Runner (mainWidgetWith, __GHCJS_RUNNER_TEXT__)
 --import Prelude.Spiros hiding (Text,div)
 
 import Reflex hiding (Query)
 
-#ifdef JSADDLE_WARP
-import Language.Javascript.JSaddle.Warp
-import Reflex.Dom.Core        (mainWidgetWithHead)
 import Reflex.Dom      hiding (mainWidgetWithHead,run,Query,element)
-#else
-import Reflex.Dom      hiding                (Query,element)
-#endif
 
 --import qualified Control.Lens as L
 
 --import qualified Data.Map as Map
 
 --import qualified Data.Text as T
-import Data.Text (Text)
+--import Data.Text (Text)
 --import Data.Text (pack, unpack)
 
 --import Text.Read (readMaybe)
@@ -64,12 +57,7 @@ import Data.Text (Text)
 ----------------------------------------
 
 main :: IO ()
-
-#ifdef JSADDLE_WARP
-main = run 3911 $ mainWidgetWithHead wHead wBody'
-#else
-main = mainWidgetWithHead wHead wBody'
-#endif
+main = mainWidgetWith wHead wBody'
 
 ----------------------------------------
 
@@ -108,13 +96,7 @@ app = display =<< count_Int =<< button sLabel
  count_Int = count & (fmap.fmap.fmap) (id :: Int -> Int)
 --app = sLabel & (button >=> display >=> count)
 --app = button sLabel >>= count >>= display 
-
-sLabel :: Text
-#ifdef JSADDLE_WARP
-sLabel = "ClickMe (jsaddle-warp)"
-#else
-sLabel = "ClickMe (webkitgtk)"
-#endif
+ sLabel = "ClickMe ("<> __GHCJS_RUNNER_TEXT__ <>")"
 
 ----------------------------------------
 

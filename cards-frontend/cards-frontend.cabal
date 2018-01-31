@@ -96,6 +96,7 @@ library
                  Cards.Frontend.Types
                  Cards.Frontend.Event
                  Cards.Frontend.Core		
+                 Cards.Frontend.Runner
                  Cards.Frontend.Example                
  other-modules:
 

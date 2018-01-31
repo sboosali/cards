@@ -39,7 +39,7 @@ type SomeWidget_ = (forall x. Widget x ())
 {-|
 
 @
->>> :i Widget
+> :i Widget
 -- module Reflex.Dom.Main
 type Widget x =
   PostBuildT
@@ -54,7 +54,7 @@ type Widget x =
 
 instance Monad (Widget x)
 
->>> :i Widget_
+> :i Widget_
 -- module Cards.Frontend.Extra
 type Widget_ x =
   PostBuildT DomTimeline
