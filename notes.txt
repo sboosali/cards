@@ -381,3 +381,47 @@ o:"whenever ~ attacks and isn't blocked
 
 
 ========================================
+REFLEX/GHCJS DOM
+
+
+
+mainWidget $ do
+ (eClick, wButton) <- button' "CLICK"
+ return eClick 
+
+
+-- | html for a button
+hButton :: MonadWidget t m => Text -> m ( t ())
+hButton t = do
+  (e, _) <- element "button" def $ text t
+  return e
+
+-- | all events for a button
+runWidget :: (forall x. Widget x ()) -> IO ()
+runWidget w = mainWidget w
+
+example_button = runWidget $ do 
+ esButton <- hButton "CLICK"
+ return esButton
+
+esButton <- runWidget $ do 
+ esButton <- hButton "CLICK"
+ return esButton
+
+>>> import Reflex 
+>>> import Reflex.Dom 
+>>> :set -XOverloadedStrings
+>>> -- `ghci` monad is `IO`, no `MonadWidget` 
+>>> (e, _) <- element "button" def $ text "(click)"
+>>> :t domEvent Click e 
+
+
+esButton <- mainWidget $ do 
+ (esButton,_) <- element "button" def (text "CLICK")
+ return esButton
+
+
+
+
+
+========================================
