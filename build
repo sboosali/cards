@@ -4,6 +4,51 @@ set -e
 
 ACTION=build
 
+function exit-with-help () {
+
+  echo '[Usage]'
+  echo
+  echo '    build COMPILER [TARGET[,TARGET...]]'
+  echo
+  echo '`nix-shell` calls `./default.nix` by default'
+  echo
+
+  echo '[Arguments]'
+  echo
+  echo 'COMPILER can be:'
+  echo '  ghc'
+  echo '  ghcjs'
+  echo
+  echo 'TARGET is `all` by default'
+  echo 
+  echo 'TARGET can be:'
+  echo '  all'
+  echo '  common'
+  echo '  frontend'
+  echo '  backend'
+  echo '  (or any `package` in the new cabal `.project` files.)'
+  echo
+
+  echo '$ cat cabal.project' 
+  (cat cabal.project | sed 's/^/> /') || true
+    # indent file
+  echo
+
+  echo '$ cat cabal-ghcjs.project' 
+  (cat cabal-ghcjs.project | sed 's/^/> /') || true
+    # indent file
+  echo 
+
+  echo '[Examples]'
+  echo
+  echo '    build ghc'
+  echo '    build ghc   backend'
+  echo '    build ghcjs frontend'
+  echo '    build ghcjs common,frontend'
+  echo
+  exit 1
+}
+
 function set-variables-from-arguments () {
  case "$1" in
  
@@ -20,6 +65,7 @@ function set-variables-from-arguments () {
   ;;
  
   *)
+     exit-with-help
   ;;
  
  esac
@@ -37,37 +83,7 @@ elif [ $# == 2 ]; then
   TARGET="$2"
 
 else
-  echo '[Usage]'
-  echo '    build COMPILER [TARGET[,TARGET...]]'
-  echo
-  echo '[Arguments]'
-  echo
-  echo 'COMPILER can be:'
-  echo '  ghc'
-  echo '  ghcjs'
-  echo
-  echo 'TARGET is `all` by default'
-  echo 
-  echo 'TARGET can be:'
-  echo '  all'
-  echo '  common'
-  echo '  frontend'
-  echo '  backend'
-  echo
-  echo 'or can any package in the new cabal `.project` files.'
-  echo 'cat cabal.project' 
-  cat cabal.project
-  echo
-  echo 'cat cabal-ghcjs.project' 
-  cat cabal-ghcjs.project
-  echo 
-  echo '[Examples]'
-  echo '    build ghc'
-  echo '    build ghc   backend'
-  echo '    build ghcjs frontend'
-  echo '    build ghcjs common,frontend'
-  echo
-  exit 1
+  exit-with-help
 fi
 
 ########################################
