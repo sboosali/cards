@@ -94,6 +94,7 @@ library
  exposed-modules:
                  Cards.Frontend
                  Cards.Frontend.Types
+                 Cards.Frontend.Event
                  Cards.Frontend.Core		
                  Cards.Frontend.Example                
  other-modules:

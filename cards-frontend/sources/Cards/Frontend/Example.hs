@@ -44,9 +44,9 @@ import Reflex hiding (Query)
 #ifdef JSADDLE_WARP
 import Language.Javascript.JSaddle.Warp
 import Reflex.Dom.Core        (mainWidgetWithHead)
-import Reflex.Dom      hiding (mainWidgetWithHead,run,Query)
+import Reflex.Dom      hiding (mainWidgetWithHead,run,Query,element)
 #else
-import Reflex.Dom      hiding                (Query)
+import Reflex.Dom      hiding                (Query,element)
 #endif
 
 --import qualified Control.Lens as L
@@ -75,6 +75,7 @@ main = mainWidgetWithHead wHead wBody'
 
 --TODO lol
 wBody' = do
+  test
   app
   wBody
 
@@ -115,4 +116,29 @@ sLabel = "ClickMe (jsaddle-warp)"
 sLabel = "ClickMe (webkitgtk)"
 #endif
 
+----------------------------------------
+
+--test :: SomeWidget_  
+test = do
+  
+ (events, _widget) <- element
+     "div"
+      (pure $ "style" =: style)
+      blank -- wMousePosition
+      -- NOTE
+      -- "thread blocked indefinitely in an MVar operation"
+
+ let eMousemove = events & onMousemove
+ let eContent = (eMousemove <&> displayMousePosition)
+ 
+ dContent <- holdDyn "" eContent
+
+ let wMousePosition = dynText dContent
+ 
+ wMousePosition
+
+ where
+ displayMousePosition (MousePosition x y) = s2t $ show (x,y)
+ style = "display:inline-block;width:100px;height:100px;background-color:gray"
+ 
 ----------------------------------------

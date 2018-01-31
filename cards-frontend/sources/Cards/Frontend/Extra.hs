@@ -12,10 +12,14 @@
 module Cards.Frontend.Extra
  ( module Cards.Frontend.Extra
  , module Prelude.Spiros
+ , module Data.Text
+-- , module Reflex.Dom
  ) where
 
-import Reflex.Dom
+import Reflex.Dom hiding (element)
 
+import Data.Text (Text)
+import qualified Data.Text as T
 import Prelude.Spiros hiding (Text,div)
 
 ---------------------------------------
@@ -28,6 +32,9 @@ import Prelude.Spiros hiding (Text,div)
 
 -}
 type SomeWidget a = (forall x. Widget x a)
+
+-- | 
+type SomeWidget_ = (forall x. Widget x ())
 
 {-|
 
@@ -101,15 +108,13 @@ NOTES
 type HasEvent t d event =
   HasDomEvent t (El' d t) event
 
-{-| (has kind @Constraint@). 
+----------------------------------------
 
-NOTES
+s2t :: String -> Text
+s2t = T.pack
 
-@
-@
-
--}  
-type HasClick t d = HasEvent t d 'ClickTag
+t2s :: Text -> String  
+t2s = T.unpack
 
 ----------------------------------------
 
@@ -123,105 +128,25 @@ div_ = div blank
 
 ----------------------------------------
 
-
-{-|
-
-@
-domEvent <name>   :: <element> -> Event <type>
-domEvent <name> _ ::              Event <type>
-@
-
+{-| most general
 
 @
-Click :: EventName 'ClickTag
-domEvent _ :: Event 
+= 'elDynAttr''
 @
 
-@
-
-domEvent Click
-  :: HasDomEvent t target 'ClickTag
-  => target
-  -> Event t (DomEventType target 'ClickTag)
-
-domEvent Click blank
-  :: (Monad m, HasDomEvent t (m ()) 'ClickTag)
-  => Event t (DomEventType (m ()) 'ClickTag)
-
-domEvent Click
-  :: HasDomEvent t target 'ClickTag
-  => target
-  -> Event t (DomEventType target 'ClickTag)
+e.g.:
 
 @
-
-NOTES
-
-@
--- `Element` is the most general element
--- (versus the specialized TextInput, InputElement, TextAreaElement, etc).
-
-instance forall k t (d :: k) (en :: EventTag).
- Reflex t =>
- HasDomEvent t (Element EventResult d t) en
-
-data Element (er :: EventTag -> *) (d :: k) t
- = Element
-  { _element_events :: EventSelector t
-                      (Data.Functor.Misc.WrapArg er EventName)
-  , _element_raw    :: RawElement d
-  }
-
+> (events, widget) <- elDynAttr "div" (pure $ "style" =: "display:inline-block") blank
 @
 
 -}
---onClick :: DomBuilder t m =>  -> m (Event t ())
-onClick
-  :: (HasDomEvent t target 'ClickTag)
-  => target
-  -> Event t (DomEventType target 'ClickTag)
-onClick = domEvent Click
-
-{-| specialized 'onClick'.
-
-@
-= 'domEvent' 'Click'
-@
-
-NOTES
-
-@
-> :i El
-type El = Element EventResult GhcjsDomSpace :: * -> *
-
-> :i DomEventType
-type instance DomEventType (Element EventResult d t) en
-  = EventResultType en
-
-> :i EventResultType
-type family EventResultType (en :: EventTag) :: *  where
- EventResultType 'ClickTag = ()
- ...
-
-@
-
-so
-
-@
-DomEventType (El' d t) 'ClickTag
-~
-DomEventType (Element EventResult d t) 'ClickTag
-~
-EventResultType 'ClickTag
-~
-()
-@
-
--}  
-onClick'
-  :: (HasClick t d)
-  => (El' d t)
-  -> Event t ()
-onClick' = domEvent Click
+element
+  :: (MonadWidget t m)
+  => Text
+  -> Dynamic t AttributeMap
+  -> m a
+  -> m (El' (DomBuilderSpace m) t, a)
+element = elDynAttr'
 
 ----------------------------------------
