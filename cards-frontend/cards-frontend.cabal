@@ -59,6 +59,30 @@ flag jsaddle-warp
   description: use `jsaddle-warp` for development. `ghc` only. 
   manual:      True
 
+-- You can disable the doctests test suite with -f-test-doctests
+flag test-doctests
+  default: False
+  manual:  True
+
+-- You can disable the hunit test suite with -f-test-hunit
+flag test-hunit
+  default: False
+  manual:  True
+
+-- Build the properties test if we're building tests
+flag test-properties
+  default: False
+  manual:  True
+
+flag test-templates
+  default: False
+  manual:  True
+
+-- whether to execute the benchmarks (which may take even longer than the tests)
+flag run-benchmarks
+  default: False
+  manual:  True
+
 ----------------------------------------
 
 library
@@ -177,10 +201,13 @@ test-suite unit
  other-modules:
   Cards.Frontend.Test
 
- build-depends:
-    base
-  , cards-frontend 
-  , tasty
+ if !flag(test-hunit)
+    buildable: False
+ else
+    build-depends:
+       base
+     , cards-frontend 
+     , tasty
   
 
 -- $ stack test properties 
@@ -195,12 +222,15 @@ test-suite properties
  other-modules:
   Cards.Frontend.Property 
 
- build-depends:
-    base
-  , cards-frontend
-  , QuickCheck 
-  , tasty
-  , tasty-quickcheck
+ if !flag(test-properties)
+    buildable: False
+ else
+    build-depends:
+       base
+     , cards-frontend
+     , QuickCheck 
+     , tasty
+     , tasty-quickcheck
 
 
 -- $ stack test documentation
@@ -213,7 +243,7 @@ test-suite documentation
  ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
 
  -- ghcjsi doesn't work, or `doctest` needs the GHC API more tightly?
- if impl(ghcjs)
+ if (!flag(test-doctests)) || impl(ghcjs)
     buildable: False
  else
     build-depends:
@@ -236,10 +266,13 @@ test-suite templates
   if flag(dump-splices)
     ghc-options: -ddump-splices
 
-  build-depends:
-      base
-    , cards-frontend
-    , lens
+  if !flag(test-templates)
+     buildable: False
+  else
+     build-depends:
+         base
+       , cards-frontend
+       , lens
 
 ----------------------------------------
 
@@ -251,12 +284,15 @@ benchmark everything
  type:             exitcode-stdio-1.0
  default-language: Haskell2010
  ghc-options:      -Wall -O2 -threaded -fdicts-cheap -funbox-strict-fields
- 
- build-depends:
-    base
-  , cards-frontend
-  , criterion
-  , deepseq
+
+ if !flag(run-benchmarks)
+    buildable: False
+ else
+    build-depends:
+       base
+     , cards-frontend
+     , criterion
+     , deepseq
 
 ----------------------------------------
 

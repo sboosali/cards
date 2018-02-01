@@ -25,14 +25,14 @@ getImageUrl Card{..} = _cardName
 
 {-| TODO
 
-pretty print the card.
+pretty print a card.
 
 -}
 ppCard :: Card -> [Text]
 ppCard Card{..} =
  [outerDivider, _cardName, innerDivider, _cardText]
  where
- outerDivider = T.replicate 40 "="
+ outerDivider = T.replicate 40                   "="
  innerDivider = T.replicate (T.length _cardName) "-"
 
 ----------------------------------------

@@ -63,8 +63,8 @@ main = mainWidgetWith wHead wBody'
 
 --TODO lol
 wBody' = do
-  test
-  app
+  -- test
+  -- app
   wBody
 
 {-|
