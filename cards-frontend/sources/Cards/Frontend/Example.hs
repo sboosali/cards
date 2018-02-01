@@ -113,7 +113,7 @@ test = do
  let eMousemove = events & onMousemove
  let eContent = (eMousemove <&> displayMousePosition)
  
- dContent <- holdDyn "" eContent
+ dContent <- holdDyn "(__,__)" eContent
 
  let wMousePosition = dynText dContent
  

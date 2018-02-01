@@ -118,13 +118,9 @@ t2s = T.unpack
 
 ----------------------------------------
 
--- | @<div>...</div>@
-div :: (MonadWidget t m) => m () -> m ()
-div = el "div"
-
--- | the HTML equivalent of the newline @"\n"@. 
-div_ :: (MonadWidget t m) => m ()
-div_ = div blank
+-- | enumerate a 'Bounded' 'Enum'. 
+constructors :: (Enum a, Bounded a) => [a]
+constructors = [minBound..maxBound]
 
 ----------------------------------------
 
@@ -148,5 +144,17 @@ element
   -> m a
   -> m (El' (DomBuilderSpace m) t, a)
 element = elDynAttr'
+
+----------------------------------------
+
+-- | @<div>...</div>@
+div :: (MonadWidget t m) => m () -> m ()
+div = el "div"
+
+-- | the HTML equivalent of the newline @"\n"@. 
+div_ :: (MonadWidget t m) => m ()
+div_ = div blank
+
+----------------------------------------
 
 ----------------------------------------

@@ -51,7 +51,7 @@ flag dump-splices
   manual:      True
 
 flag jsaddle-warp
-  default:     True
+  default:     False
   -- ^ NOTE should be False,
   -- but reflex-platform's project.nix doesn't support cabal flags,
   -- and cabal2nix doesn't evaluate conditionals correctly, 
@@ -95,7 +95,15 @@ library
                  Cards.Frontend
                  Cards.Frontend.Types
                  Cards.Frontend.Event
-                 Cards.Frontend.Core		
+
+                 Cards.Frontend.Core
+
+                 Cards.Frontend.DB
+                 Cards.Frontend.Query		
+                 Cards.Frontend.Result
+
+                 Cards.Frontend.GUI
+ 
                  Cards.Frontend.Runner
                  Cards.Frontend.Example                
  other-modules:
