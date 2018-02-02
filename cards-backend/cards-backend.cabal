@@ -22,7 +22,9 @@ copyright:           2018 Spiros Boosalis
 license:             BSD3
 license-file:        LICENSE
 stability:           provisional
-tested-with:         GHC == 8.2.2
+tested-with:         GHC == 8.0.2
+
+----------------------------------------
 
 -- PVP
 -- https://wiki.haskell.org/Package_versioning_policy
@@ -34,18 +36,26 @@ extra-source-files:
   .travis.yml
   HLint.hs
 
--- data-files:
---   data/
+----------------------------------------
+
+data-files:
+  data/json/AllSets-x.json
+  data/json/version.json 
+
+----------------------------------------
 
 source-repository head
   type:     git
   location: https://github.com/sboosali/cards-backend
+
+----------------------------------------
 
 -- make the `template` test suite dump its template-haskell splices
 flag dump-splices
   default: False
   manual: True
 
+----------------------------------------
 
 library
  hs-source-dirs:      sources
@@ -112,6 +122,8 @@ library
 -- other packages 
 
 
+----------------------------------------
+
 executable example-cards-backend
  hs-source-dirs:      executables
  main-is:             Main.hs
@@ -123,6 +135,30 @@ executable example-cards-backend
     base
   , cards-backend
 
+
+-- mtgjson.com
+executable mtgjson 
+ hs-source-dirs:      executables
+ main-is:             DownloadAndUnzip.hs
+
+ default-language:    Haskell2010
+ ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+ ghc-options:         -fno-warn-missing-signatures -fno-warn-dodgy-exports -fno-warn-unused-imports
+
+ build-depends:
+    base
+  , zlib
+  , tar
+  , zip-archive
+  , bytestring
+  , http-client 
+  , http-client-tls
+  , http-types 
+  , wreq
+  , lens
+  , lens-aeson
+
+----------------------------------------
 
 -- $ stack test documentation
 test-suite documentation 
@@ -197,6 +233,8 @@ test-suite templates
     , lens
 
 
+----------------------------------------
+
 -- $ stack bench 
 benchmark everything 
  hs-source-dirs:      benchmarks
@@ -212,6 +250,8 @@ benchmark everything
   , criterion
   , deepseq
 
+
+----------------------------------------
 
 -- originally generated with this command:  
 -- 
