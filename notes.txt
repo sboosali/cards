@@ -422,6 +422,16 @@ esButton <- mainWidget $ do
 
 
 
+========================================
+mtgjson
+
+https://mtgjson.com/sets.html
+
+https://mtgjson.com/json/version.json
+
+
+========================================
+
 
 
 ========================================

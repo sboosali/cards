@@ -77,6 +77,30 @@ myOverlaysWith = pkgs: self: super: let
       # latest needs ghc-8.2.2
       # rev "2b7517f27242863ba153bc045dd269b348df05aa" 
 
+    megaparsec = github {
+      owner  = "mrkkrp";
+      repo   = "megaparsec";
+      rev    = "140fe937954c9e9c4801778b3d427524d9fb8a23"; 
+      fetchSubmodules = true;
+      sha256 = "116w7hy2hp61j29kyafsfq5fx6s12954vnpxb6jgipvlcwnjwq3l";
+    } {
+      # inherit (self) parser-combinators; 
+    };
+      # reflex-platform has megaparsec-5.3.1
+      # megaparsec = hackage_ "megaparsec" "6.4.0";
+      # ERROR '''can't read /nix/store/hcqlfq5rcshf31k9cnrvgzan9jdf37cy-all-cabal-hashes-2b0bf3ddf8b75656582c1e45c51caa59458cd3ad-src/1/megaparsec/6.4.0/megaparsec.json: No such file or directory'''
+
+    parser-combinators = github_ {
+      owner  = "mrkkrp";
+      repo   = "parser-combinators";
+      rev    = "9a03215c6d0a1bf5d81328f446d40226ef3d77ea"; 
+      fetchSubmodules = true;
+      sha256 = "0yl9ribw1lff1h8jgq8mi11ivb8psj86p5dbdkirfw0mla0kydr8";
+    };
+      # '''Configuring megaparsec-6.3.0...
+      # Setup: Encountered missing dependencies:
+      # parser-combinators >=0.4 && <1.0'''
+
  /* 
 
   # You can use `callHackage` and `callCabal2nix` 

@@ -25,7 +25,9 @@ copyright:           2018 Spiros Boosalis
 license:             BSD3
 license-file:        LICENSE
 stability:           provisional
-tested-with:         GHC == 8.2.2
+tested-with:
+  GHC == 8.0.2
+  GHCJS == 8.0.2
 
 -- PVP
 -- https://wiki.haskell.org/Package_versioning_policy
