@@ -3,7 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE OverloadedLists #-}
 
-{-| The query language and search functionality. 
+{-| The query language(s) and search functionality. 
 
 -}
 module Cards.Frontend.Query where
@@ -14,6 +14,47 @@ import Cards.Frontend.Types
 -- import Cards.Frontend.Result
 
 import qualified Data.Text as T
+
+--import qualified Text.Megaparsec as P
+-- 
+
+----------------------------------------
+
+{-| @magiccards.info@'s sytax
+
+-}
+data MCISyntax = MCISyntax
+ { mciFreeText :: Maybe Text
+ , mciFields   :: Map Text [Text]
+ }
+
+----------------------------------------
+
+{-| @magiccards.info@'s behavior, features, predicates, etc.
+
+-}
+data MCIQuery
+
+----------------------------------------
+
+-- {-|
+
+-- -}
+-- data LogicSyntax
+
+----------------------------------------
+
+-- {-|
+
+-- a @Prolog@-like language (simpler than / a subset thereof), with unification
+
+-- -}
+-- data LogicQuery
+
+----------------------------------------
+
+parseMCISyntax :: Text -> Maybe MCISyntax
+parseMCISyntax t = Just $ MCISyntax (Just t) []
 
 ----------------------------------------
 

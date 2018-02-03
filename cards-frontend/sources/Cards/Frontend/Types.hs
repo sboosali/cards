@@ -31,6 +31,21 @@ type RawQuery = Text
 
 type ValidQuery = Text
 
+data QueryOptions = QueryOptions
+ { _queryLanguage :: QueryLanguage
+ } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+
+instance Default QueryOptions where
+  def = QueryOptions def 
+
+{-| ParseQueryLike... -}
+data QueryLanguage
+  = ParseQueryLikeMCI -- ^ @magiccards.info@'s sytax
+  | ParseQueryLikeProlog -- ^ 
+  deriving (Show,Read,Eq,Ord,Enum,Bounded,Ix,Generic,NFData,Hashable)
+
+instance Default QueryLanguage where def = ParseQueryLikeMCI
+
 ----------------------------------------
 
 type CardDatabase = [Card]
