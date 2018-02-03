@@ -77,6 +77,16 @@ myOverlaysWith = pkgs: self: super: let
       # latest needs ghc-8.2.2
       # rev "2b7517f27242863ba153bc045dd269b348df05aa" 
 
+    reflex-vinyl = local ../reflex-vinyl {
+    };
+
+    # reflex-vinyl = github_ {
+    #   owner  = "sboosali";
+    #   repo   = "reflex-vinyl";
+    #   rev    = ""; 
+    #   sha256 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+    # };
+
     megaparsec = github {
       owner  = "mrkkrp";
       repo   = "megaparsec";

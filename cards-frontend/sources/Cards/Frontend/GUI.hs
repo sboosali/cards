@@ -19,8 +19,10 @@ import Cards.Frontend.Query
 import Reflex hiding (Query)
 --import qualified Reflex as R
 import Reflex.Dom hiding (Query)
+import Reflex.Vinyl
 
 --import qualified Control.Lens as L
+import Control.Lens hiding ((<&>))
 
 --import qualified Data.Map as Map
 import Data.Map (Map)
@@ -64,6 +66,34 @@ wHead = do
 -}
 wBody :: MonadWidget t m => m ()
 wBody = wSearchPage
+
+----------------------------------------
+
+grid :: SomeWidget_
+grid = do
+ let child = blank
+ 
+ (es, a) <- elFor'
+             (Click :& Dblclick :& Mousemove :& RNil)
+             "div"
+             (constDyn mempty)
+             child
+ 
+ -- let eClick         = es ^. _Click
+ let eMousePosition = es ^. _Mousemove
+ let eMousePositionText = eMousePosition
+                         <&> (\(x,y) -> show (x,y) & s2t)
+     -- i.e. ((s2t . show) <$> eMousePosition)
+     
+ let eDoubleClickedPositionText = (es^._Dblclick) <&> (show > s2t)
+
+ dMousePosition <- holdDyn "(_,_)" eMousePositionText
+ dDoubleClickedPositionText <- holdDyn "(_,_)" eDoubleClickedPositionText
+
+ dynText dMousePosition
+ dynText dDoubleClickedPositionText
+
+ return a
 
 ----------------------------------------
 
@@ -150,6 +180,37 @@ formatCard Card{..} = elDynAttr "div" (pure cssDisplayInline) $ do
 -- formatResults
 --  = fmap (\Card{..} -> _cardName <> "\n" <> _cardText)
 --  > T.intercalate "\n\n========================================\n\n"
+
+----------------------------------------
+
+-- myWidget :: SomeWidget_
+-- myWidget = do
+--  let child = blank
+ 
+--  (es_1, x) <- elFor'
+--              (Click :& Mousemove :& RNil)
+--              "div"
+--              (constDyn mempty)
+--              child
+ 
+--  (es_2)   <- elFor
+--              _MousingEvents
+--              "div"
+--              (constDyn mempty)
+--              child
+
+--  -- `_eClick_1 and `_eClick_2` are equivalent
+ 
+--  let _eClick_1     = es_1 ^. event Click 
+--  let _eMousemove_1 = es_1 ^. event Mousemove 
+
+--  let _eClick_2     = es_2 ^. _Click 
+--  let _eMousemove_2 = es_2 ^. _Mousemove
+
+--  -- let eClick     = ( es ^. (rget Click     . _EventOf) ) 
+--  -- let eMousemove = ( es ^. (rget Mousemove . _EventOf) )
+
+--  return x
 
 ----------------------------------------
 
