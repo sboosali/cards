@@ -1,0 +1,131 @@
+/* by Hari Narayanan */
+
+body {
+  background-color: #efefef;
+}
+
+
+.card {
+  position: relative;
+  width: 312px;
+  height: 445px;
+  
+  display: flex;
+  flex-direction: column;
+
+  border: 1px solid #aaa;
+  font-size: 14px;
+
+  background-color: rgb(184, 166, 83);
+}
+
+.card-body {
+  margin: 15px;
+  background-color: inherit;
+}
+
+.name-bar {
+  display: flex;
+  flex-direction: row;
+
+  border: 1px solid #888;
+  padding: 3px 2px 2px 3px;
+}
+
+.card-name {
+  font-weight: 600;
+}
+
+.spacer {
+  flex-grow: 2;
+}
+
+.card-cost {
+  font-family: monospace;
+}
+
+.art {
+  height: 202px;
+  padding: 3px 4px;
+  margin-bottom: 4px;
+}
+
+.art-image {
+  height: 100%;
+  background-image: url(https://magiccards.info/scans/en/rix/153.jpg);
+  background-position: -19px 399px;
+  border: 1px solid #666;
+}
+
+.type-bar {
+  display: flex;
+  flex-direction: row;
+
+  border: 1px solid #888;
+  padding: 3px 2px 2px 3px;
+
+  font-size: 13px;
+}
+
+.card-type {
+  margin: 1px 0 0 1px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.expansion {
+  font-family: monospace;
+  letter-spacing: 1px;
+}
+
+.rarity {
+  font-family: monospace;
+}
+
+.card-text {
+  display: flex;
+  flex-direction: column;
+
+  height: 120px;
+  padding: 6px 3px 11px 3px;  
+  margin: 4px 1px 0px 1px;
+  border: 1px solid #888;
+  background-color: beige;
+}
+
+.oracle-text {
+  font-size: 13px;
+  letter-spacing: 0.1px;
+}
+
+.oracle-paragraph {
+  margin-top: 4.5px;
+}
+
+.oracle-paragraph:first-child {
+  margin-top: 0px;
+}
+
+.flavor-text {
+  margin-top: 6px;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.pt {
+  position: absolute;
+  bottom: 19px;
+  right: 16px;
+  height: 14px;
+  width: 38px;
+
+  border: 1px solid #888;
+  padding: 3px;
+
+  text-align: center;
+  font-size: 15px; 
+  font-family: monospace;
+
+  background-color: inherit;
+  z-index: 1;
+}
