@@ -1,0 +1,106 @@
+https://stedolan.github.io/jq/manual/
+
+========================================
+
+.artist
+.cmc
+.colors
+.legalities[] | .format, .legality
+.manaCost
+.name
+.printings[]
+.rarity
+.text
+.type
+.types[]
+
+========================================
+
+.artist
+.cmc
+.colors
+.manaCost
+.name
+.rarity
+.text
+.type
+
+.legalities[] | .format, .legality
+.printings[]
+
+========================================
+
+$ cat TwoCardsOneSet-x.json | jq '.[] | .cards[] | { artist: .artist, cmc: .cmc, colors: .colors, manaCost: .manaCost, name: .name, rarity: .rarity, text: .text, type: .type }'
+{
+  "artist": "Mark Poole",
+  "cmc": 1,
+  "colors": [
+    "Blue"
+  ],
+  "manaCost": "{U}",
+  "name": "Ancestral Recall",
+  "rarity": "Rare",
+  "text": "Target player draws three cards.",
+  "type": "Instant"
+}
+{
+  "artist": "Jesper Myrfors",
+  "cmc": 3,
+  "colors": [
+    "Black"
+  ],
+  "manaCost": "{2}{B}",
+  "name": "Scathe Zombies",
+  "rarity": "Common",
+  "text": null,
+  "type": "Creature — Zombie"
+}
+
+========================================
+
+cat TwoCardsOneSet-x.json | jq '.[] | .cards[] | { artist: .artist, cmc: .cmc, manaCost: .manaCost, name: .name, rarity: .rarity, text: .text, type: .type }'
+
+.colors[]
+.legalities[] | .format, .legality
+.printings[]
+
+========================================
+jq
+
+$ cat AllSets-x.json | jq '.RIX | .cards[] | { artist: .artist, cmc: .cmc, manaCost: .manaCost, name: .name, rarity: .rarity, text: .text, type: .type }' > Cards-RIX-y.json 
+
+
+$ cat Cards-RIX-y.json | jq '.[] | [ .manaCost, .name, .rarity, .text, .type ]' > Cards-RIX-y.txt
+
+========================================
+jl
+
+$ cat AllSets-x.json | jl '...'
+
+? cat AllSets-x.json | jl 'elems | filter (elem _.name ["RIX","IXL"])' > RIX-IXL-y.json
+
+ cat AllSets-x.json | jl 'filter (\o -> elem o.name ["RIX","IXL"])' --array --lines  | wc -l
+
+ cat AllSets-x.json | jl 'filter (\o -> o.name = "RIX" || o.name = "IXL")' --array --lines  | wc -l
+
+
+========================================
+jl
+
+cat AllSets-x.json | jq '{RIX, IXL} | .[] | {(.code): .cards[] | { artist, cmc, manaCost, name, rarity, text, type }'
+
+cat AllSets-x.json | jq -c '{RIX, IXL}' > RIX-IXL-x.json
+cat RIX-IXL-y.json | jq -S '.cards' > RIX-IXL.json
+
+========================================
+jl
+
+jq '.[] |= {cards: .cards | map({ artist, cmc, manaCost, name, rarity, text, type })}' XLN-RIX-x.json > XLN-RIX-y.json
+
+
+
+
+
+
+
+========================================
