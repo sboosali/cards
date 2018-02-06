@@ -8,6 +8,8 @@ cards-backend/data/json/RealSets-x.json
 cards-backend/data/json/RealSets-y.json
 cards-backend/data/json/RIXSets-y.json
 
+cards-common/data/json/RIXSets-z.json
+
 # Haskell
 cabal.project.local
 dist-newstyle/

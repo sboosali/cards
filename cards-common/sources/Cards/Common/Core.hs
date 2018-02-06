@@ -1,8 +1,13 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 module Cards.Common.Core where
 import Cards.Common.Extra
-import Cards.Common.Types
+-- import Cards.Common.Types
 
-import Prelude.Spiros
+import qualified Data.Text as T
 
-stub = "stub"
+----------------------------------------
+
+normalize :: Text -> Text 
+normalize = T.toCaseFold >>> T.words >>> T.unwords
+
+----------------------------------------

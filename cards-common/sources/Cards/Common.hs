@@ -1,10 +1,5 @@
 {-|
 
->>> :set -XLambdaCase
-
->>> stub
-"stub"
-
 -}
 module Cards.Common
  ( module Cards.Common.Types

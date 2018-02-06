@@ -26,7 +26,7 @@ license:             BSD3
 license-file:        LICENSE
 stability:           provisional
 tested-with:
-  GHC == 8.0.2
+  GHC   == 8.0.2
   GHCJS == 8.0.2
 
 -- PVP
@@ -39,8 +39,14 @@ extra-source-files:
   .travis.yml
   HLint.hs
 
--- data-files:
---   data/
+----------------------------------------
+
+data-files:
+  data/json/RealSets-x.json
+  data/json/RIXSets-y.json
+--  data/json/RIXSets-z.json
+
+----------------------------------------
 
 source-repository head
   type:     git
@@ -80,13 +86,23 @@ library
                  Cards.Common
                  Cards.Common.Types
                  Cards.Common.Core		
-                 Cards.Common.Example                
+                 Cards.Common.Example           
+
+                 Cards.MTGJSON.Schema     
+                 Cards.MTGJSON.Aeson
+                 Cards.MTGJSON.Example
+                 Cards.MTGJSON.Paths 
+
  other-modules:
 
-                 Cards.Common.Extra            
-                 -- Paths_cards-common
--- autogen-modules:
-                 -- Paths_cards-common
+                 Cards.Common.Extra
+                           
+                 Cards.MTGJSON.Macros
+                 
+                 Paths_cards_common
+
+ autogen-modules:
+                 Paths_cards_common
 
  build-depends:
                base >=4.7 && <5
@@ -94,6 +110,8 @@ library
 -- mine 
              , spiros
 --              , enumerate 
+
+             , template-haskell
 
 -- (extended) standard library 
              , deepseq
@@ -110,6 +128,9 @@ library
              , lens
 
 -- other packages 
+             , aeson
+             , binary
+             , file-embed
 
 ----------------------------------------
 
@@ -219,6 +240,7 @@ benchmark everything
   , criterion
   , deepseq
 
+----------------------------------------
 
 -- originally generated with this command:  
 -- 
