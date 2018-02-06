@@ -34,6 +34,19 @@ import Data.Map (Map)
 -- import Data.Monoid
 -- import System.Environment
 
+--import Clay hiding (i, s, div, value, (-:))
+-- import Clay.Selector (with)
+-- import qualified Clay
+--import qualified Clay as CSS
+import qualified Clay as C
+
+import Prelude.Spiros hiding (Text)
+
+----------------------------------------
+
+css :: C.Css -> Text
+css = C.render > toS
+
 {-NOTES
 
 -}
@@ -49,7 +62,7 @@ Naming:
 wHead :: MonadWidget t m => m ()
 wHead = do
   el "title" $ text "MTG Card Search"
-  styleSheet "css/style.css"
+  styleSheet "css/style.css" --TODO data-files, then post-build cp; `nix`, copy "share", not just "bin", into result-frontend?
 
   where
 
@@ -74,23 +87,16 @@ grid = do
  let child = blank
  
  (es, a) <- elFor'
-             (Click :& Dblclick :& Mousemove :& RNil)
+             (Click :& Dblclick :& RNil)
              "div"
              (constDyn mempty)
              child
  
  -- let eClick         = es ^. _Click
- let eMousePosition = es ^. _Mousemove
- let eMousePositionText = eMousePosition
-                         <&> (\(x,y) -> show (x,y) & s2t)
-     -- i.e. ((s2t . show) <$> eMousePosition)
-     
  let eDoubleClickedPositionText = (es^._Dblclick) <&> (show > s2t)
 
- dMousePosition <- holdDyn "(_,_)" eMousePositionText
  dDoubleClickedPositionText <- holdDyn "(_,_)" eDoubleClickedPositionText
 
- dynText dMousePosition
  dynText dDoubleClickedPositionText
 
  return a

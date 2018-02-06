@@ -67,15 +67,17 @@ myOverlaysWith = pkgs: self: super: let
    # Add Haskell Packages Below           #
    ######################################## 
 
-    spiros = github_ {
-      owner  = "sboosali";
-      repo   = "spiros";
-      rev    = "f6c86509cfa1b198c5deb4b89b3dadf6184ea1d0"; 
-      sha256 = "0bvxgp1mvlpwzr9qdpjs20qs4i813wnhrsl3nq25r8v68x6fblhk";
-    };
-      # NOTE
-      # latest needs ghc-8.2.2
-      # rev "2b7517f27242863ba153bc045dd269b348df05aa" 
+   spiros = local_ ../spiros;
+
+    # spiros = github_ {
+    #   owner  = "sboosali";
+    #   repo   = "spiros";
+    #   rev    = "f6c86509cfa1b198c5deb4b89b3dadf6184ea1d0"; 
+    #   sha256 = "0bvxgp1mvlpwzr9qdpjs20qs4i813wnhrsl3nq25r8v68x6fblhk";
+    # };
+    #   # NOTE
+    #   # latest needs ghc-8.2.2
+    #   # rev "2b7517f27242863ba153bc045dd269b348df05aa" 
 
     reflex-vinyl = local ../reflex-vinyl {
     };
