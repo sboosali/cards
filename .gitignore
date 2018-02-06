@@ -3,6 +3,11 @@ ignore/
 temporary/ 
 TODO
 
+# this
+cards-backend/data/json/RealSets-x.json
+cards-backend/data/json/RealSets-y.json
+cards-backend/data/json/RIXSets-y.json
+
 # Haskell
 cabal.project.local
 dist-newstyle/

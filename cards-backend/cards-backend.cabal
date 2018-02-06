@@ -41,7 +41,8 @@ extra-source-files:
 data-files:
   data/json/AllSets-x.json
   data/json/version.json 
-  data/json/XLN-RIX-y.json
+
+  data/json/RIXSets-z.json
 
 ----------------------------------------
 
