@@ -3,7 +3,11 @@
 
 ########################################
 
+emacsclient ./cards-frontend/ghcid.txt &
+
 nix-shell -A shells.ghc --run 'ghcid --directory="./cards-frontend/" --reload="./sources/" --restart="./cards-frontend.cabal" --project="cards-frontend" --command "cabal new-repl cards-frontend" --outputfile=./ghcid.txt'
+
+########################################
 
 #  -c --command=COMMAND  Command to run (defaults to ghci or cabal repl)
 #  -T --test=EXPR        Command to run after successful loading

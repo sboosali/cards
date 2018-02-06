@@ -5,9 +5,9 @@ set -e
 
 ########################################
 
-emacsclient ./cards-backend/ghcid.txt &
+emacsclient ./cards-common/ghcid.txt &
 
-nix-shell -A shells.ghc --run 'ghcid --directory="./cards-backend/" --reload="./sources/" --restart="./cards-backend.cabal" --project="cards-backend" --command "cabal new-repl cards-backend" --outputfile=./ghcid.txt'
+nix-shell -A shells.ghc --run 'ghcid --directory="./cards-common/" --reload="./sources/" --restart="./cards-common.cabal" --project="cards-common" --command "cabal new-repl cards-common" --outputfile=./ghcid.txt'
 
 ########################################
 
@@ -21,11 +21,3 @@ nix-shell -A shells.ghc --run 'ghcid --directory="./cards-backend/" --reload="./
 #  -o --outputfile=FILE  File to write the full output to
 #     --ignore-loaded    Keep going if no files are loaded. Requires --reload
 
-
-# TARGET="cards-backend"
-# CABAL_COMMAND="cabal new-repl $TARGET"
-# GHCID_COMMAND="ghcid --command $CABAL_COMMAND"
-# NIX_COMMAND="nix-shell -A shells.ghc $GHCID_COMMAND"
-#
-# echo ${NIX_COMMAND}
-# eval ${NIX_COMMAND}
