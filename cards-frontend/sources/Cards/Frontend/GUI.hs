@@ -40,7 +40,9 @@ import Data.Map (Map)
 --import qualified Clay as CSS
 import qualified Clay as C
 
-import Prelude.Spiros hiding (Text)
+--import Prelude.Spiros hiding (Text,div)
+ -- reflex `Text` is strict
+ -- Prelude numerical `div`
 
 ----------------------------------------
 

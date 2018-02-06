@@ -11,8 +11,10 @@
 -}
 module Cards.Frontend.Extra
  ( module Cards.Frontend.Extra
+
  , module Prelude.Spiros
  , module Data.Text
+ , module Data.String.Conv
 -- , module Reflex.Dom
  ) where
 
@@ -21,6 +23,8 @@ import Reflex.Dom hiding (element)
 import Data.Text (Text)
 import qualified Data.Text as T
 import Prelude.Spiros hiding (Text,div)
+
+import Data.String.Conv
 
 ---------------------------------------
 

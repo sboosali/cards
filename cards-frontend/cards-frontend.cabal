@@ -173,6 +173,7 @@ library
              , bytestring
              , transformers
              , mtl
+             , string-conv
 
 -- ekmett 
              , exceptions

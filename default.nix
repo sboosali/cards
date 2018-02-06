@@ -9,6 +9,10 @@ haskell = nixpkgs.haskell.lib;
 reflex-platform = import ./reflex-platform {};
   # `reflex-platform` uses a pinned/older `nixpkgs` version.
 
+# imports
+inherit (builtins)
+ fromJSON readFile baseNameOf;
+
 in
 ########################################
 ### Haskell Dependencies...
@@ -34,6 +38,10 @@ which is correct, since we want to mix in any siblings that are being overriden 
 
 myOverlaysWith = pkgs: self: super: let
 
+ inherit (pkgs)
+  fetchgit 
+ ;
+
  cabal2nix = name: source: 
              self.callCabal2nix name source;
 
@@ -42,6 +50,24 @@ myOverlaysWith = pkgs: self: super: let
 
  local     = path:
              self.callPackage path; 
+
+ prefetched = path:
+             let
+              # basename-of-path
+              n = baseNameOf path;
+              # output-from-nix-prefetch-git
+              o =
+               fromJSON (readFile path);
+              # input-for-fetchgit
+              i = {
+               inherit (o)
+                 url rev sha256;
+              };
+              # package-derivation
+              p = fetchgit i;
+             in
+             cabal2nix n p;                
+#             self.callPackage p; 
 
  github    = o:
              cabal2nix o.repo (pkgs.fetchFromGitHub o); 
@@ -57,7 +83,8 @@ myOverlaysWith = pkgs: self: super: let
  # override the package without overriding any dependencies
  cabal2nix_ = name: source:   cabal2nix name source  {};
  hackage_   = name: version:  hackage   name version {};
- local_     = path:           local     path         {};
+ local_      = path:           local      path         {};
+ prefetched_ = path:           prefetched path         {};
  github_    = o:              github    o            {};
 
  in
@@ -66,8 +93,6 @@ myOverlaysWith = pkgs: self: super: let
    ########################################
    # Add Haskell Packages Below           #
    ######################################## 
-
-   spiros = local_ ../spiros;
 
     # spiros = github_ {
     #   owner  = "sboosali";
@@ -78,6 +103,29 @@ myOverlaysWith = pkgs: self: super: let
     #   # NOTE
     #   # latest needs ghc-8.2.2
     #   # rev "2b7517f27242863ba153bc045dd269b348df05aa" 
+
+    spiros = local_ ../spiros;
+
+    # spiros = local_ ../spiros;
+     # ^ needed `protolude`, not anymore
+    # protolude = prefetched_ ./protolude.json; 
+     #
+     # Preprocessing library for clock-0.7.2..
+     # Clock.hsc:44:0: warning: "hsc_alignment" redefined
+     # In file included from dist/build/System/Clock_hsc_test0.c:1:0:
+     # /nix/store/kf23n3922ikr69lhz7ag29mda7rrykmw-ghc-8.2.1/lib/ghc-8.2.1/template-hsc.h:91:0: note: this is the location of the previous definition
+     #  #define hsc_alignment(x...)                                           \
+     #  ^
+     # System/Clock.hsc:44 directive let cannot be handled in cross-compilation mode
+     # builder for ‘/nix/store/8614br7l58ifr54x81pbnbxax5bxf0nq-clock-0.7.2-aarch64-unknown-linux-android.drv’ failed with exit code 1
+     # building path(s) ‘/nix/store/6ixvivjic4j1qnvfd8zld6a9v2jf52qg-clock-0.7.2-arm-unknown-linux-androideabi’
+     # cannot build derivation ‘/nix/store/bgwlga9jlcx9bgygd8mq4znhdnjfq5a5-spiros-0.0.1-aarch64-unknown-linux-android.drv’: 1 dependencies couldn't be built
+     # cannot build derivation ‘/nix/store/wjgj9a89fwyij2m3klfxmphrfh68fnr5-cards-frontend-0.0.0-aarch64-unknown-linux-android.drv’: 1 dependencies couldn't be built
+     # killing process 13427
+     # cannot build derivation ‘/nix/store/vyzdvvkdybm6xd0fr2hn5zajw5mzg0lr-android-app.drv’: 1 dependencies couldn't be built
+     
+    # protolude = hackage "protolude" "0.2.1" {};
+    # 
 
     reflex-vinyl = local ../reflex-vinyl {
     };
