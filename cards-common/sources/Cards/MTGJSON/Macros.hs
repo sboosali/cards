@@ -1,16 +1,3 @@
--- {-# LANGUAGE OverloadedStrings #-}
-
--- {-|
-
--- transitively imports @Paths_cards_common@. 
-
--- -}
--- module Cards.MTGJSON.Macros where
-
--- import Data.ByteString (ByteString)
-
--- ----------------------------------------
-
 {-TODO-}
 
 {-# LANGUAGE TemplateHaskell #-}
@@ -30,11 +17,17 @@ import Data.ByteString (ByteString)
 
 ----------------------------------------
 
--- b'AllSetsX :: ByteString
--- b'AllSetsX = $(embedDataFile fp'AllSetsX)
+-- {-
 
--- b'RealSetsX :: ByteString
--- b'RealSetsX = $(embedDataFile fp'RealSetsX)
+-- *Cards.Common Cards.MTGJSON.Schema Cards.MTGJSON.Paths B8 B Cards.MTGJSON.Macros> 
+-- writeFile "ignore/RIXSetsY.txt" (show b'RIXSetsY)
+
+-- -}
+
+-- b'RIXSetsY :: ByteString
+-- b'RIXSetsY = ""
+
+----------------------------------------
 
 b'RIXSetsY :: ByteString
 b'RIXSetsY = $(embedDataFile fp'RIXSetsY)
@@ -50,6 +43,12 @@ embedDataFile
 
 -}
 
+
+-- b'AllSetsX :: ByteString
+-- b'AllSetsX = $(embedDataFile fp'AllSetsX)
+
+-- b'RealSetsX :: ByteString
+-- b'RealSetsX = $(embedDataFile fp'RealSetsX)
 
 -- b'RIXSetsArray :: ByteString
 -- b'RIXSetsArray = $(embedDataFile fp'RIXSetsArray)
@@ -68,6 +67,3 @@ embedDataFile
 {--}
 
 ----------------------------------------
-
--- b'RIXSetsY :: ByteString
--- b'RIXSetsY = ""

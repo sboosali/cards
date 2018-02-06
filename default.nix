@@ -127,6 +127,38 @@ myOverlaysWith = pkgs: self: super: let
     # protolude = hackage "protolude" "0.2.1" {};
     # 
 
+    unicode-show = skipTests super.unicode-show;
+
+     # Linking dist/build/unicode-show-test/unicode-show-test ...
+     # running tests
+     # Running 1 test suites...
+     # Test suite unicode-show-test: RUNNING...
+     # individual representations test:
+     #   ushow "\1589\1576\1575\1581 \1575\1604\1582\1610\1585" == "صباح الخير": [OK]
+     #   ushow "\128518\128149>\955\\=\128024" == "😆💕>λ\\=🐘": [OK]
+     #   ushow "\28450\&6" == "漢6": [OK]
+     #   ushow " 7" == " 7": [OK]
+     #   ushow "\25913\n\34892" == "改\n行": [OK]
+     #   ushow "\19979\19968\31449\na\ri\ta\22269\38469\26426\22330" == "下一站\na\ri\ta国际机场": [OK]
+     #   ushow "\SOH\SO\&H" == "\SOH\SO\&H": [OK]
+     # read . ushow == id:
+     #   read . ushow == id, for String: [OK, passed 100 tests]
+     #   read . read . ushow . ushow == id, for String: [OK, passed 100 tests]
+     #   read . ushow == id, for some crazy Unicode type: [OK, passed 100 tests]
+     #   read . ushow == id, for some crazy Unicode type: [Failed]
+     # *** Failed! Exception: 'Prelude.read: no parse' (after 1 test): 
+     # ""
+     # ""
+     # (used seed -5100929916581787240)
+     #   read . ushow == id, for compound type: [OK, passed 100 tests]
+     # 
+     #          Properties  Test Cases  Total       
+     #  Passed  4           7           11          
+     #  Failed  1           0           1           
+     #  Total   5           7           12          
+     # Test suite unicode-show-test: FAIL
+     # Test suite logged to: dist/test/unicode-show-0.1.0.2-unicode-show-test.log
+
     reflex-vinyl = local ../reflex-vinyl {
     };
 

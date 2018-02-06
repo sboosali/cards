@@ -39,6 +39,8 @@ extra-source-files:
   .travis.yml
   HLint.hs
 
+  includes/RIXSets-y.txt
+
 ----------------------------------------
 
 data-files:
@@ -93,11 +95,14 @@ library
                  Cards.MTGJSON.Example
                  Cards.MTGJSON.Paths 
 
+                 --TODO
+                 Cards.MTGJSON.ByteStringLiterals
+                 Cards.MTGJSON.Macros
+
  other-modules:
 
                  Cards.Common.Extra
-                           
-                 Cards.MTGJSON.Macros
+                 Cards.Common.UnicodeShow
                  
                  Paths_cards_common
 
@@ -131,6 +136,7 @@ library
              , aeson
              , binary
              , file-embed
+             , unicode-show
 
 ----------------------------------------
 

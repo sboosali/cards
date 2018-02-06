@@ -431,6 +431,23 @@ https://mtgjson.com/json/version.json
 
 
 ========================================
+unicode-show
+
+-- | Show the input, and then replace Haskell character literals
+-- with the character it represents, for any Unicode printable characters except backslash, single and double quotation marks.
+-- If something fails, fallback to standard 'show'.
+
+ushow :: Show a => a -> String
+ushow = ushowWith
+ (\c -> isPrint c && not (isHaskellEscaped c))
+
+isHaskellEscaped c
+  = c == '\\' 
+ || c == '\''
+ || c == '\"'
+
+> isPrint '—'
+True
 
 
 
