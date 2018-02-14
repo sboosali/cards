@@ -10,6 +10,13 @@ cards-backend/data/json/RIXSets-y.json
 
 cards-common/data/json/RIXSets-z.json
 
+cards-backend/data/json/AllCards-x.json
+cards-backend/data/json/AllCards.hs
+cards-backend/data/json/CardNamesTexts.OneLine.json
+cards-backend/data/json/CardNamesTexts.json
+cards-backend/data/json/CardNamesTexts.txt
+cards-backend/data/json/CardNamesTextsCompact.json
+
 # Haskell
 cabal.project.local
 dist-newstyle/

@@ -5,7 +5,9 @@
 
 {-| The user interface.
 
-reflex widgets. 
+reflex widgets.
+
+prototype that searches through card name only, displaying the oracle text too. inline AllCards.json as Haskell literal.  
 
 -}
 module Cards.Frontend.GUI where
@@ -27,7 +29,7 @@ import Control.Lens hiding ((<&>))
 --import qualified Data.Map as Map
 import Data.Map (Map)
 
---import qualified Data.Text as T
+import qualified Data.Text as T
 --import Data.Text (pack, unpack)
 
 --import Text.Read (readMaybe)
@@ -117,9 +119,14 @@ wSearchPage = do
 --  let eQuery = never & fmapMaybe nonEmptyString
  
   let dResults = dQuery <&> execQuery defaultCardDatabase
+  let dCount   = dResults <&> length
 
-  let dTable = dResults <&> formatResults
-  _wTable <- dyn dTable 
+  let dTable  = dResults <&> formatResults
+  let dHeader = dCount <&> formatCount 
+
+  _ <- dyn dHeader
+  
+  _ <- dyn dTable 
 
   blank
 
@@ -127,10 +134,10 @@ wSearchPage = do
 
 initialQuery :: Text
 initialQuery = "fire"
- -- initialQuery = "n:fire t:kavu"
+ --TODO initialQuery = "n:fire t:kavu"
 
 placeholderQuery :: Text
-placeholderQuery = "fire"
+placeholderQuery = "e.g. fire"
 
 queryAttributes :: Reflex t => Dynamic t (Map Text Text)
 queryAttributes = constDyn as
@@ -164,6 +171,13 @@ iSearch = def
 
 ----------------------------------------
 
+formatCount :: (MonadWidget t m) => Int -> m ()
+formatCount
+  = show > T.pack
+  > text
+  > elClass "div" "card-result-count"
+--  > elDynAttr "card-result-count"
+  
 formatResults :: (MonadWidget t m) => Results -> m ()
 formatResults
  = traverse_ formatCard
@@ -172,13 +186,30 @@ formatResults
  --                [div_, text "========================================", div_])
  -- > sequence_
 
-cssDisplayInline :: Map Text Text
-cssDisplayInline = "display" =: "inline"
+-- cssDisplayInline :: Map Text Text
+-- cssDisplayInline = "display" =: "inline"
+
+attributesCardResult :: Map Text Text
+attributesCardResult =
+  [ "class" -: "card-result"
+  , "style" -: styleCardResult
+  ]
+
+styleCardResult :: Text
+styleCardResult = T.intercalate " "
+  [ "border: 1px solid;"
+  , "border-radius: 3px;"
+  ]
+
+elementCardResult :: Text
+elementCardResult = "div" 
 
 formatCard :: (MonadWidget t m) => Card -> m ()
-formatCard Card{..} = elDynAttr "div" (pure cssDisplayInline) $ do
-  div $ text _cardName
-  div $ text _cardText
+formatCard Card{..} = elDynAttr elementCardResult dAttributes $ do
+  el "div" $ text _cardName -- span
+  el "div" $ text _cardText
+  where
+  dAttributes = pure attributesCardResult
 
  -- divClass "card-result" $ do  
  -- div $ text _cardName

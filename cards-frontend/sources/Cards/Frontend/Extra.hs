@@ -147,9 +147,13 @@ element
   -> Dynamic t AttributeMap
   -> m a
   -> m (El' (DomBuilderSpace m) t, a)
-element = elDynAttr'
+element = elDynAttr' -- <&> fst 
 
 ----------------------------------------
+
+-- | @<div>...</div>@
+divWith :: (MonadWidget t m) => Dynamic t AttributeMap -> m () -> m ()
+divWith = elDynAttr "div"
 
 -- | @<div>...</div>@
 div :: (MonadWidget t m) => m () -> m ()

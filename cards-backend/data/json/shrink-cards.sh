@@ -2,13 +2,16 @@
 set -e
 ########################################
 
-########################################
-
-jq '.[] |= {cards: .cards | map({ artist, cmc, manaCost, name, rarity, text, type })}' "$1" "$2"
+ARGUMENTS=
 
 ########################################
 
-# e.g.
-# ./shrink-cards.sh AllSets-x.json AllSets-y.json 
-# jq '.[] |= {cards: .cards | map({ artist, cmc, manaCost, name, rarity, text, type })}' AllSets-x.json > AllSets-y.json 
+jq --compact-output --sort-keys '.[] | {name,text}' AllCards-x.json > CardNamesTexts.json 
+
+jq --compact-output --join-output --sort-keys '.[] | {name,text}' AllCards-x.json > CardNamesTexts.OneLine.json 
+
+#  jq --raw-output '[.name,.text] | join("\t")' CardNamesTexts.json 
+
+# TODO wrap to make valid .hs
+jq -c '[.name,.text]' CardNamesTexts.json | sed 's/\[/\ , (/g' | sed 's/\]/\)/g' | sed '0,/,/{s/,/\[/}' > AllCards.hs
 

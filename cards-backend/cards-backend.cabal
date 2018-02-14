@@ -89,11 +89,10 @@ library
                  Cards.Backend.Core		
                  Cards.Backend.Example                
  other-modules:
-
                  Cards.Backend.Extra            
-                 -- Paths_cards-backend
+                 -- Paths_cards_backend
 -- autogen-modules:
-                 -- Paths_cards-backend
+                 -- Paths_cards_backend
 
  build-depends:
                base >=4.7 && <5

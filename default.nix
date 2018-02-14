@@ -55,10 +55,10 @@ myOverlaysWith = pkgs: self: super: let
              let
               # basename-of-path
               n = baseNameOf path;
-              # output-from-nix-prefetch-git
+              # output from nix-prefetch-git
               o =
                fromJSON (readFile path);
-              # input-for-fetchgit
+              # input for fetchgit
               i = {
                inherit (o)
                  url rev sha256;
@@ -159,8 +159,11 @@ myOverlaysWith = pkgs: self: super: let
      # Test suite unicode-show-test: FAIL
      # Test suite logged to: dist/test/unicode-show-0.1.0.2-unicode-show-test.log
 
-    reflex-vinyl = local ../reflex-vinyl {
-    };
+    reflex-vinyl = haskell.dontHaddock (local_ ../reflex-vinyl);
+    # sources/DOM/Attribute/Singletons.hs:285:3: error:
+    #     parse error on input ‘-- ^ Identifies the currently active element when DOM focus is on a composite widget, textbox, group, or application. ’
+    # 5) in 'Reflex.Vinyl'
+
 
     # reflex-vinyl = github_ {
     #   owner  = "sboosali";
@@ -168,6 +171,20 @@ myOverlaysWith = pkgs: self: super: let
     #   rev    = ""; 
     #   sha256 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
     # };
+
+    vinyl = github_ {
+      owner  = "VinylRecords";
+      repo   = "Vinyl";
+      rev    = "a5ffd10fbc747c5366ae9806e61bf45f78c3eb33";  # "0.7.0"
+      sha256 = "18wa9qpxw4za7h9dav4xfjq876z3dkpmxnpzfvv1bvq0hpldsrip";
+    };
+    # sources/DOM/Extra.hs:16:1: error:
+    #     Failed to load interface for ‘Data.Vinyl.CoRec’
+    #     Perhaps you meant Data.Vinyl.Core (from vinyl-0.5.3)
+    #
+    # vinyl = hackage_ "vinyl" "0.7.0";
+    # sed: can't read /nix/store/hcqlfq5rcshf31k9cnrvgzan9jdf37cy-all-cabal-hashes-2b0bf3ddf8b75656582c1e45c51caa59458cd3ad-src/1/vinyl/0.7.0/vinyl.json: No such file or directory
+    # cabal2nix: nix-prefetch-url: createProcess: runInteractiveProcess: exec: does not exist (No such file or directory)
 
     megaparsec = github {
       owner  = "mrkkrp";

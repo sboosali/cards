@@ -67,10 +67,10 @@ main = do
       putStrLn "[bytes]"
       T.putStrLn $ toS b
 
-      putStrLn "[ushow]"
-      let s = toS $ ushow b
-      
-      T.writeFile "cards-common/includes/RIXSets-y.txt" s
+      -- putStrLn "[ushow]"
+      -- let s = toS $ ushow b
+      -- 
+      -- T.writeFile "cards-common/includes/RIXSets-y.txt" s
        --NOTE
 
   print e'

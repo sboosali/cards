@@ -1,0 +1,1176 @@
+[
+  {
+    "name": "Unstable",
+    "code": "UST",
+    "releaseDate": "2017-12-08"
+  },
+  {
+    "name": "Unhinged",
+    "code": "UNH",
+    "releaseDate": "2004-11-20"
+  },
+  {
+    "name": "Unglued",
+    "code": "UGL",
+    "releaseDate": "1998-08-11"
+  },
+  {
+    "name": "Wizards of the Coast Online Store",
+    "code": "pWOS",
+    "releaseDate": "1999-09-04"
+  },
+  {
+    "name": "Worlds",
+    "code": "pWOR",
+    "releaseDate": "1999-08-04"
+  },
+  {
+    "name": "World Magic Cup Qualifiers",
+    "code": "pWCQ",
+    "releaseDate": "2013-04-06"
+  },
+  {
+    "name": "Super Series",
+    "code": "pSUS",
+    "releaseDate": "1999-12-01"
+  },
+  {
+    "name": "Summer of Magic",
+    "code": "pSUM",
+    "releaseDate": "2007-07-21"
+  },
+  {
+    "name": "Release Events",
+    "code": "pREL",
+    "releaseDate": "2003-07-26"
+  },
+  {
+    "name": "Pro Tour",
+    "code": "pPRO",
+    "releaseDate": "2007-02-09"
+  },
+  {
+    "name": "Prerelease Events",
+    "code": "pPRE",
+    "releaseDate": "1997-10-04"
+  },
+  {
+    "name": "Portal Demo Game",
+    "code": "pPOD",
+    "releaseDate": "1997-05-01"
+  },
+  {
+    "name": "Magic Player Rewards",
+    "code": "pMPR",
+    "releaseDate": "2001-05-01"
+  },
+  {
+    "name": "Magic Game Day",
+    "code": "pMGD",
+    "releaseDate": "2007-07-14"
+  },
+  {
+    "name": "Media Inserts",
+    "code": "pMEI",
+    "releaseDate": "1995-01-01"
+  },
+  {
+    "name": "Launch Parties",
+    "code": "pLPA",
+    "releaseDate": "2008-02-01"
+  },
+  {
+    "name": "Legend Membership",
+    "code": "pLGM",
+    "releaseDate": "1995-01-01"
+  },
+  {
+    "name": "Judge Gift Program",
+    "code": "pJGP",
+    "releaseDate": "1998-06-01"
+  },
+  {
+    "name": "Happy Holidays",
+    "code": "pHHO",
+    "releaseDate": "2006-12-31"
+  },
+  {
+    "name": "Wizards Play Network",
+    "code": "pWPN",
+    "releaseDate": "2008-10-01"
+  },
+  {
+    "name": "Gateway",
+    "code": "pGTW",
+    "releaseDate": "2006-01-01"
+  },
+  {
+    "name": "Guru",
+    "code": "pGRU",
+    "releaseDate": "1999-07-12"
+  },
+  {
+    "name": "Grand Prix",
+    "code": "pGPX",
+    "releaseDate": "2007-02-24"
+  },
+  {
+    "name": "Friday Night Magic",
+    "code": "pFNM",
+    "releaseDate": "2000-02-01"
+  },
+  {
+    "name": "European Land Program",
+    "code": "pELP",
+    "releaseDate": "2000-02-05"
+  },
+  {
+    "name": "Dragon Con",
+    "code": "pDRC",
+    "releaseDate": "1994-01-01"
+  },
+  {
+    "name": "Champs and States",
+    "code": "pCMP",
+    "releaseDate": "2006-03-18"
+  },
+  {
+    "name": "Celebration",
+    "code": "pCEL",
+    "releaseDate": "1996-08-14"
+  },
+  {
+    "name": "Arena League",
+    "code": "pARL",
+    "releaseDate": "1996-08-02"
+  },
+  {
+    "name": "Asia Pacific Land Program",
+    "code": "pALP",
+    "releaseDate": "1998-09-01"
+  },
+  {
+    "name": "Two-Headed Giant Tournament",
+    "code": "p2HG",
+    "releaseDate": "2005-12-09"
+  },
+  {
+    "name": "15th Anniversary",
+    "code": "p15A",
+    "releaseDate": "2008-04-01"
+  },
+  {
+    "name": "Premium Deck Series: Graveborn",
+    "code": "PD3",
+    "releaseDate": "2011-11-18"
+  },
+  {
+    "name": "Premium Deck Series: Fire and Lightning",
+    "code": "PD2",
+    "releaseDate": "2010-11-19"
+  },
+  {
+    "name": "Premium Deck Series: Slivers",
+    "code": "H09",
+    "releaseDate": "2009-11-20"
+  },
+  {
+    "name": "Portal Three Kingdoms",
+    "code": "PTK",
+    "releaseDate": "1999-05-01"
+  },
+  {
+    "name": "Portal",
+    "code": "POR",
+    "releaseDate": "1997-05-01"
+  },
+  {
+    "name": "Portal Second Age",
+    "code": "PO2",
+    "releaseDate": "1998-06-24"
+  },
+  {
+    "name": "Planechase Anthology",
+    "code": "PCA",
+    "releaseDate": "2016-11-25"
+  },
+  {
+    "name": "Planechase 2012 Edition",
+    "code": "PC2",
+    "releaseDate": "2012-06-01"
+  },
+  {
+    "name": "Planechase",
+    "code": "HOP",
+    "releaseDate": "2009-09-04"
+  },
+  {
+    "name": "Vintage Masters",
+    "code": "VMA",
+    "releaseDate": "2014-06-16"
+  },
+  {
+    "name": "Modern Masters",
+    "code": "MMA",
+    "releaseDate": "2013-06-07"
+  },
+  {
+    "name": "Modern Masters 2017 Edition",
+    "code": "MM3",
+    "releaseDate": "2017-03-17"
+  },
+  {
+    "name": "Modern Masters 2015 Edition",
+    "code": "MM2",
+    "releaseDate": "2015-05-22"
+  },
+  {
+    "name": "Masters Edition",
+    "code": "MED",
+    "releaseDate": "2007-09-10"
+  },
+  {
+    "name": "Masters Edition IV",
+    "code": "ME4",
+    "releaseDate": "2011-01-10"
+  },
+  {
+    "name": "Masters Edition III",
+    "code": "ME3",
+    "releaseDate": "2009-09-07"
+  },
+  {
+    "name": "Masters Edition II",
+    "code": "ME2",
+    "releaseDate": "2008-09-22"
+  },
+  {
+    "name": "Iconic Masters",
+    "code": "IMA",
+    "releaseDate": "2017-11-17"
+  },
+  {
+    "name": "Eternal Masters",
+    "code": "EMA",
+    "releaseDate": "2016-06-10"
+  },
+  {
+    "name": "Masterpiece Series: Amonkhet Invocations",
+    "code": "MPS_AKH",
+    "releaseDate": "2017-04-28"
+  },
+  {
+    "name": "Masterpiece Series: Kaladesh Inventions",
+    "code": "MPS",
+    "releaseDate": "2016-09-30"
+  },
+  {
+    "name": "Zendikar Expeditions",
+    "code": "EXP",
+    "releaseDate": "2015-10-02"
+  },
+  {
+    "name": "Explorers of Ixalan",
+    "code": "E02",
+    "releaseDate": "2017-11-24"
+  },
+  {
+    "name": "From the Vault: Transform",
+    "code": "V17",
+    "releaseDate": "2015-11-24"
+  },
+  {
+    "name": "From the Vault: Lore",
+    "code": "V16",
+    "releaseDate": "2016-08-19"
+  },
+  {
+    "name": "From the Vault: Angels",
+    "code": "V15",
+    "releaseDate": "2015-08-21"
+  },
+  {
+    "name": "From the Vault: Annihilation (2014)",
+    "code": "V14",
+    "releaseDate": "2014-08-22"
+  },
+  {
+    "name": "From the Vault: Twenty",
+    "code": "V13",
+    "releaseDate": "2013-08-23"
+  },
+  {
+    "name": "From the Vault: Realms",
+    "code": "V12",
+    "releaseDate": "2012-08-31"
+  },
+  {
+    "name": "From the Vault: Legends",
+    "code": "V11",
+    "releaseDate": "2011-08-26"
+  },
+  {
+    "name": "From the Vault: Relics",
+    "code": "V10",
+    "releaseDate": "2010-08-27"
+  },
+  {
+    "name": "From the Vault: Exiled",
+    "code": "V09",
+    "releaseDate": "2009-08-28"
+  },
+  {
+    "name": "From the Vault: Dragons",
+    "code": "DRB",
+    "releaseDate": "2008-08-29"
+  },
+  {
+    "name": "Duel Decks: Elves vs. Goblins",
+    "code": "EVG",
+    "releaseDate": "2007-11-16"
+  },
+  {
+    "name": "Duel Decks: Merfolk vs. Goblins",
+    "code": "DDT",
+    "releaseDate": "2017-11-10"
+  },
+  {
+    "name": "Duel Decks: Mind vs. Might",
+    "code": "DDS",
+    "releaseDate": "2017-03-31"
+  },
+  {
+    "name": "Duel Decks: Nissa vs. Ob Nixilis",
+    "code": "DDR",
+    "releaseDate": "2016-09-02"
+  },
+  {
+    "name": "Duel Decks: Blessed vs. Cursed",
+    "code": "DDQ",
+    "releaseDate": "2016-02-26"
+  },
+  {
+    "name": "Duel Decks: Zendikar vs. Eldrazi",
+    "code": "DDP",
+    "releaseDate": "2015-08-28"
+  },
+  {
+    "name": "Duel Decks: Elspeth vs. Kiora",
+    "code": "DDO",
+    "releaseDate": "2015-02-27"
+  },
+  {
+    "name": "Duel Decks: Speed vs. Cunning",
+    "code": "DDN",
+    "releaseDate": "2014-09-05"
+  },
+  {
+    "name": "Duel Decks: Jace vs. Vraska",
+    "code": "DDM",
+    "releaseDate": "2014-03-14"
+  },
+  {
+    "name": "Duel Decks: Heroes vs. Monsters",
+    "code": "DDL",
+    "releaseDate": "2013-09-06"
+  },
+  {
+    "name": "Duel Decks: Sorin vs. Tibalt",
+    "code": "DDK",
+    "releaseDate": "2013-03-15"
+  },
+  {
+    "name": "Duel Decks: Izzet vs. Golgari",
+    "code": "DDJ",
+    "releaseDate": "2012-09-07"
+  },
+  {
+    "name": "Duel Decks: Venser vs. Koth",
+    "code": "DDI",
+    "releaseDate": "2012-03-30"
+  },
+  {
+    "name": "Duel Decks: Ajani vs. Nicol Bolas",
+    "code": "DDH",
+    "releaseDate": "2011-09-02"
+  },
+  {
+    "name": "Duel Decks: Knights vs. Dragons",
+    "code": "DDG",
+    "releaseDate": "2011-04-01"
+  },
+  {
+    "name": "Duel Decks: Elspeth vs. Tezzeret",
+    "code": "DDF",
+    "releaseDate": "2010-09-03"
+  },
+  {
+    "name": "Duel Decks: Phyrexia vs. the Coalition",
+    "code": "DDE",
+    "releaseDate": "2010-03-19"
+  },
+  {
+    "name": "Duel Decks: Garruk vs. Liliana",
+    "code": "DDD",
+    "releaseDate": "2009-10-30"
+  },
+  {
+    "name": "Duel Decks: Divine vs. Demonic",
+    "code": "DDC",
+    "releaseDate": "2009-04-10"
+  },
+  {
+    "name": "Duel Decks Anthology, Jace vs. Chandra",
+    "code": "DD3_JVC",
+    "releaseDate": "2014-12-05"
+  },
+  {
+    "name": "Duel Decks Anthology, Garruk vs. Liliana",
+    "code": "DD3_GVL",
+    "releaseDate": "2014-12-05"
+  },
+  {
+    "name": "Duel Decks Anthology, Elves vs. Goblins",
+    "code": "DD3_EVG",
+    "releaseDate": "2014-12-05"
+  },
+  {
+    "name": "Duel Decks Anthology, Divine vs. Demonic",
+    "code": "DD3_DVD",
+    "releaseDate": "2014-12-05"
+  },
+  {
+    "name": "Duel Decks: Jace vs. Chandra",
+    "code": "DD2",
+    "releaseDate": "2008-11-07"
+  },
+  {
+    "name": "Magic: The Gathering—Conspiracy",
+    "code": "CNS",
+    "releaseDate": "2014-06-06"
+  },
+  {
+    "name": "Conspiracy: Take the Crown",
+    "code": "CN2",
+    "releaseDate": "2016-08-26"
+  },
+  {
+    "name": "Magic: The Gathering-Commander",
+    "code": "CMD",
+    "releaseDate": "2011-06-17"
+  },
+  {
+    "name": "Commander Anthology",
+    "code": "CMA",
+    "releaseDate": "2017-06-09"
+  },
+  {
+    "name": "Commander's Arsenal",
+    "code": "CM1",
+    "releaseDate": "2012-11-02"
+  },
+  {
+    "name": "Commander 2017",
+    "code": "C17",
+    "releaseDate": "2017-08-25"
+  },
+  {
+    "name": "Commander 2016",
+    "code": "C16",
+    "releaseDate": "2016-11-11"
+  },
+  {
+    "name": "Commander 2015",
+    "code": "C15",
+    "releaseDate": "2015-11-13"
+  },
+  {
+    "name": "Commander 2014",
+    "code": "C14",
+    "releaseDate": "2014-11-07"
+  },
+  {
+    "name": "Commander 2013 Edition",
+    "code": "C13",
+    "releaseDate": "2013-11-01"
+  },
+  {
+    "name": "International Collector's Edition",
+    "code": "CEI",
+    "releaseDate": "1993-12-01"
+  },
+  {
+    "name": "Collector's Edition",
+    "code": "CED",
+    "releaseDate": "1993-12-01"
+  },
+  {
+    "name": "Archenemy: Nicol Bolas",
+    "code": "E01",
+    "releaseDate": "2017-06-16"
+  },
+  {
+    "name": "Archenemy",
+    "code": "ARC",
+    "releaseDate": "2010-06-18"
+  },
+  {
+    "name": "Zendikar",
+    "code": "ZEN",
+    "releaseDate": "2009-10-02",
+    "block": "Zendikar"
+  },
+  {
+    "name": "Ixalan",
+    "code": "XLN",
+    "releaseDate": "2017-09-29",
+    "block": "Ixalan"
+  },
+  {
+    "name": "Worldwake",
+    "code": "WWK",
+    "releaseDate": "2010-02-05",
+    "block": "Zendikar"
+  },
+  {
+    "name": "Weatherlight",
+    "code": "WTH",
+    "releaseDate": "1997-06-09",
+    "block": "Mirage"
+  },
+  {
+    "name": "Welcome Deck 2017",
+    "code": "W17",
+    "releaseDate": "2017-04-15",
+    "block": "Amonkhet"
+  },
+  {
+    "name": "Welcome Deck 2016",
+    "code": "W16",
+    "releaseDate": "2016-04-08",
+    "block": "Shadows over Innistrad"
+  },
+  {
+    "name": "Visions",
+    "code": "VIS",
+    "releaseDate": "1997-02-03",
+    "block": "Mirage"
+  },
+  {
+    "name": "Vanguard",
+    "code": "VAN",
+    "releaseDate": "1997-05-01"
+  },
+  {
+    "name": "Urza's Saga",
+    "code": "USG",
+    "releaseDate": "1998-10-12",
+    "block": "Urza's"
+  },
+  {
+    "name": "Urza's Legacy",
+    "code": "ULG",
+    "releaseDate": "1999-02-15",
+    "block": "Urza's"
+  },
+  {
+    "name": "Urza's Destiny",
+    "code": "UDS",
+    "releaseDate": "1999-06-07",
+    "block": "Urza's"
+  },
+  {
+    "name": "Time Spiral",
+    "code": "TSP",
+    "releaseDate": "2006-10-06",
+    "block": "Time Spiral"
+  },
+  {
+    "name": "Time Spiral \"Timeshifted\"",
+    "code": "TSB",
+    "releaseDate": "2006-10-06",
+    "block": "Time Spiral"
+  },
+  {
+    "name": "Tempest Remastered",
+    "code": "TPR",
+    "releaseDate": "2015-05-06"
+  },
+  {
+    "name": "Torment",
+    "code": "TOR",
+    "releaseDate": "2002-02-08",
+    "block": "Odyssey"
+  },
+  {
+    "name": "Tempest",
+    "code": "TMP",
+    "releaseDate": "1997-10-14",
+    "block": "Tempest"
+  },
+  {
+    "name": "Theros",
+    "code": "THS",
+    "releaseDate": "2013-09-27",
+    "block": "Theros"
+  },
+  {
+    "name": "Stronghold",
+    "code": "STH",
+    "releaseDate": "1998-03-02",
+    "block": "Tempest"
+  },
+  {
+    "name": "Scars of Mirrodin",
+    "code": "SOM",
+    "releaseDate": "2010-10-01",
+    "block": "Scars of Mirrodin"
+  },
+  {
+    "name": "Saviors of Kamigawa",
+    "code": "SOK",
+    "releaseDate": "2005-06-03",
+    "block": "Kamigawa"
+  },
+  {
+    "name": "Shadows over Innistrad",
+    "code": "SOI",
+    "releaseDate": "2016-04-08",
+    "block": "Shadows over Innistrad"
+  },
+  {
+    "name": "Shadowmoor",
+    "code": "SHM",
+    "releaseDate": "2008-05-02",
+    "block": "Shadowmoor"
+  },
+  {
+    "name": "Scourge",
+    "code": "SCG",
+    "releaseDate": "2003-05-26",
+    "block": "Onslaught"
+  },
+  {
+    "name": "Starter 1999",
+    "code": "S99",
+    "releaseDate": "1999-07-12"
+  },
+  {
+    "name": "Starter 2000",
+    "code": "S00",
+    "releaseDate": "2000-04-24"
+  },
+  {
+    "name": "Return to Ravnica",
+    "code": "RTR",
+    "releaseDate": "2012-10-05",
+    "block": "Return to Ravnica"
+  },
+  {
+    "name": "Rivals Quick Start Set",
+    "code": "RQS",
+    "releaseDate": "1996-06-10"
+  },
+  {
+    "name": "Rise of the Eldrazi",
+    "code": "ROE",
+    "releaseDate": "2010-04-23",
+    "block": "Zendikar"
+  },
+  {
+    "name": "Rivals of Ixalan",
+    "code": "RIX",
+    "releaseDate": "2018-01-19",
+    "block": "Ixalan"
+  },
+  {
+    "name": "Ravnica: City of Guilds",
+    "code": "RAV",
+    "releaseDate": "2005-10-07",
+    "block": "Ravnica"
+  },
+  {
+    "name": "Planeshift",
+    "code": "PLS",
+    "releaseDate": "2001-02-05",
+    "block": "Invasion"
+  },
+  {
+    "name": "Planar Chaos",
+    "code": "PLC",
+    "releaseDate": "2007-02-02",
+    "block": "Time Spiral"
+  },
+  {
+    "name": "Prophecy",
+    "code": "PCY",
+    "releaseDate": "2000-06-05",
+    "block": "Masques"
+  },
+  {
+    "name": "Magic Origins",
+    "code": "ORI",
+    "releaseDate": "2015-07-17"
+  },
+  {
+    "name": "Onslaught",
+    "code": "ONS",
+    "releaseDate": "2002-10-07",
+    "block": "Onslaught"
+  },
+  {
+    "name": "Oath of the Gatewatch",
+    "code": "OGW",
+    "releaseDate": "2016-01-22",
+    "block": "Battle for Zendikar"
+  },
+  {
+    "name": "Odyssey",
+    "code": "ODY",
+    "releaseDate": "2001-10-01",
+    "block": "Odyssey"
+  },
+  {
+    "name": "New Phyrexia",
+    "code": "NPH",
+    "releaseDate": "2011-05-13",
+    "block": "Scars of Mirrodin"
+  },
+  {
+    "name": "Nemesis",
+    "code": "NMS",
+    "releaseDate": "2000-02-14",
+    "block": "Masques"
+  },
+  {
+    "name": "Mirrodin",
+    "code": "MRD",
+    "releaseDate": "2003-10-02",
+    "block": "Mirrodin"
+  },
+  {
+    "name": "Morningtide",
+    "code": "MOR",
+    "releaseDate": "2008-02-01",
+    "block": "Lorwyn"
+  },
+  {
+    "name": "Mercadian Masques",
+    "code": "MMQ",
+    "releaseDate": "1999-10-04",
+    "block": "Masques"
+  },
+  {
+    "name": "Mirage",
+    "code": "MIR",
+    "releaseDate": "1996-10-08",
+    "block": "Mirage"
+  },
+  {
+    "name": "Multiverse Gift Box",
+    "code": "MGB",
+    "releaseDate": "1996-11-01"
+  },
+  {
+    "name": "Modern Event Deck 2014",
+    "code": "MD1",
+    "releaseDate": "2014-05-30"
+  },
+  {
+    "name": "Mirrodin Besieged",
+    "code": "MBS",
+    "releaseDate": "2011-02-04",
+    "block": "Scars of Mirrodin"
+  },
+  {
+    "name": "Magic 2015 Core Set",
+    "code": "M15",
+    "releaseDate": "2014-07-18"
+  },
+  {
+    "name": "Magic 2014 Core Set",
+    "code": "M14",
+    "releaseDate": "2013-07-19"
+  },
+  {
+    "name": "Magic 2013",
+    "code": "M13",
+    "releaseDate": "2012-07-13"
+  },
+  {
+    "name": "Magic 2012",
+    "code": "M12",
+    "releaseDate": "2011-07-15"
+  },
+  {
+    "name": "Magic 2011",
+    "code": "M11",
+    "releaseDate": "2010-07-16"
+  },
+  {
+    "name": "Magic 2010",
+    "code": "M10",
+    "releaseDate": "2009-07-17"
+  },
+  {
+    "name": "Lorwyn",
+    "code": "LRW",
+    "releaseDate": "2007-10-12",
+    "block": "Lorwyn"
+  },
+  {
+    "name": "Legions",
+    "code": "LGN",
+    "releaseDate": "2003-02-03",
+    "block": "Onslaught"
+  },
+  {
+    "name": "Legends",
+    "code": "LEG",
+    "releaseDate": "1994-06-10"
+  },
+  {
+    "name": "Limited Edition Beta",
+    "code": "LEB",
+    "releaseDate": "1993-10-01"
+  },
+  {
+    "name": "Limited Edition Alpha",
+    "code": "LEA",
+    "releaseDate": "1993-08-05"
+  },
+  {
+    "name": "Khans of Tarkir",
+    "code": "KTK",
+    "releaseDate": "2014-09-26",
+    "block": "Khans of Tarkir"
+  },
+  {
+    "name": "Kaladesh",
+    "code": "KLD",
+    "releaseDate": "2016-09-30",
+    "block": "Kaladesh"
+  },
+  {
+    "name": "Judgment",
+    "code": "JUD",
+    "releaseDate": "2002-05-27",
+    "block": "Odyssey"
+  },
+  {
+    "name": "Journey into Nyx",
+    "code": "JOU",
+    "releaseDate": "2014-05-02",
+    "block": "Theros"
+  },
+  {
+    "name": "Introductory Two-Player Set",
+    "code": "ITP",
+    "releaseDate": "1996-12-31"
+  },
+  {
+    "name": "Innistrad",
+    "code": "ISD",
+    "releaseDate": "2011-09-30",
+    "block": "Innistrad"
+  },
+  {
+    "name": "Invasion",
+    "code": "INV",
+    "releaseDate": "2000-10-02",
+    "block": "Invasion"
+  },
+  {
+    "name": "Ice Age",
+    "code": "ICE",
+    "releaseDate": "1995-06-01",
+    "block": "Ice Age"
+  },
+  {
+    "name": "Hour of Devastation",
+    "code": "HOU",
+    "releaseDate": "2017-07-14",
+    "block": "Amonkhet"
+  },
+  {
+    "name": "Homelands",
+    "code": "HML",
+    "releaseDate": "1995-10-14"
+  },
+  {
+    "name": "Gatecrash",
+    "code": "GTC",
+    "releaseDate": "2013-02-01",
+    "block": "Return to Ravnica"
+  },
+  {
+    "name": "Guildpact",
+    "code": "GPT",
+    "releaseDate": "2006-02-03",
+    "block": "Ravnica"
+  },
+  {
+    "name": "Future Sight",
+    "code": "FUT",
+    "releaseDate": "2007-05-04",
+    "block": "Time Spiral"
+  },
+  {
+    "name": "Ugin's Fate promos",
+    "code": "FRF_UGIN",
+    "releaseDate": "2015-01-17"
+  },
+  {
+    "name": "Fate Reforged",
+    "code": "FRF",
+    "releaseDate": "2015-01-23",
+    "block": "Khans of Tarkir"
+  },
+  {
+    "name": "Fallen Empires",
+    "code": "FEM",
+    "releaseDate": "1994-11-15"
+  },
+  {
+    "name": "Exodus",
+    "code": "EXO",
+    "releaseDate": "1998-06-15",
+    "block": "Tempest"
+  },
+  {
+    "name": "Eventide",
+    "code": "EVE",
+    "releaseDate": "2008-07-25",
+    "block": "Shadowmoor"
+  },
+  {
+    "name": "Eldritch Moon",
+    "code": "EMN",
+    "releaseDate": "2016-07-22",
+    "block": "Shadows over Innistrad"
+  },
+  {
+    "name": "Dragons of Tarkir",
+    "code": "DTK",
+    "releaseDate": "2015-03-27",
+    "block": "Khans of Tarkir"
+  },
+  {
+    "name": "Darksteel",
+    "code": "DST",
+    "releaseDate": "2004-02-06",
+    "block": "Mirrodin"
+  },
+  {
+    "name": "The Dark",
+    "code": "DRK",
+    "releaseDate": "1994-08-08"
+  },
+  {
+    "name": "Duels of the Planeswalkers",
+    "code": "DPA",
+    "releaseDate": "2010-06-04"
+  },
+  {
+    "name": "Deckmasters",
+    "code": "DKM",
+    "releaseDate": "2001-12-01"
+  },
+  {
+    "name": "Dark Ascension",
+    "code": "DKA",
+    "releaseDate": "2012-02-03",
+    "block": "Innistrad"
+  },
+  {
+    "name": "Dissension",
+    "code": "DIS",
+    "releaseDate": "2006-05-05",
+    "block": "Ravnica"
+  },
+  {
+    "name": "Dragon's Maze",
+    "code": "DGM",
+    "releaseDate": "2013-05-03",
+    "block": "Return to Ravnica"
+  },
+  {
+    "name": "Coldsnap Theme Decks",
+    "code": "CST",
+    "releaseDate": "2006-07-21"
+  },
+  {
+    "name": "Coldsnap",
+    "code": "CSP",
+    "releaseDate": "2006-07-21",
+    "block": "Ice Age"
+  },
+  {
+    "name": "Magic Origins Clash Pack",
+    "code": "CP3",
+    "releaseDate": "2015-07-17"
+  },
+  {
+    "name": "Fate Reforged Clash Pack",
+    "code": "CP2",
+    "releaseDate": "2015-01-23"
+  },
+  {
+    "name": "Magic 2015 Clash Pack",
+    "code": "CP1",
+    "releaseDate": "2014-07-18"
+  },
+  {
+    "name": "Conflux",
+    "code": "CON",
+    "releaseDate": "2009-02-06",
+    "block": "Alara"
+  },
+  {
+    "name": "Chronicles",
+    "code": "CHR",
+    "releaseDate": "1995-07-01"
+  },
+  {
+    "name": "Champions of Kamigawa",
+    "code": "CHK",
+    "releaseDate": "2004-10-01",
+    "block": "Kamigawa"
+  },
+  {
+    "name": "Beatdown Box Set",
+    "code": "BTD",
+    "releaseDate": "2000-10-01"
+  },
+  {
+    "name": "Battle Royale Box Set",
+    "code": "BRB",
+    "releaseDate": "1999-11-12"
+  },
+  {
+    "name": "Betrayers of Kamigawa",
+    "code": "BOK",
+    "releaseDate": "2005-02-04",
+    "block": "Kamigawa"
+  },
+  {
+    "name": "Born of the Gods",
+    "code": "BNG",
+    "releaseDate": "2014-02-07",
+    "block": "Theros"
+  },
+  {
+    "name": "Battle for Zendikar",
+    "code": "BFZ",
+    "releaseDate": "2015-10-02",
+    "block": "Battle for Zendikar"
+  },
+  {
+    "name": "Avacyn Restored",
+    "code": "AVR",
+    "releaseDate": "2012-05-04",
+    "block": "Innistrad"
+  },
+  {
+    "name": "Antiquities",
+    "code": "ATQ",
+    "releaseDate": "1994-03-04"
+  },
+  {
+    "name": "Anthologies",
+    "code": "ATH",
+    "releaseDate": "1998-11-01"
+  },
+  {
+    "name": "Arabian Nights",
+    "code": "ARN",
+    "releaseDate": "1993-12-17"
+  },
+  {
+    "name": "Alara Reborn",
+    "code": "ARB",
+    "releaseDate": "2009-04-30",
+    "block": "Alara"
+  },
+  {
+    "name": "Apocalypse",
+    "code": "APC",
+    "releaseDate": "2001-06-04",
+    "block": "Invasion"
+  },
+  {
+    "name": "Alliances",
+    "code": "ALL",
+    "releaseDate": "1996-06-10",
+    "block": "Ice Age"
+  },
+  {
+    "name": "Shards of Alara",
+    "code": "ALA",
+    "releaseDate": "2008-10-03",
+    "block": "Alara"
+  },
+  {
+    "name": "Amonkhet",
+    "code": "AKH",
+    "releaseDate": "2017-04-28",
+    "block": "Amonkhet"
+  },
+  {
+    "name": "Aether Revolt",
+    "code": "AER",
+    "releaseDate": "2017-01-20",
+    "block": "Kaladesh"
+  },
+  {
+    "name": "Ninth Edition",
+    "code": "9ED",
+    "releaseDate": "2005-07-29"
+  },
+  {
+    "name": "Eighth Edition",
+    "code": "8ED",
+    "releaseDate": "2003-07-28"
+  },
+  {
+    "name": "Seventh Edition",
+    "code": "7ED",
+    "releaseDate": "2001-04-11"
+  },
+  {
+    "name": "Classic Sixth Edition",
+    "code": "6ED",
+    "releaseDate": "1999-04-21"
+  },
+  {
+    "name": "Fifth Edition",
+    "code": "5ED",
+    "releaseDate": "1997-03-24"
+  },
+  {
+    "name": "Fifth Dawn",
+    "code": "5DN",
+    "releaseDate": "2004-06-04",
+    "block": "Mirrodin"
+  },
+  {
+    "name": "Fourth Edition",
+    "code": "4ED",
+    "releaseDate": "1995-04-01"
+  },
+  {
+    "name": "Revised Edition",
+    "code": "3ED",
+    "releaseDate": "1994-04-01"
+  },
+  {
+    "name": "Unlimited Edition",
+    "code": "2ED",
+    "releaseDate": "1993-12-01"
+  },
+  {
+    "name": "Tenth Edition",
+    "code": "10E",
+    "releaseDate": "2007-07-13"
+  }
+]

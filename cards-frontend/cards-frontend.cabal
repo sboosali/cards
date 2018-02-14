@@ -133,7 +133,7 @@ library
                  Cards.Frontend.Runner
                  Cards.Frontend.Example                
  other-modules:
-
+                 Cards.AllCards
                  Cards.Frontend.Extra            
                  -- Paths_cards-frontend
 -- autogen-modules:
