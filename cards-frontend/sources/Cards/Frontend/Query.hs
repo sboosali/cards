@@ -58,8 +58,13 @@ parseMCISyntax t = Just $ MCISyntax (Just t) []
 
 ----------------------------------------
 
+----------------------------------------
+
 validateQuery :: RawQuery -> Maybe ValidQuery
-validateQuery = fromPredicate T.null
+validateQuery
+  = normalize
+  > fromPredicate T.null
+  > fmap ValidQuery
 
 {- | for `fmapMaybe`.
 
@@ -69,17 +74,11 @@ fromPredicate p = \x -> if p x then Just x else Nothing
 
 ----------------------------------------
 
-execQuery :: CardDatabase -> Query -> Results
-execQuery db = parseQuery >>> runQuery db 
+-- parseQuery :: Text -> RawQuery 
+-- parseQuery 
+--   = normalize 
+-- --  > RawQuery
 
--- execQuery :: CardDatabase -> Query -> Text
--- execQuery db = parseQuery >>> runQuery db >>> formatResults 
-
-parseQuery :: Text -> Query 
-parseQuery q = T.toLower q
-
-runQuery :: CardDatabase -> Query -> Results
-runQuery db q = db & filter (\Card{..} -> q `T.isInfixOf` _cardName) 
  -- (_cardName == q) 
  -- & fmap _cardText
 ----------------------------------------
@@ -89,5 +88,14 @@ abbreviations =
   [ "cmc"-: "converted mana cost"
   , "kill"-: "destroy"
   ]
+
+----------------------------------------
+
+normalize :: Text -> Text
+normalize
+  = T.toLower
+
+normalizeS :: String -> Text
+normalizeS = T.pack > normalize
 
 ----------------------------------------

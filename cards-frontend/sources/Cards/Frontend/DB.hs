@@ -12,14 +12,19 @@ import qualified Cards.AllCards as AllCards
 
 import Cards.Frontend.Extra
 import Cards.Frontend.Types
+import Cards.Frontend.Query
 
-import qualified Data.Text as T
+--import qualified Data.Text as T
 
 ----------------------------------------
 
 defaultCardDatabase :: CardDatabase
-defaultCardDatabase = AllCards.cards
- & fmap (\(x,y) -> Card (T.pack x) (T.pack y))
+defaultCardDatabase = toCardDatabase AllCards.cards
+
+toCardDatabase :: [(String,String)] -> CardDatabase
+toCardDatabase
+ = fmap (\(x,y) -> Card (normalizeS x) (normalizeS y))
+ > CardDatabase
 
  -- [ "fire" -: "deal 3 damage", "ice" -: "tap target permanent", "kavu firemaw" -: "FIREMAW" ]
 

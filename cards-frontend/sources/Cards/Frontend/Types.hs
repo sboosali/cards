@@ -21,15 +21,17 @@ import Cards.Frontend.Extra
 -- import Data.Monoid
 -- import System.Environment
 
--- import Prelude.Spiros hiding (Text)
+import Prelude.Spiros hiding (Text)
+import GHC.Exts (IsList)
 
 ----------------------------------------
 
-type Query = Text
-
 type RawQuery = Text
+--type Query = ValidQuery
 
-type ValidQuery = Text
+--newtype RawQuery = RawQuery { fromRawQuery :: Text } deriving ()
+
+newtype ValidQuery = ValidQuery { fromValidQuery :: Text } deriving ()
 
 data QueryOptions = QueryOptions
  { _queryLanguage :: QueryLanguage
@@ -48,7 +50,7 @@ instance Default QueryLanguage where def = ParseQueryLikeMCI
 
 ----------------------------------------
 
-type CardDatabase = [Card]
+newtype CardDatabase = CardDatabase { fromCardDatabase :: [Card] } deriving ()
 
 data Card = Card 
  { _cardName :: Text 
@@ -57,9 +59,11 @@ data Card = Card
 
 ----------------------------------------
 
-type Results = [Result]
+newtype Results = Results { fromResults :: [Result] }
+ deriving (IsList)
 
-type Result = Card
+newtype Result = Result { fromResult :: Card }
+ deriving ()
 
 data ResultsOptions = ResultsOptions
  { _resultsFormat :: ResultsFormat 
@@ -73,6 +77,7 @@ instance Default ResultsOptions where
 data ResultsFormat
   = DisplayResultsAsText
   | DisplayResultsAsImages
+  | DisplayResultsAsHTML
   deriving (Show,Read,Eq,Ord,Enum,Bounded,Ix,Generic,NFData,Hashable)
 
 instance Default ResultsFormat where def = DisplayResultsAsText

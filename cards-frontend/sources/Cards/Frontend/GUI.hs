@@ -15,8 +15,9 @@ module Cards.Frontend.GUI where
 import Cards.Frontend.Extra
 import Cards.Frontend.Types
 import Cards.Frontend.DB
-import Cards.Frontend.Query
---import Cards.Frontend.Result
+--import Cards.Frontend.Query
+import Cards.Frontend.Search
+import Cards.Frontend.Result
 
 import Reflex hiding (Query)
 --import qualified Reflex as R
@@ -42,7 +43,9 @@ import qualified Data.Text as T
 --import qualified Clay as CSS
 import qualified Clay as C
 
---import Prelude.Spiros hiding (Text,div)
+import Data.Maybe
+
+import Prelude.Spiros hiding (Text,div)
  -- reflex `Text` is strict
  -- Prelude numerical `div`
 
@@ -119,10 +122,11 @@ wSearchPage = do
 --  let eQuery = never & fmapMaybe nonEmptyString
  
   let dResults = dQuery <&> execQuery defaultCardDatabase
-  let dCount   = dResults <&> length
-
+                 <&> fromMaybe noResults --TODO
+  let dCount   = dResults <&> (fromResults > length)
+  
+  let dHeader = dCount   <&> formatCount 
   let dTable  = dResults <&> formatResults
-  let dHeader = dCount <&> formatCount 
 
   _ <- dyn dHeader
   
@@ -180,7 +184,8 @@ formatCount
   
 formatResults :: (MonadWidget t m) => Results -> m ()
 formatResults
- = traverse_ formatCard
+ = fromResults
+ > traverse_ formatResult
  -- = fmap formatCard
  -- > intersperse (sequence_
  --                [div_, text "========================================", div_])
@@ -202,7 +207,10 @@ styleCardResult = T.intercalate " "
   ]
 
 elementCardResult :: Text
-elementCardResult = "div" 
+elementCardResult = "div"
+
+formatResult :: (MonadWidget t m) => Result -> m ()
+formatResult (Result card) = formatCard card
 
 formatCard :: (MonadWidget t m) => Card -> m ()
 formatCard Card{..} = elDynAttr elementCardResult dAttributes $ do

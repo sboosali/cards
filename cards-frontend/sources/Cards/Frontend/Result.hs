@@ -15,6 +15,11 @@ import qualified Data.Text as T
 
 ----------------------------------------
 
+noResults :: Results
+noResults = []
+
+----------------------------------------
+
 {-| TODO
 
 -}
@@ -36,3 +41,4 @@ ppCard Card{..} =
  innerDivider = T.replicate (T.length _cardName) "-"
 
 ----------------------------------------
+

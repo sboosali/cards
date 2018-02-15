@@ -126,6 +126,7 @@ library
 
                  Cards.Frontend.DB
                  Cards.Frontend.Query		
+                 Cards.Frontend.Search
                  Cards.Frontend.Result
 
                  Cards.Frontend.GUI
