@@ -57,7 +57,9 @@ import Reflex.Dom      hiding (mainWidgetWithHead,run,Query,element)
 ----------------------------------------
 
 main :: IO ()
-main = mainWidgetWith wHead wBody'
+main = do
+  forceIO defaultCardDatabase
+  mainWidgetWith wHead wBody'
 
 ----------------------------------------
 

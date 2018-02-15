@@ -13,11 +13,11 @@ prototype that searches through card name only, displaying the oracle text too. 
 module Cards.Frontend.GUI where
 
 import Cards.Frontend.Extra
-import Cards.Frontend.Types
-import Cards.Frontend.DB
---import Cards.Frontend.Query
-import Cards.Frontend.Search
-import Cards.Frontend.Result
+import Cards.Frontend.Types 
+import Cards.Frontend.DB (defaultCardDatabase)
+import Cards.Frontend.Query (validateQuery)
+import Cards.Frontend.Search (runQuery)
+--import Cards.Frontend.Result (noResults)
 
 import Reflex hiding (Query)
 --import qualified Reflex as R
@@ -43,9 +43,13 @@ import qualified Data.Text as T
 --import qualified Clay as CSS
 import qualified Clay as C
 
-import Data.Maybe
+import Data.Time (NominalDiffTime)
+--import Data.Thyme.Time -- (NominalDiffTime)
+--- ^ NOTE "This module provides compatibility instances and wrappers for the things that thyme does differently from time, and allows it to be used as a drop-in replacement for the latter"
 
-import Prelude.Spiros hiding (Text,div)
+--import Data.Maybe
+
+--import Prelude.Spiros hiding (Text,div)
  -- reflex `Text` is strict
  -- Prelude numerical `div`
 
@@ -110,6 +114,10 @@ grid = do
 
 ----------------------------------------
 
+-- | in seconds. 
+queryDebouncingInterval :: NominalDiffTime
+queryDebouncingInterval = 0.5 --TODO debounce only for display, eagerly compute
+
 {-|
 
 -}
@@ -117,22 +125,99 @@ wSearchPage :: MonadWidget t m => m ()
 wSearchPage = do
 
   oSearch <- textInput iSearch
-  let dSearch = value oSearch
-  let dQuery = dSearch
---  let eQuery = never & fmapMaybe nonEmptyString
- 
-  let dResults = dQuery <&> execQuery defaultCardDatabase
-                 <&> fromMaybe noResults --TODO
-  let dCount   = dResults <&> (fromResults > length)
-  
-  let dHeader = dCount   <&> formatCount 
-  let dTable  = dResults <&> formatResults
+  let dSearchValue = value oSearch
 
-  _ <- dyn dHeader
+  let eQueryEveryKeypress
+        = dSearchValue
+        & updated
+          -- Continuous
   
-  _ <- dyn dTable 
+  eQueryDebounced <- eQueryEveryKeypress 
+    & debounce queryDebouncingInterval
+  
+  -- dSearchDebounced <- dSearchContinuous
+  --   & debounceD searchbarDebouncingInterval ""
+  -- let dRawQuery = dSearchDebounced
+  
+--  let eQuery = never & fmapMaybe nonEmptyString
+
+--                 <&> fromMaybe noResults --NOTE ignore invalid queries
+
+  let (eQueryIsInvalid, eValidQuery)
+        = eQueryDebounced
+        & fpartitionOnPredicate validateQuery
+  
+  let eResults = eValidQuery <&> runQuery defaultCardDatabase
+  let eSearchError = ("invalid query" <$ eQueryIsInvalid)
+  let eLaterResultsPage = leftmost
+       [ FailedResultsPage     <$> eSearchError
+       , SuccessfulResultsPage <$> eResults
+       ]
+       --NOTE these are actually mutually-exclusive,
+       -- given the `fpartition`
+
+  dResultsPage <- holdDyn InitialResultsPage eLaterResultsPage
+  let dWidget = dResultsPage <&> formatResultsPage def
+  
+  _ <- dyn dWidget
 
   blank
+
+----------------------------------------
+
+-- wResults :: MonadWidget t m => Event t Results -> m (Dynamic1_ t m)
+-- wResults eResults = do
+
+--   dHeader <- holdDyn blank eHeader
+--   dTable  <- holdDyn blank eTable
+  
+-- --  let dSuccess = (dHeader >> dTable)
+--   let dSuccess = do
+--         dHeader
+--         dTable
+--   return dSuccess
+
+--   where
+--   eCount  = eResults <&> (fromResults > length)
+  
+--   eHeader = eCount   <&> formatCount 
+--   eTable  = eResults <&> formatResults
+
+  -- let eCount   = eResults <&> (fromResults > length)
+  
+  -- let eHeader = eCount   <&> formatCount 
+  -- let eTable  = eResults <&> formatResults
+
+  -- let dSuccess = do
+  --      _ <- dyn dHeader
+  --      _ <- dyn dTable
+  --      blank
+
+  -- dSuccess
+
+----------------------------------------
+
+-- debounceD
+--   :: (MonadFix m, MonadHold t m, PerformEvent t m, TriggerEvent t m, MonadIO (Performable m))
+--   => NominalDiffTime -> a -> Dynamic t a -> m (Dynamic t a)
+-- debounceD duration initial dOriginal = do
+--   let eOriginal = dOriginal & updated
+-- --  let bOriginal = dOriginal & current
+
+--   eDebounced <- debounce duration eOriginal
+  
+--   dDebounced <- holdDyn initial eDebounced  -- bOriginal
+
+--   return dDebounced
+
+{-NOTE
+
+debounce
+> Block occurrences of an Event until the given number of seconds elapses without
+the Event firing, at which point the last occurrence of the Event will fire.
+
+-}
+
 
 ----------------------------------------
 
@@ -175,13 +260,48 @@ iSearch = def
 
 ----------------------------------------
 
+formatResultsPage
+  :: (MonadWidget t m)
+  => ResultsOptions -> ResultsPage -> m ()
+formatResultsPage _ = \case
+ InitialResultsPage       -> formatInitial
+ FailedResultsPage e      -> formatError e
+ SuccessfulResultsPage rs -> formatSuccess rs
+
+formatInitial
+  :: (MonadWidget t m)
+  => m ()
+formatInitial =
+  text "ready"
+
+formatError   
+  :: (MonadWidget t m)
+  => SearchError
+  -> m ()
+formatError (SearchError e) =
+  text e
+
+formatSuccess
+  :: (MonadWidget t m)
+  => Results
+  -> m ()
+formatSuccess results = do
+  
+  _count  & formatCount
+  results & formatResults
+
+  where
+  _count = results & (fromResults > length)
+
+----------------------------------------
+
 formatCount :: (MonadWidget t m) => Int -> m ()
 formatCount
   = show > T.pack
   > text
   > elClass "div" "card-result-count"
 --  > elDynAttr "card-result-count"
-  
+
 formatResults :: (MonadWidget t m) => Results -> m ()
 formatResults
  = fromResults

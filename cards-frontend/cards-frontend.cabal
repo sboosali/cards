@@ -94,11 +94,18 @@ library
   -Wall
 -- disable
   -fno-warn-unticked-promoted-constructors
+--  -fno-warn-missing-methods
 -- enable
   -fwarn-incomplete-uni-patterns
   -fwarn-incomplete-record-updates
   -fwarn-identities
   -fwarn-missing-fields
+
+--TODO
+-- sources/Cards/Frontend/Types.hs:63:12: warning: [-Wmissing-methods]
+--     • No explicit implementation for
+--         ‘GHC.Exts.fromList’ and ‘GHC.Exts.toList’
+--     • In the instance declaration for ‘IsList Results’
 
  -- toggles between main being a `jsaddle-warp` server 
  -- or a (?) `webkitgtk` non-server. 
@@ -132,6 +139,8 @@ library
                  Cards.Frontend.GUI
  
                  Cards.Frontend.Runner
+                 Cards.Frontend.Application 
+-- other-modules:
                  Cards.Frontend.Example                
  other-modules:
                  Cards.AllCards
@@ -154,6 +163,7 @@ library
 -- mine 
              , spiros
 --              , enumerate 
+             , memo
 
 -- reflex
              , reflex
@@ -175,6 +185,9 @@ library
              , transformers
              , mtl
              , string-conv
+
+             , time
+             , thyme
 
 -- ekmett 
              , exceptions

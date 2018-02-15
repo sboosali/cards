@@ -2,7 +2,8 @@
 
 {-# LANGUAGE DataKinds, ConstraintKinds #-}
 {-# LANGUAGE DeriveAnyClass #-}
- 
+--{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 {-| The core types. 
 
 This module mostly defines types 
@@ -21,8 +22,26 @@ import Cards.Frontend.Extra
 -- import Data.Monoid
 -- import System.Environment
 
-import Prelude.Spiros hiding (Text)
-import GHC.Exts (IsList)
+--import Prelude.Spiros hiding (Text)
+--import GHC.Exts (IsList(..))
+
+----------------------------------------
+
+data ResultsPage
+ = InitialResultsPage
+ | FailedResultsPage     SearchError
+ | SuccessfulResultsPage Results
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+
+----------------------------------------
+
+newtype SearchError = SearchError
+  { fromSearchError :: Text }
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable) --,IsString)
+
+instance IsString SearchError where
+  fromString = fromString > SearchError
+  --toString   = fromSearchError
 
 ----------------------------------------
 
@@ -31,7 +50,8 @@ type RawQuery = Text
 
 --newtype RawQuery = RawQuery { fromRawQuery :: Text } deriving ()
 
-newtype ValidQuery = ValidQuery { fromValidQuery :: Text } deriving ()
+newtype ValidQuery = ValidQuery { fromValidQuery :: Text }
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 data QueryOptions = QueryOptions
  { _queryLanguage :: QueryLanguage
@@ -50,7 +70,10 @@ instance Default QueryLanguage where def = ParseQueryLikeMCI
 
 ----------------------------------------
 
-newtype CardDatabase = CardDatabase { fromCardDatabase :: [Card] } deriving ()
+data CardDatabase = CardDatabase
+  { fromCardDatabase :: [Card]
+  --TODO , hashedCardDatabase :: Int -- for caching
+  } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 data Card = Card 
  { _cardName :: Text 
@@ -60,10 +83,16 @@ data Card = Card
 ----------------------------------------
 
 newtype Results = Results { fromResults :: [Result] }
- deriving (IsList)
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
-newtype Result = Result { fromResult :: Card }
- deriving ()
+instance IsList Results where
+  type Item Results = Result
+  fromList = Results
+  toList = fromResults
+
+newtype Result = Result
+ { fromResult :: Card }
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 data ResultsOptions = ResultsOptions
  { _resultsFormat :: ResultsFormat 

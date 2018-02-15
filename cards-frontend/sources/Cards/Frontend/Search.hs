@@ -14,6 +14,8 @@ import Cards.Frontend.Query
 
 import qualified Data.Text as T
 
+import Memoize
+
 import Prelude.Spiros
 
 ----------------------------------------
@@ -27,10 +29,22 @@ execQuery db
 -- execQuery db = parseQuery >>> runQuery db >>> formatResults 
 
 runQuery :: CardDatabase -> ValidQuery -> Results
-runQuery (CardDatabase db) (ValidQuery q)
-  = db
-  & filter (\Card{..} -> q `T.isInfixOf` _cardName)
+runQuery database = memoWithMap go
+  where
+  go = runQuery' database
+{-# INLINE runQuery #-}  
+--TODO caching; close over the CardDatabase, which changes infrequently anyways. 
+
+runQuery' :: CardDatabase -> ValidQuery -> Results
+runQuery' (CardDatabase db) = \query
+ -> db
+  & filter (matchCard query)
   & fmap Result
   & Results
+{-# INLINE runQuery' #-}  
+
+matchCard :: ValidQuery -> Card -> Bool --TODO Maybe Result
+matchCard (ValidQuery q) Card{..} =
+  q `T.isInfixOf` _cardName
 
 ----------------------------------------

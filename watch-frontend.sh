@@ -5,7 +5,9 @@
 
 emacsclient ./cards-frontend/ghcid.txt &
 
-nix-shell -A shells.ghc --run 'ghcid --directory="./cards-frontend/" --reload="./sources/" --restart="./cards-frontend.cabal" --project="cards-frontend" --command "cabal new-repl cards-frontend" --outputfile=./ghcid.txt'
+nix-shell -A shells.ghc --run 'ghcid --directory="./cards-frontend/" --reload="./sources/" --restart="./cards-frontend.cabal" --project="cards-frontend" --outputfile=./ghcid.txt --command "cabal new-repl cards-frontend"'
+
+#NOTE unsupported: --ghci-options -ferror-spans"
 
 ########################################
 

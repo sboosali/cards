@@ -106,6 +106,8 @@ myOverlaysWith = pkgs: self: super: let
 
     spiros = local_ ../spiros;
 
+    memo = local_ ../Haskell-Memoize;
+
     # spiros = local_ ../spiros;
      # ^ needed `protolude`, not anymore
     # protolude = prefetched_ ./protolude.json; 

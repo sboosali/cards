@@ -60,10 +60,13 @@ parseMCISyntax t = Just $ MCISyntax (Just t) []
 
 ----------------------------------------
 
+{- | non-empty and 'normalize'd (case insensitive, etc).
+
+-}
 validateQuery :: RawQuery -> Maybe ValidQuery
 validateQuery
   = normalize
-  > fromPredicate T.null
+  > fromPredicate (T.null > not)
   > fmap ValidQuery
 
 {- | for `fmapMaybe`.
@@ -94,6 +97,7 @@ abbreviations =
 normalize :: Text -> Text
 normalize
   = T.toLower
+  > T.strip
 
 normalizeS :: String -> Text
 normalizeS = T.pack > normalize

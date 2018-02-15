@@ -9,9 +9,9 @@ transitively imports @Paths_cards_common@.
 -}
 module Cards.MTGJSON.Macros where
 
-import Cards.MTGJSON.Paths
+--import Cards.MTGJSON.Paths
 
-import Data.ByteString (ByteString)
+--import Data.ByteString (ByteString)
 
 --import Prelude.Spiros
 
@@ -29,8 +29,8 @@ import Data.ByteString (ByteString)
 
 ----------------------------------------
 
-b'RIXSetsY :: ByteString
-b'RIXSetsY = $(embedDataFile fp'RIXSetsY)
+-- b'RIXSetsY :: ByteString
+-- b'RIXSetsY = $(embedDataFile fp'RIXSetsY)
 
 {-
 

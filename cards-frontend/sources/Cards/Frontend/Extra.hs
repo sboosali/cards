@@ -24,9 +24,17 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import Prelude.Spiros hiding (Text,div)
 
+--import Data.Either
+
 import Data.String.Conv
 
 ---------------------------------------
+
+--type DynamicWidget t m
+
+type Dynamic1  t f a = Dynamic t (f a)
+
+type Dynamic1_ t f   = Dynamic t (f ())
 
 {-|
 
@@ -164,5 +172,77 @@ div_ :: (MonadWidget t m) => m ()
 div_ = div blank
 
 ----------------------------------------
+
+-- |
+fpartitionMaybes
+  :: FunctorMaybe f
+  => f (Maybe a)
+  -> (f (), f a)
+fpartitionMaybes stream = (failure, success)
+  where
+  success = stream & fmapMaybe id
+  failure = stream & fmapMaybe (fromNothing ())
+
+  fromNothing x = (maybe (Just x) (const Nothing))
+
+-- |
+fpartitionEithers
+  :: FunctorMaybe f
+  => f (Either e a)
+  -> (f e, f a)
+fpartitionEithers stream = (failure, success)
+  where
+  success = stream & fmapMaybe isSuccess
+  failure = stream & fmapMaybe isFailure
+  isSuccess = either (const Nothing) Just
+  isFailure = either Just            (const Nothing)
+
+-- |
+fpartition
+  :: FunctorMaybe f
+  => (a -> Bool)
+  -> f a
+  -> (f a, f a)
+fpartition predicate stream = (failure, success)
+  where
+  success = stream & ffilter predicate
+  failure = stream & ffilter (not . predicate)
+
+-- |
+fpartitionOn
+  :: (Functor f, FunctorMaybe f)
+  => (a -> Either e b)
+  -> f a
+  -> (f e, f b)
+fpartitionOn p = fmap p > fpartitionEithers
+
+-- |
+fpartitionOnPredicate
+  :: (Functor f, FunctorMaybe f)
+  => (a -> Maybe b)
+  -> f a
+  -> (f (), f b)
+fpartitionOnPredicate p = fmap p > fpartitionMaybes
+
+-- fpartitionOn split stream = (failure, success)
+--   where
+--   success = stream & fmapMaybe isSuccess
+--   failure = stream & fmapMaybe isFailure
+
+--   isSuccess = split > fromLeft  Nothing 
+--   isFailure = split > fromRight Nothing
+  
+--   -- issuccess = split > either Nothing id
+--   -- isFailure = split > either id Nothing
+
+----------------------------------------
+
+fromLeft :: a -> Either a b -> a
+fromLeft _ (Left a) = a
+fromLeft a _        = a
+
+fromRight :: b -> Either a b -> b
+fromRight _ (Right b) = b
+fromRight b _         = b
 
 ----------------------------------------
