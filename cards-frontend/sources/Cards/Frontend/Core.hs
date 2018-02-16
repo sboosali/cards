@@ -1,20 +1,16 @@
-{-# LANGUAGE NoImplicitPrelude #-}
-
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE OverloadedLists #-}
 
 {-| The core definitions. 
 
 -}
 module Cards.Frontend.Core where
 
-import Cards.Frontend.Extra
+--import Cards.Frontend.Extra
 --import Cards.Frontend.Types
 --import Cards.Frontend.DB
 
 --import Reflex hiding (Query)
 --import qualified Reflex as R
-import Reflex.Dom hiding (Query)
+
 
 --import qualified Control.Lens as L
 
@@ -29,6 +25,17 @@ import Reflex.Dom hiding (Query)
 -- import Data.Monoid
 -- import System.Environment
 
+----------------------------------------
+
+----------------------------------------
+
+-- {-|
+
+-- -}
+-- checkboxBoundedEnum :: (Enum a, Bounded a) => AttributeMap -> [a]
+-- checkboxBoundedEnum _ = constructors'
+  
+----------------------------------------
 {-NOTES
 
 create an HTML element, with (1) Dynamic attributes and a (2) child element, returning its Events:
@@ -89,12 +96,3 @@ button' t = do
 
 -}
 
-----------------------------------------
-
-{-|
-
--}
-checkboxBoundedEnum :: (Enum a, Bounded a) => AttributeMap -> [a]
-checkboxBoundedEnum _ = constructors
-
-----------------------------------------

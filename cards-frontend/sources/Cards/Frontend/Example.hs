@@ -1,4 +1,3 @@
-{-# LANGUAGE NoImplicitPrelude #-}
 
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE OverloadedLists #-}
@@ -33,14 +32,15 @@ Naming:
 -}
 module Cards.Frontend.Example where
 
-import Cards.Frontend
+--import qualified Cards.Frontend.GUI as GUI
 import Cards.Frontend.Extra
-import Cards.Frontend.Runner (mainWidgetWith, __GHCJS_RUNNER_TEXT__)
+import qualified Cards.Frontend        as Cards 
+import qualified Cards.Frontend.Runner as Runner 
 --import Prelude.Spiros hiding (Text,div)
 
-import Reflex hiding (Query)
+-- import Reflex hiding (Query)
+-- import Reflex.Dom      hiding (mainWidgetWithHead,run,Query,element)
 
-import Reflex.Dom      hiding (mainWidgetWithHead,run,Query,element)
 
 --import qualified Control.Lens as L
 
@@ -58,71 +58,78 @@ import Reflex.Dom      hiding (mainWidgetWithHead,run,Query,element)
 
 main :: IO ()
 main = do
-  forceIO defaultCardDatabase
-  mainWidgetWith wHead wBody'
+  -- TODO defaultFrontend, defaultInitialization
+  forceIO Cards.defaultCardDatabase
+  Runner.mainWidgetWithFrontend Cards.frontend
 
 ----------------------------------------
 
---TODO lol
-wBody' = do
-  -- test
-  -- app
-  wBody
+-- wHead :: MonadWidget t m => m ()  
+-- wHead = GUI.wHead
 
-{-|
-
-@
-type Widget x =
-  PostBuildT
-    Spider
-    (ImmediateDomBuilderT
-       Spider (WithWebView x (PerformEventT Spider (SpiderHost Global))))
-@
-
-
-@
-main = run 3911 $ mainWidget app
-@
-
-versus
-
-@
-main = mainWidget app
-@
-
--}
---app :: Widget t ()
-app = display =<< count_Int =<< button sLabel
- where
--- count_Int :: Event t a -> Event t Int
- count_Int = count & (fmap.fmap.fmap) (id :: Int -> Int)
---app = sLabel & (button >=> display >=> count)
---app = button sLabel >>= count >>= display 
- sLabel = "ClickMe ("<> __GHCJS_RUNNER_TEXT__ <>")"
+-- --TODO lol
+-- wBody :: MonadW t m => m ()
+-- wBody = do
+--   -- test
+--   -- app
+--   GUI.wBody
 
 ----------------------------------------
 
---test :: SomeWidget_  
-test = do
+-- {-|
+
+-- @
+-- type Widget x =
+--   PostBuildT
+--     Spider
+--     (ImmediateDomBuilderT
+--        Spider (WithWebView x (PerformEventT Spider (SpiderHost Global))))
+-- @
+
+
+-- @
+-- main = run 3911 $ mainWidget app
+-- @
+
+-- versus
+
+-- @
+-- main = mainWidget app
+-- @
+
+-- -}
+-- --app :: Widget t ()
+-- app = display =<< count_Int =<< button sLabel
+--  where
+-- -- count_Int :: Event t a -> Event t Int
+--  count_Int = count & (fmap.fmap.fmap) (id :: Int -> Int)
+-- --app = sLabel & (button >=> display >=> count)
+-- --app = button sLabel >>= count >>= display 
+--  sLabel = "ClickMe ("<> __GHCJS_RUNNER_TEXT__ <>")"
+
+-- ----------------------------------------
+
+-- --test :: SomeWidget_  
+-- test = do
   
- (events, _widget) <- element
-     "div"
-      (pure $ "style" =: style)
-      blank -- wMousePosition
-      -- NOTE
-      -- "thread blocked indefinitely in an MVar operation"
+--  (events, _widget) <- element
+--      "div"
+--       (pure $ "style" =: style)
+--       blank -- wMousePosition
+--       -- NOTE
+--       -- "thread blocked indefinitely in an MVar operation"
 
- let eMousemove = events & onMousemove
- let eContent = (eMousemove <&> displayMousePosition)
+--  let eMousemove = events & onMousemove
+--  let eContent = (eMousemove <&> displayMousePosition)
  
- dContent <- holdDyn "(__,__)" eContent
+--  dContent <- holdDyn "(__,__)" eContent
 
- let wMousePosition = dynText dContent
+--  let wMousePosition = dynText dContent
  
- wMousePosition
+--  wMousePosition
 
- where
- displayMousePosition (MousePosition x y) = s2t $ show (x,y)
- style = "display:inline-block;width:100px;height:100px;background-color:gray"
+--  where
+--  displayMousePosition (MousePosition x y) = s2t $ show (x,y)
+--  style = "display:inline-block;width:100px;height:100px;background-color:gray"
  
 ----------------------------------------

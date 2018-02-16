@@ -17,6 +17,7 @@ module Cards.Frontend.Extra
  ) where
 
 import Reflex.Dom hiding (element)
+--import           GHCJS.DOM.Types            (MonadJSM)
 
 import qualified Data.Text as T
 
@@ -24,6 +25,7 @@ import qualified Data.Text as T
 import Data.String.Conv as X
 import Data.Time        as X (NominalDiffTime)
 import Data.Text        as X (Text)
+import GHCJS.DOM.Types  as X (MonadJSM)
 
 -- re-export custom prelude
 import Prelude.Spiros hiding (Text,div)
@@ -50,11 +52,33 @@ fromBoolean b = fromPredicate (const b)
 
 ---------------------------------------
 
+type IO_ = IO ()
+
+{- | the `reflex-dom-contrib` widgets require @'MonadJSM'@.
+
+-}
+type MonadW t m =
+  ( MonadWidget t m
+  , MonadJSM IO
+  )
+
+{-NOTE
+
+MonadJSM m  versus  MonadJSM IO
+
+    • Could not deduce (MonadJSM IO) arising from a use of ‘radioGroup’
+
+-}
+
+---------------------------------------
+  
 --type DynamicWidget t m
 
 type Dynamic1  t f a = Dynamic t (f a)
 
 type Dynamic1_ t f   = Dynamic t (f ())
+
+type DynamicAttributeMap t = Dynamic t AttributeMap
 
 {-|
 
@@ -150,9 +174,9 @@ t2s = T.unpack
 
 ----------------------------------------
 
--- | enumerate a 'Bounded' 'Enum'. 
-constructors :: (Enum a, Bounded a) => [a]
-constructors = [minBound..maxBound]
+-- -- | enumerate a 'Bounded' 'Enum'. 
+-- constructors :: (Enum a, Bounded a) => [a]
+-- constructors = [minBound..maxBound]
 
 ----------------------------------------
 
@@ -180,11 +204,13 @@ element = elDynAttr' -- <&> fst
 ----------------------------------------
 
 -- | @<div>...</div>@
-divWith :: (MonadWidget t m) => Dynamic t AttributeMap -> m () -> m ()
+divWith
+  :: (MonadWidget t m)
+  => Dynamic t AttributeMap -> m a -> m a
 divWith = elDynAttr "div"
 
 -- | @<div>...</div>@
-div :: (MonadWidget t m) => m () -> m ()
+div :: (MonadWidget t m) => m a -> m a
 div = el "div"
 
 -- | the HTML equivalent of the newline @"\n"@. 
@@ -264,5 +290,10 @@ fromLeft a _        = a
 fromRight :: b -> Either a b -> b
 fromRight _ (Right b) = b
 fromRight b _         = b
+
+----------------------------------------
+
+dNoAttributes :: (Reflex t) => Dynamic t AttributeMap
+dNoAttributes = constDyn mempty
 
 ----------------------------------------
