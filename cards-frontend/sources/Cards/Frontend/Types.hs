@@ -3,6 +3,8 @@
 {-# LANGUAGE OverloadedLists #-}
 
 {-# LANGUAGE DataKinds, ConstraintKinds #-}
+{-# LANGUAGE RankNTypes #-}
+
 {-# LANGUAGE DeriveAnyClass #-}
 --{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
@@ -15,6 +17,9 @@ and whatever values are necessary for instances.
 -}
 module Cards.Frontend.Types where
 import Cards.Frontend.Extra
+
+import Reflex
+import Reflex.Dom
 
 --import qualified Data.Text as T
 --import Data.Text (Text)
@@ -34,6 +39,19 @@ import Data.List.NonEmpty (nonEmpty)
 
 ----------------------------------------
 
+--TODO
+type Runner = Frontend -> IO()
+  
+--TODO
+data Frontend = Frontend
+ { wHead :: SomeWidget_
+ , wBody :: SomeWidget_
+-- , wBody :: (MonadJSM IO) => SomeWidget_
+-- , wCSS  :: Either Text FilePath -- ^ `inline` or `link`ed
+ }
+
+----------------------------------------
+
 data ResultsPage
  = InitialResultsPage
  | FailedResultsPage     SearchError
@@ -42,6 +60,14 @@ data ResultsPage
 
 instance Default ResultsPage where
   def = InitialResultsPage
+  
+----------------------------------------
+
+data ResultsPageConfig t = ResultsPageConfig  
+ { dInterfaceConfig :: Dynamic t InterfaceConfig
+ , eSubmitButton    :: Event   t ()
+ , oSearchBar       :: TextInput t
+ }
 
 ----------------------------------------
 
@@ -69,6 +95,9 @@ data SearchOptions = SearchOptions
 instance Default SearchOptions where
   def = defaultSearchOptions
 
+pSearchOptions :: Proxy SearchOptions
+pSearchOptions = Proxy
+
 {-|
 
 * '_requireSubmitOrEnter': a.k.a. @True@ disables "live search". @False@ by default.
@@ -79,18 +108,14 @@ defaultSearchOptions = SearchOptions
  { _requireSubmitOrEnter              = False
  , _debouncingDelayInMilliseconds     = 500
  , _minimumQueryLengthForLiveSearch   = 3
- 
  }
 
-----------------------------------------
-
-newtype SearchError = SearchError
-  { fromSearchError :: Text }
-  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable) --,IsString)
-
-instance IsString SearchError where
-  fromString = fromString > SearchError
-  --toString   = fromSearchError
+fasterSearchOptions :: SearchOptions
+fasterSearchOptions = SearchOptions
+ { _requireSubmitOrEnter              = False
+ , _debouncingDelayInMilliseconds     = 100
+ , _minimumQueryLengthForLiveSearch   = 0
+ }
 
 ----------------------------------------
 
@@ -102,12 +127,17 @@ type RawQuery = Text
 newtype ValidQuery = ValidQuery { fromValidQuery :: Text }
  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
+----------------------------------------
+
 data QueryOptions = QueryOptions
  { _queryLanguage :: QueryLanguage
  } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 instance Default QueryOptions where
   def = QueryOptions def 
+
+pQueryOptions :: Proxy QueryOptions
+pQueryOptions = Proxy
 
 {-| ParseQueryLike... -}
 data QueryLanguage
@@ -119,17 +149,8 @@ data QueryLanguage
 
 instance Default QueryLanguage where def = ParseQueryLikeMCI
 
-----------------------------------------
-
-data CardDatabase = CardDatabase
-  { fromCardDatabase :: [Card]
-  --TODO , hashedCardDatabase :: Int -- for caching
-  } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
-
-data Card = Card 
- { _cardName :: Text 
- , _cardText :: Text
- } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+pQueryLanguage :: Proxy QueryLanguage
+pQueryLanguage = Proxy
 
 ----------------------------------------
 
@@ -145,6 +166,8 @@ newtype Result = Result
  { fromResult :: Card
  } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
+----------------------------------------
+
 data ResultsOptions = ResultsOptions
  { _resultsFormat :: ResultsFormat 
  , _resultsOrder  :: ResultsOrder
@@ -152,6 +175,11 @@ data ResultsOptions = ResultsOptions
 
 instance Default ResultsOptions where
   def = ResultsOptions def def
+  
+pResultsOptions :: Proxy ResultsOptions
+pResultsOptions = Proxy
+
+----------------------------------------
 
 {-| DisplayResultsAs... -}
 data ResultsFormat
@@ -161,6 +189,9 @@ data ResultsFormat
   deriving (Show,Read,Eq,Ord,Enum,Bounded,Ix,Generic,NFData,Hashable)
 
 instance Default ResultsFormat where def = DisplayResultsAsText
+
+pResultsFormat :: Proxy ResultsFormat
+pResultsFormat = Proxy
 
 ----------------------------------------
 
@@ -185,6 +216,9 @@ defaultResultsOrder =
   , SortResultsByName
   ]
 
+singularResultsOrder :: SortResultsBy -> ResultsOrder 
+singularResultsOrder = (:|[]) > ResultsOrder
+
 data SortResultsBy
   = SortResultsByName
   | SortResultsByEdition
@@ -195,7 +229,57 @@ data SortResultsBy
   deriving (Show,Read,Eq,Ord,Enum,Bounded,Ix,Generic,NFData,Hashable)
 
 instance Default SortResultsBy where def = SortResultsByName
-      
+
+pSortResultsBy :: Proxy SortResultsBy
+pSortResultsBy = Proxy
+
+----------------------------------------
+
+newtype SearchError = SearchError
+  { fromSearchError :: Text }
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable) --,IsString)
+
+instance IsString SearchError where
+  fromString = fromString > SearchError
+  --toString   = fromSearchError
+
+----------------------------------------
+
+data CardDatabase = CardDatabase
+  { fromCardDatabase :: [Card]
+  --TODO , hashedCardDatabase :: Int -- for caching
+  } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+
+data Card = Card 
+ { _cardName :: Text 
+ , _cardText :: Text
+ } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+
+----------------------------------------
+
+pBool :: Proxy Bool
+pBool = Proxy
+
+----------------------------------------
+
+-- | one of the known javacsript runners (i.e. representatios the @jsaddle-*@ family of packages). 
+data JAVASCRIPT_RUNNER
+  = BROWSER --TODO???
+  | NODEJS --TODO???
+  | JSADDLEWARP
+  | WEBKITGTK
+  | WKWEBVIEW
+  deriving (Show)
+--introspect on the runner.
+
+displayJavascriptRunner :: JAVASCRIPT_RUNNER -> Text
+displayJavascriptRunner = \case
+  BROWSER     -> "browser"
+  NODEJS      -> "node.js"
+  JSADDLEWARP -> "JSaddle-Warp" -- "jsaddle-warp"
+  WEBKITGTK   -> "WebKitGTK"    -- "webkit-gtk"
+  WKWEBVIEW   -> "WKWebView"
+
 ----------------------------------------
 {-
 

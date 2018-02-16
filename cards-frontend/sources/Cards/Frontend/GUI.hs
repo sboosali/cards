@@ -14,10 +14,12 @@ module Cards.Frontend.GUI where
 
 import Cards.Frontend.Extra
 import Cards.Frontend.Types 
+--import Cards.Frontend.Core
 import Cards.Frontend.DB (defaultCardDatabase)
 import Cards.Frontend.Query (validateQuery)
 import Cards.Frontend.Search (runQuery)
 --import Cards.Frontend.Result (noResults)
+import Cards.Frontend.Widgets (genericRadioGroup)
 
 import Reflex hiding (Query)
 --import qualified Reflex as R
@@ -56,13 +58,10 @@ import qualified Clay as C
 --import Prelude (undefined)
 
 ----------------------------------------
-
-css :: C.Css -> Text
-css = C.render > toS
-
-{-NOTES
-
--}
+  
+frontend :: Frontend
+--frontend = Frontend{..}
+frontend = Frontend wHead' wBody'
 
 ----------------------------------------
 
@@ -72,8 +71,8 @@ Naming:
 * "w" for widget.
 
 -}
-wHead :: MonadWidget t m => m ()
-wHead = do
+wHead' :: MonadWidget t m => m ()
+wHead' = do
   el "title" $ text "MTG Card Search"
   styleSheet "static/css/style.css"
   --TODO data-files, then post-build cp; `nix`, copy "share", not just "bin", into result-frontend?
@@ -91,40 +90,78 @@ wHead = do
 {-|
 
 -}
-wBody :: MonadWidget t m => m ()
-wBody = do
+wBody' :: MonadW t m => m ()
+wBody' = do
   dInterfaceConfig <- wSettingsPage
   wSearchPage dInterfaceConfig
   blank
 
+-- wTabbedPages :: HtmlWidget t (Maybe Selection) <- 
+-- wTabbedPages
+
 ----------------------------------------
-  
-wSettingsPage :: MonadWidget t m => m (Dynamic t InterfaceConfig)
+
+wSettingsPage :: MonadW t m => m (Dynamic t InterfaceConfig)
 wSettingsPage = do
+
+  dSearchOptions  <- wSearchSettings
+  dQueryOptions   <- wQuerySettings
+  dResultsOptions <- wResultsSettings
   
-  dInterfaceConfig <- holdDyn def never --TODO
+  let dInterfaceConfig = InterfaceConfig
+       <$> dSearchOptions
+       <*> dQueryOptions
+       <*> dResultsOptions
+
+  -- <- holdDyn def never --TODO
+
   return dInterfaceConfig
+
+-- data InterfaceConfig = InterfaceConfig
+--  { _cSearchOptions  :: SearchOptions
+--  , _cQueryOptions   :: QueryOptions
+--  , _cResultsOptions :: ResultsOptions
+--  }
+
+wSearchSettings :: MonadW t m => m (Dynamic t SearchOptions)
+wSearchSettings = do
+
+  dShouldRequireManual <- genericRadioGroup pBool
+
+  dDebounceInterval    <- return $ pure 500--def
+  dQueryLength         <- return $ pure 3--def
+
+  let dSearchOptions = SearchOptions
+       <$> dShouldRequireManual
+       <*> dDebounceInterval
+       <*> dQueryLength
+
+  return dSearchOptions
+
+wQuerySettings :: MonadW t m => m (Dynamic t QueryOptions)
+wQuerySettings = do
   
-----------------------------------------
+  dQueryLanguage <- genericRadioGroup pQueryLanguage -- dNoAttributes
+  
+  let dQueryOptions = QueryOptions
+       <$> dQueryLanguage
 
-grid :: SomeWidget_
-grid = do
- let child = blank
- 
- (es, a) <- elFor'
-             (Click :& Dblclick :& RNil)
-             "div"
-             (constDyn mempty)
-             child
- 
- -- let eClick         = es ^. _Click
- let eDoubleClickedPositionText = (es^._Dblclick) <&> (show > s2t)
+  return dQueryOptions
 
- dDoubleClickedPositionText <- holdDyn "(_,_)" eDoubleClickedPositionText
+wResultsSettings :: MonadW t m => m (Dynamic t ResultsOptions)
+wResultsSettings = do
 
- dynText dDoubleClickedPositionText
+  dResultsFormat <- genericRadioGroup pResultsFormat -- 
+  dSortResultsBy <- genericRadioGroup pSortResultsBy
 
- return a
+  let dResultsOrder = dSortResultsBy
+       <&> singularResultsOrder
+
+  let dResultsOptions = ResultsOptions
+       <$> dResultsFormat
+       <*> dResultsOrder
+  
+  return dResultsOptions
 
 ----------------------------------------
 
@@ -136,41 +173,68 @@ grid = do
 
 -}
 wSearchPage
-  :: MonadWidget t m
+  :: MonadW t m
   => Dynamic t InterfaceConfig
   -> m ()
 wSearchPage dInterfaceConfig = do
 
-  let anInterfaceConfig = defaultInterfaceConfig :: InterfaceConfig --TODO
-  let aSearchConfig = anInterfaceConfig & _cSearchOptions
-
-  oSearch <- textInput iSearch
+  oSearchBar <- textInput iSearch
    -- the search bar
-  let eEnter = oSearch & _textInput_keypress
-       & fmapMaybe _onlyEnterKey
-   -- pressing enter in the search bar
-  eSubmit <- button "Submit"
+  eSubmitButton <- button "Submit"
    -- the submit button for the search bar
 
+  let config = ResultsPageConfig
+       { dInterfaceConfig 
+       , eSubmitButton
+       , oSearchBar
+       }
+
+  eLaterResultsPage <- dynamicResultsPage config
+
+  dResultsPage <- holdDyn InitialResultsPage eLaterResultsPage
+  let dWidget = dResultsPage <&> formatResultsPage def
+  
+  _ <- dyn dWidget
+
+  blank
+
+----------------------------------------
+
+{-|
+
+-}
+dynamicResultsPage
+  :: MonadW t m
+  => ResultsPageConfig t
+  -> m (Event t ResultsPage)
+dynamicResultsPage (ResultsPageConfig{..}) = do
+
+  --TODO
+  let aSearchConfig = def & _cSearchOptions
+  
+  let eEnter = oSearchBar & _textInput_keypress
+       & fmapMaybe _onlyEnterKey
+   -- pressing enter in the search bar
+      
   let eSubmitOrEnter = mconcat
-       [ eSubmit
+       [ eSubmitButton
        , eEnter
        ]
    -- a manual submission (either of these events)
   
-  let dSearchValue = oSearch & value
+  let dSearchValue = oSearchBar & value
    -- the input text
 
   let eQueryManual = eSubmitOrEnter
        & tagPromptlyDyn dSearchValue
 
   let eQueryEveryKeypress
-        = dSearchValue
-        & updated
+       = dSearchValue
+       & updated
 
-  --TODO debounce only for display, eagerly compute
   eQueryDebounced <- eQueryEveryKeypress 
-    & debounce (_convertDebounceDelay aSearchConfig)
+       & debounce (_convertDebounceDelay aSearchConfig)
+         --TODO debounce only for display, eagerly compute
 
   let eQueryAutomatic = eQueryDebounced
        & fmapMaybe (_dropShortQueries aSearchConfig)
@@ -178,10 +242,12 @@ wSearchPage dInterfaceConfig = do
 
   let eQuery = leftmost
        [ eQueryManual
-         -- "form search", user pressed submit (not debounced)
+         -- "form search", the user pressed submit
+         -- (not debounced)
        , eQueryAutomatic
-         -- "live search", user has stopped typing
-       ]                    
+         -- "live search", the user has stopped typing
+         -- for long enough (i.e. debounced)
+       ]
 
   -- dSearchDebounced <- dSearchContinuous
   --   & debounceD searchbarDebouncingInterval ""
@@ -196,20 +262,15 @@ wSearchPage dInterfaceConfig = do
         & fpartitionOnPredicate validateQuery
   
   let eResults = eValidQuery <&> runQuery defaultCardDatabase
-  let eSearchError = ("invalid query" <$ eQueryIsInvalid)
-  let eLaterResultsPage = leftmost
+  let eSearchError = ("Invalid Query" <$ eQueryIsInvalid)
+  let eResultsPage = leftmost
        [ FailedResultsPage     <$> eSearchError
        , SuccessfulResultsPage <$> eResults
        ]
        --NOTE these are actually mutually-exclusive,
        -- given the `fpartition`
 
-  dResultsPage <- holdDyn InitialResultsPage eLaterResultsPage
-  let dWidget = dResultsPage <&> formatResultsPage def
-  
-  _ <- dyn dWidget
-
-  blank
+  return eResultsPage
 
   where
 
@@ -230,8 +291,8 @@ wSearchPage dInterfaceConfig = do
 
   _onlyEnterKey :: Word -> Maybe () --  KeyCode
   _onlyEnterKey = fromPredicate isEnterKey > fmap (const ())
-
-  isEnterKey = (==13)
+      where
+      isEnterKey = (==13)
 
   --  Validator Int
 
@@ -432,6 +493,38 @@ formatCard Card{..} = elDynAttr elementCardResult dAttributes $ do
 -- formatResults
 --  = fmap (\Card{..} -> _cardName <> "\n" <> _cardText)
 --  > T.intercalate "\n\n========================================\n\n"
+
+----------------------------------------
+
+----------------------------------------
+
+grid :: SomeWidget_
+grid = do
+ let child = blank
+ 
+ (es, a) <- elFor'
+             (Click :& Dblclick :& RNil)
+             "div"
+             (constDyn mempty)
+             child
+ 
+ -- let eClick         = es ^. _Click
+ let eDoubleClickedPositionText = (es^._Dblclick) <&> (show > s2t)
+
+ dDoubleClickedPositionText <- holdDyn "(_,_)" eDoubleClickedPositionText
+
+ dynText dDoubleClickedPositionText
+
+ return a
+
+----------------------------------------
+
+css :: C.Css -> Text
+css = C.render > toS
+
+{-NOTES
+
+-}
 
 ----------------------------------------
 
