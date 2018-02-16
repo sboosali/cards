@@ -9,18 +9,103 @@ haskell = nixpkgs.haskell.lib;
 reflex-platform = import ./reflex-platform {};
   # `reflex-platform` uses a pinned/older `nixpkgs` version.
 
-# imports
 inherit (builtins)
  fromJSON readFile baseNameOf;
+
+inherit (nixpkgs)
+ pkgs;
+
+inherit (pkgs)   
+ fetchFromGitHub;
+
+in
+########################################
+### UTILITIES...
+let
+
+# utility functions
+skipTests       = haskell.dontCheck; 
+dropUpperBounds = haskell.doJailbreak;
+
+#:: String -> Path -> 
+execCabal2nix = options: src:
+  nixpkgs.runCommand "cabal2nix" {
+    buildCommand = ''
+      cabal2nix ${options} file://"${src}" >"$out"
+    '';
+    buildInputs = with nixpkgs; [
+      cabal2nix
+    ];
+  } "";
 
 in
 ########################################
 ### Haskell Dependencies...
 let
 
-# utility functions
-skipTests       = haskell.dontCheck; 
-dropUpperBounds = haskell.doJailbreak;
+# Source repositories
+sources = {
+
+  # reflex = fetchFromGitHub {
+  #   owner           = "reflex-frp";
+  #   repo            = "reflex";
+  #   rev             = "8e0177ff28c25436452dba1222cbf8d1a20424fd";
+  #   fetchSubmodules = true;
+  #   sha256          = "1f0xhwq4wvf5c6w8qhvpcn30jaxxq29s2x3iy8bml3a65fpvj0sh";
+  # };
+
+};
+
+# "Megarepos",
+# repositories which have multiple packages as subdirectories.
+megarepos = {
+
+   jsaddle = fetchFromGitHub {
+      owner  = "ghcjs";
+      repo   = "jsaddle";
+      rev    = "6a8fbe20cfd4ea00e197acdf311a650b97cb9a61"; 
+      # fetchsubmodules = true;
+      sha256 =
+        "143r9nfglkydhp6rl0qrsyfpjnxfj04fhn96cf8hkx2mk09baa01";
+    }; # https://github.com/ghcjs/jsaddle
+
+  reflex-dom = fetchFromGitHub {
+    owner           = "reflex-frp";
+    repo            = "reflex-dom"; 
+    rev             = "212dca4b7ff323dca423f2dd934341bdee7ea2c5";
+    sha256          =
+       "0wv8xwr4bv2zb8qz3kf7nq2ixjg2hmyccxppgpwis3wmjai89frk";
+  };
+
+};
+
+# subrepositories of a megarepo
+subrepos = {
+
+   jsaddle = { 
+    path    = megarepos.jsaddle; 
+    subpath = "jsaddle";
+   };
+
+   jsaddle-warp = { 
+    path    = megarepos.jsaddle; 
+    subpath = "jsaddle-warp";
+   };
+
+   jsaddle-webkit2gtk = { 
+    path    = megarepos.jsaddle; 
+    subpath = "jsaddle-webkit2gtk";
+   };
+
+};
+
+#NOTES  
+# jsaddle-warp        - runs JSaddle in a warp server with a web browser connected to it.
+# jsaddle-webkit2gtk  - runs JSaddle in a WebKitGTK window.
+# jsaddle-wkwebview   - runs JSaddle in a WKWebView on iOS or macOS.
+# jsaddle-clib        - C interface used to run JSaddle on Android using JNI.
+
+########################################
 
 /* customize the environment's haskell packages. 
 
@@ -38,10 +123,18 @@ which is correct, since we want to mix in any siblings that are being overriden 
 
 myOverlaysWith = pkgs: self: super: let
 
+ # local "imports"
  inherit (pkgs)
   fetchgit 
  ;
 
+ # helpers for getting haskell packages from different standard locations:
+ # * the local filesystem
+ # * hackage
+ # * tarballs from anywhere
+ # * sources on github. 
+ # *
+ #
  cabal2nix = name: source: 
              self.callCabal2nix name source;
 
@@ -50,7 +143,10 @@ myOverlaysWith = pkgs: self: super: let
 
  local     = path:
              self.callPackage path; 
+ nix       = local; 
+           # an alias (the distinct name is only for clarity)
 
+ # `prefetched` meaning `nix-prefetch-*` in particular. 
  prefetched = path:
              let
               # basename-of-path
@@ -80,12 +176,33 @@ myOverlaysWith = pkgs: self: super: let
              #        sha256          :: String
              #      } 
 
+ subrepository = {path, subpath}:
+                 nix
+                   (execCabal2nix "--subpath ${subpath}" path);
+
  # override the package without overriding any dependencies
- cabal2nix_ = name: source:   cabal2nix name source  {};
- hackage_   = name: version:  hackage   name version {};
- local_      = path:           local      path         {};
- prefetched_ = path:           prefetched path         {};
- github_    = o:              github    o            {};
+ cabal2nix_     = name: source:   cabal2nix  name source  {};
+ hackage_       = name: version:  hackage    name version {};
+ nix_           = path:           nix        path         {};
+ local_         = path:           local      path         {};
+ prefetched_    = path:           prefetched path         {};
+ github_        = o:              github     o            {};
+ subrepository_ = paths:          subrepository paths     {};
+
+ # more (local) utilities
+ haskell = pkgs.haskell.lib; 
+ #
+ skipTests         = haskell.dontCheck; 
+ skipDocumentation = haskell.dontHaddock;
+ dropUpperBounds   = haskell.doJailbreak;
+ #
+ loosen    = p:
+  skipDocumentation (skipTests (dropUpperBounds p));
+ dependsOn = package: dependencies: 
+  haskell.addBuildDepends package dependencies;
+ #
+ inherit (haskell);
+ #
 
  in
 
@@ -188,6 +305,27 @@ myOverlaysWith = pkgs: self: super: let
     # sed: can't read /nix/store/hcqlfq5rcshf31k9cnrvgzan9jdf37cy-all-cabal-hashes-2b0bf3ddf8b75656582c1e45c51caa59458cd3ad-src/1/vinyl/0.7.0/vinyl.json: No such file or directory
     # cabal2nix: nix-prefetch-url: createProcess: runInteractiveProcess: exec: does not exist (No such file or directory)
 
+    reflex-dom-contrib = github_ {
+      owner  = "reflex-frp";
+      repo   = "reflex-dom-contrib";
+      rev    = "b47f90c810c838009bf69e1f8dacdcd10fe8ffe3"; 
+      fetchSubmodules = true;
+      sha256 =
+        "0yvjnr9xfm0bg7b6q7ssdci43ca2ap3wvjhshv61dnpvh60ldsk9";
+    };
+
+   # $ nix-prefetch-git  https://github.com/ghcjs/jsaddle  > jsaddle.json
+   # jsaddle = prefetched_ ./jsaddle.json;
+
+   # jsaddle = github_ {
+   #    owner  = "ghcjs";
+   #    repo   = "jsaddle"
+   #    rev    = ""; 
+   #    # fetchsubmodules = true;
+   #    sha256 =
+   #      "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+   #  };        
+
     megaparsec = github {
       owner  = "mrkkrp";
       repo   = "megaparsec";
@@ -237,7 +375,31 @@ myOverlaysWith = pkgs: self: super: let
     };
  */
 
- };
+  # reflex-dom-core = let
+  #   megarepo = repositories.reflex-dom;
+  #   in
+  #   (skipTests (dropUpperBounds
+  #     (nix_ (execCabal2nixSubpath "reflex-dom-core" megarepo))));
+
+  # reflex-dom = let
+  #   megarepo = repositories.reflex-dom;
+  #   in
+  #   (skipTests (dropUpperBounds
+  #     (nix_ (execCabal2nix "--subpath reflex-dom -fuse-warp" megarepo))));
+
+  # jsaddle            = loosen (subrepository_ subrepos.jsaddle);
+  # jsaddle-warp       = loosen (subrepository_ subrepos.jsaddle-warp);
+  # jsaddle-webkit2gtk = loosen (subrepository_ subrepos.jsaddle-webkit2gtk);
+  
+  # jsaddle-dom        = loosen (github_ {
+  #     owner  = "ghcjs";
+  #     repo   = "jsaddle-dom";
+  #     rev    = "d6a85de23b5644f1e39a590ec706c90be5aeaa51"; 
+  #     sha256 =
+  #       "198zmd50jvyn8sahn7ysdqy105h8vs6xw0wpa3wlc9rp867y2zi4";
+  # });
+
+};
 
 in
 ########################################
