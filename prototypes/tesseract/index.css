@@ -1,0 +1,171 @@
+.draft-container {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.pack-pane {
+  border-right: 3px gray solid;
+  width: 75%;
+  overflow-y: auto;
+}
+
+.deck-pane {
+  width: 25%;
+  margin-left: 10px;
+  overflow-y: auto;
+}
+
+.card {
+  position: relative;
+  width: 312px;
+  height: 445px;
+  margin: 5px;
+  
+  display: inline-flex;
+  flex-direction: column;
+
+  border: 1px solid #aaa;
+  font-size: 14px;
+
+  border-radius: 4px;
+}
+
+.card-clickable {
+  cursor: pointer;
+}
+
+.card-clickable:hover {
+  border: 4px gray solid;
+  margin: 2px;
+}
+
+.card-body {
+  margin: 15px;
+}
+
+.name-bar {
+  display: flex;
+  flex-direction: row;
+
+  border: 1px solid #888;
+  border-radius: 2px;
+  padding: 3px 2px 2px 3px;
+
+  overflow-x: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.card-name {
+  font-weight: 600;
+}
+
+.spacer {
+  flex-grow: 2;
+}
+
+.card-cost {
+  font-family: monospace;
+}
+
+.art {
+  height: 202px;
+  padding: 3px 4px;
+  margin-bottom: 4px;
+}
+
+.art-image {
+  height: 100%;
+  background-position: -19px 399px;
+  border: 1px solid #666;
+  border-radius: 2px;
+}
+
+.type-bar {
+  display: flex;
+  flex-direction: row;
+
+  border: 1px solid #888;
+  border-radius: 2px;
+  padding: 3px 2px 2px 3px;
+
+  font-size: 13px;
+}
+
+.card-type {
+  margin: 1px 2px 0 1px;
+  font-size: 12px;
+  font-weight: 600;
+
+  width: 80%;
+  overflow-x: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.expansion {
+  display: inline;
+  font-family: monospace;
+  letter-spacing: 1px;
+}
+
+.rarity {
+  display: inline;
+  margin-left: 3px;
+  font-family: monospace;
+}
+
+.card-text {
+  display: flex;
+  flex-direction: column;
+
+  height: 120px;
+  padding: 6px 3px 11px 3px;  
+  margin: 4px 1px 0px 1px;
+  border: 1px solid #888;
+  border-radius: 2px;
+
+  overflow-x: initial;
+  overflow-y: hidden;
+  /* white-space: nowrap; */
+  text-overflow: ellipsis;
+}
+
+.oracle-text {
+  font-size: 13px;
+  letter-spacing: 0.1px;
+}
+
+.oracle-paragraph {
+  margin-top: 4.5px;
+}
+
+.oracle-paragraph:first-child {
+  margin-top: 0px;
+}
+
+.flavor-text {
+  margin-top: 6px;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.pt {
+  position: absolute;
+  bottom: 19px;
+  right: 16px;
+  height: 16px;
+  width: 38px;
+
+  border: 1px solid #888;
+  border-radius: 2px;
+  padding: 3px;
+
+  text-align: center;
+  font-size: 14px; 
+  font-family: monospace;
+
+  background-color: inherit;
+  z-index: 1;
+}
