@@ -38,8 +38,8 @@ extra-source-files:
   .travis.yml
   HLint.hs
 
--- data-files:
---   data/
+data-files:
+  static/css/style.css
 
 source-repository head
   type:     git
@@ -92,10 +92,15 @@ library
 
  ghc-options:
   -Wall
--- disable
+  
+  -fdefer-typed-holes
+  -fwarn-typed-holes
+
+  -- disable
   -fno-warn-unticked-promoted-constructors
---  -fno-warn-missing-methods
--- enable
+  --  -fno-warn-missing-methods
+
+  -- enable
   -fwarn-incomplete-uni-patterns
   -fwarn-incomplete-record-updates
   -fwarn-identities
@@ -114,12 +119,13 @@ library
     -- TODO check
 
  default-language:   Haskell2010
- default-extensions: PackageImports AutoDeriveTypeable DeriveDataTypeable DeriveGeneric
+ default-extensions: NoImplicitPrelude                    
+                     AutoDeriveTypeable DeriveDataTypeable DeriveGeneric
                      DeriveFunctor DeriveFoldable DeriveTraversable
                      LambdaCase EmptyCase TypeOperators PostfixOperators
                      ViewPatterns BangPatterns KindSignatures
                      NamedFieldPuns RecordWildCards TupleSections
-                     MultiWayIf DoAndIfThenElse EmptyDataDecls
+                     MultiWayIf DoAndIfThenElse EmptyDataDecls  PackageImports
                      MultiParamTypeClasses FlexibleContexts FlexibleInstances
                      TypeFamilies FunctionalDependencies
                      ScopedTypeVariables StandaloneDeriving

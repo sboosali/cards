@@ -11,22 +11,42 @@
 -}
 module Cards.Frontend.Extra
  ( module Cards.Frontend.Extra
-
  , module Prelude.Spiros
- , module Data.Text
- , module Data.String.Conv
+ , module X
 -- , module Reflex.Dom
  ) where
 
 import Reflex.Dom hiding (element)
 
-import Data.Text (Text)
 import qualified Data.Text as T
+
+-- re-exports
+import Data.String.Conv as X
+import Data.Time        as X (NominalDiffTime)
+import Data.Text        as X (Text)
+
+-- re-export custom prelude
 import Prelude.Spiros hiding (Text,div)
 
---import Data.Either
+----------------------------------------
 
-import Data.String.Conv
+--TODO :: (a -> Bool) -> (a -> Maybe a)
+
+type Predicate a = (a -> Bool)
+
+type Validator a = (a -> Maybe a)
+  
+{- | for `fmapMaybe`.
+
+-}
+fromPredicate :: Predicate a -> Validator a
+fromPredicate p = \x -> if p x then Just x else Nothing
+  
+{- | for `fmapMaybe`.
+
+-}
+fromBoolean :: Bool -> Validator a
+fromBoolean b = fromPredicate (const b)
 
 ---------------------------------------
 

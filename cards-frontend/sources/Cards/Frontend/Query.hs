@@ -1,4 +1,3 @@
-{-# LANGUAGE NoImplicitPrelude #-}
 
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE OverloadedLists #-}
@@ -18,6 +17,8 @@ import qualified Data.Text as T
 --import qualified Text.Megaparsec as P
 -- 
 
+--import Data.Char
+  
 ----------------------------------------
 
 {-| @magiccards.info@'s sytax
@@ -69,12 +70,6 @@ validateQuery
   > fromPredicate (T.null > not)
   > fmap ValidQuery
 
-{- | for `fmapMaybe`.
-
--}
-fromPredicate :: (a -> Bool) -> (a -> Maybe a)
-fromPredicate p = \x -> if p x then Just x else Nothing
-
 ----------------------------------------
 
 -- parseQuery :: Text -> RawQuery 
@@ -94,12 +89,26 @@ abbreviations =
 
 ----------------------------------------
 
-normalize :: Text -> Text
-normalize
-  = T.toLower
-  > T.strip
-
 normalizeS :: String -> Text
 normalizeS = T.pack > normalize
 
+normalize :: Text -> Text
+normalize
+  = ignoreCasing
+  > stripRedundantWhitespace
+  where
+
+  ignoreCasing
+    = T.toLower
+
+  stripRedundantWhitespace
+    = T.strip
+
+  --TODO preserve in body
+  -- stripRedundantWhitespace
+  --   = T.split isSpace
+  --   > mconcat
+
+ -- stripWhitespace = T.strip
+  
 ----------------------------------------

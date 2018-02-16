@@ -1,4 +1,5 @@
 module Cards.AllCards where
+import Prelude
 
 cards :: [(String,String)]
 cards = 

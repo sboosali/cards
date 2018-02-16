@@ -22,7 +22,7 @@ import Cards.Frontend.Search (runQuery)
 import Reflex hiding (Query)
 --import qualified Reflex as R
 import Reflex.Dom hiding (Query)
-import Reflex.Vinyl
+import Reflex.Vinyl -- hiding (KeyCode)
 
 --import qualified Control.Lens as L
 import Control.Lens hiding ((<&>))
@@ -43,7 +43,7 @@ import qualified Data.Text as T
 --import qualified Clay as CSS
 import qualified Clay as C
 
-import Data.Time (NominalDiffTime)
+--import Data.Time (NominalDiffTime)
 --import Data.Thyme.Time -- (NominalDiffTime)
 --- ^ NOTE "This module provides compatibility instances and wrappers for the things that thyme does differently from time, and allows it to be used as a drop-in replacement for the latter"
 
@@ -52,6 +52,8 @@ import Data.Time (NominalDiffTime)
 --import Prelude.Spiros hiding (Text,div)
  -- reflex `Text` is strict
  -- Prelude numerical `div`
+
+--import Prelude (undefined)
 
 ----------------------------------------
 
@@ -73,7 +75,8 @@ Naming:
 wHead :: MonadWidget t m => m ()
 wHead = do
   el "title" $ text "MTG Card Search"
-  styleSheet "css/style.css" --TODO data-files, then post-build cp; `nix`, copy "share", not just "bin", into result-frontend?
+  styleSheet "static/css/style.css"
+  --TODO data-files, then post-build cp; `nix`, copy "share", not just "bin", into result-frontend?
 
   where
 
@@ -89,8 +92,19 @@ wHead = do
 
 -}
 wBody :: MonadWidget t m => m ()
-wBody = wSearchPage
+wBody = do
+  dInterfaceConfig <- wSettingsPage
+  wSearchPage dInterfaceConfig
+  blank
 
+----------------------------------------
+  
+wSettingsPage :: MonadWidget t m => m (Dynamic t InterfaceConfig)
+wSettingsPage = do
+  
+  dInterfaceConfig <- holdDyn def never --TODO
+  return dInterfaceConfig
+  
 ----------------------------------------
 
 grid :: SomeWidget_
@@ -114,27 +128,61 @@ grid = do
 
 ----------------------------------------
 
--- | in seconds. 
-queryDebouncingInterval :: NominalDiffTime
-queryDebouncingInterval = 0.5 --TODO debounce only for display, eagerly compute
+-- -- | in seconds. 
+-- queryDebouncingInterval :: NominalDiffTime
+-- queryDebouncingInterval = 0.5 
 
 {-|
 
 -}
-wSearchPage :: MonadWidget t m => m ()
-wSearchPage = do
+wSearchPage
+  :: MonadWidget t m
+  => Dynamic t InterfaceConfig
+  -> m ()
+wSearchPage dInterfaceConfig = do
+
+  let anInterfaceConfig = defaultInterfaceConfig :: InterfaceConfig --TODO
+  let aSearchConfig = anInterfaceConfig & _cSearchOptions
 
   oSearch <- textInput iSearch
-  let dSearchValue = value oSearch
+   -- the search bar
+  let eEnter = oSearch & _textInput_keypress
+       & fmapMaybe _onlyEnterKey
+   -- pressing enter in the search bar
+  eSubmit <- button "Submit"
+   -- the submit button for the search bar
+
+  let eSubmitOrEnter = mconcat
+       [ eSubmit
+       , eEnter
+       ]
+   -- a manual submission (either of these events)
+  
+  let dSearchValue = oSearch & value
+   -- the input text
+
+  let eQueryManual = eSubmitOrEnter
+       & tagPromptlyDyn dSearchValue
 
   let eQueryEveryKeypress
         = dSearchValue
         & updated
-          -- Continuous
-  
+
+  --TODO debounce only for display, eagerly compute
   eQueryDebounced <- eQueryEveryKeypress 
-    & debounce queryDebouncingInterval
-  
+    & debounce (_convertDebounceDelay aSearchConfig)
+
+  let eQueryAutomatic = eQueryDebounced
+       & fmapMaybe (_dropShortQueries aSearchConfig)
+       & fmapMaybe (_keepLiveQueries  aSearchConfig)
+
+  let eQuery = leftmost
+       [ eQueryManual
+         -- "form search", user pressed submit (not debounced)
+       , eQueryAutomatic
+         -- "live search", user has stopped typing
+       ]                    
+
   -- dSearchDebounced <- dSearchContinuous
   --   & debounceD searchbarDebouncingInterval ""
   -- let dRawQuery = dSearchDebounced
@@ -144,7 +192,7 @@ wSearchPage = do
 --                 <&> fromMaybe noResults --NOTE ignore invalid queries
 
   let (eQueryIsInvalid, eValidQuery)
-        = eQueryDebounced
+        = eQuery
         & fpartitionOnPredicate validateQuery
   
   let eResults = eValidQuery <&> runQuery defaultCardDatabase
@@ -162,6 +210,42 @@ wSearchPage = do
   _ <- dyn dWidget
 
   blank
+
+  where
+
+  _convertDebounceDelay :: SearchOptions -> NominalDiffTime
+  _convertDebounceDelay SearchOptions{..} 
+    = (_debouncingDelayInMilliseconds/1000)
+       -- convert to seconds for `debounce`
+    & toRational
+    & fromRational
+
+  _dropShortQueries :: SearchOptions -> Validator RawQuery
+  _dropShortQueries SearchOptions{..} = fromPredicate $ \t ->
+    T.length t >= (_minimumQueryLengthForLiveSearch & fromIntegral)
+
+  _keepLiveQueries :: SearchOptions -> Validator RawQuery  
+  _keepLiveQueries SearchOptions{..} = fromBoolean
+    (not _requireSubmitOrEnter) -- i.e. only if we don't require it
+
+  _onlyEnterKey :: Word -> Maybe () --  KeyCode
+  _onlyEnterKey = fromPredicate isEnterKey > fmap (const ())
+
+  isEnterKey = (==13)
+
+  --  Validator Int
+
+    --(\t -> fromPredicate $ length t >= _minimumQueryLengthForLiveSearch)
+
+  
+
+-- dInterfaceConfig <- holdDyn defaultInterfaceConfig
+
+{-NOTE
+
+button :: (...) => Text -> m (Event t ())
+
+-}
 
 ----------------------------------------
 
@@ -272,14 +356,15 @@ formatInitial
   :: (MonadWidget t m)
   => m ()
 formatInitial =
-  text "ready"
+  text "Ready"
 
 formatError   
   :: (MonadWidget t m)
   => SearchError
   -> m ()
 formatError (SearchError e) =
-  text e
+  el "div" $ do
+    text e
 
 formatSuccess
   :: (MonadWidget t m)

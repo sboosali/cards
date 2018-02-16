@@ -1,4 +1,6 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedLists #-}
 
 {-# LANGUAGE DataKinds, ConstraintKinds #-}
 {-# LANGUAGE DeriveAnyClass #-}
@@ -25,6 +27,11 @@ import Cards.Frontend.Extra
 --import Prelude.Spiros hiding (Text)
 --import GHC.Exts (IsList(..))
 
+--import Data.Time (NominalDiffTime)
+
+--import qualified Data.List.NonEmpty as NonEmpty
+import Data.List.NonEmpty (nonEmpty)
+
 ----------------------------------------
 
 data ResultsPage
@@ -32,6 +39,48 @@ data ResultsPage
  | FailedResultsPage     SearchError
  | SuccessfulResultsPage Results
  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+
+instance Default ResultsPage where
+  def = InitialResultsPage
+
+----------------------------------------
+
+data InterfaceConfig = InterfaceConfig
+ { _cSearchOptions  :: SearchOptions
+ , _cQueryOptions   :: QueryOptions
+ , _cResultsOptions :: ResultsOptions
+ } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+
+instance Default InterfaceConfig where
+  def = defaultInterfaceConfig
+
+defaultInterfaceConfig :: InterfaceConfig
+defaultInterfaceConfig = InterfaceConfig def def def
+
+----------------------------------------
+
+data SearchOptions = SearchOptions
+ { _requireSubmitOrEnter              :: Bool -- ^ whether the "submit" button must be clicked.
+ , _debouncingDelayInMilliseconds     :: Double
+   -- NominalDiffTime
+ , _minimumQueryLengthForLiveSearch   :: Natural
+ } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+
+instance Default SearchOptions where
+  def = defaultSearchOptions
+
+{-|
+
+* '_requireSubmitOrEnter': a.k.a. @True@ disables "live search". @False@ by default.
+
+-}
+defaultSearchOptions :: SearchOptions
+defaultSearchOptions = SearchOptions
+ { _requireSubmitOrEnter              = False
+ , _debouncingDelayInMilliseconds     = 500
+ , _minimumQueryLengthForLiveSearch   = 3
+ 
+ }
 
 ----------------------------------------
 
@@ -62,8 +111,10 @@ instance Default QueryOptions where
 
 {-| ParseQueryLike... -}
 data QueryLanguage
-  = ParseQueryLikeMCI -- ^ @magiccards.info@'s sytax
-  | ParseQueryLikeProlog -- ^ 
+  = ParseQueryLikeMCI    -- ^ @magiccards.info@'s sytax
+  | ParseQueryLikeProlog -- ^
+  | ParseQueryAsFreeText -- ^
+  | ParseQueryLikeSQL    -- ^
   deriving (Show,Read,Eq,Ord,Enum,Bounded,Ix,Generic,NFData,Hashable)
 
 instance Default QueryLanguage where def = ParseQueryLikeMCI
@@ -91,8 +142,8 @@ instance IsList Results where
   toList = fromResults
 
 newtype Result = Result
- { fromResult :: Card }
- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+ { fromResult :: Card
+ } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 data ResultsOptions = ResultsOptions
  { _resultsFormat :: ResultsFormat 
@@ -111,8 +162,30 @@ data ResultsFormat
 
 instance Default ResultsFormat where def = DisplayResultsAsText
 
+----------------------------------------
+
 {-| SortResultsBy... -}
-data ResultsOrder
+data ResultsOrder = ResultsOrder
+  { fromResultsOrder :: (NonEmpty SortResultsBy) -- ^ a @Set@
+  }
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+  --NOTE we don't use Set itself because (1) we want it to be non-empty and (2) Sets aren't Generic
+
+instance Default ResultsOrder where
+  def = defaultResultsOrder
+
+instance IsList ResultsOrder where
+  type Item ResultsOrder = SortResultsBy
+  fromList = nonEmpty > maybe [def] id > ResultsOrder
+  toList   = fromResultsOrder > toList
+
+defaultResultsOrder :: ResultsOrder
+defaultResultsOrder =
+  [ SortResultsByEdition
+  , SortResultsByName
+  ]
+
+data SortResultsBy
   = SortResultsByName
   | SortResultsByEdition
   | SortResultsByColor
@@ -121,8 +194,8 @@ data ResultsOrder
   | SortResultsByRarity
   deriving (Show,Read,Eq,Ord,Enum,Bounded,Ix,Generic,NFData,Hashable)
 
-instance Default ResultsOrder where def = SortResultsByName
-
+instance Default SortResultsBy where def = SortResultsByName
+      
 ----------------------------------------
 {-
 
