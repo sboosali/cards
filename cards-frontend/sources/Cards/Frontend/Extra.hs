@@ -27,6 +27,10 @@ import Data.Time        as X (NominalDiffTime)
 import Data.Text        as X (Text)
 import GHCJS.DOM.Types  as X (MonadJSM(..), JSM)
 
+-- standard library
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.List.NonEmpty (NonEmpty(..), nonEmpty)
+
 -- re-export custom prelude
 import Prelude.Spiros hiding (Text,div)
 
@@ -305,3 +309,148 @@ dNoAttributes :: (Reflex t) => Dynamic t AttributeMap
 dNoAttributes = constDyn mempty
 
 ----------------------------------------
+
+toNonEmptyDefaulting
+  :: ( Default x
+     , IsList xs
+     , (x ~ Item xs)
+     )
+  => xs
+  -> NonEmpty x
+toNonEmptyDefaulting
+  = toList > nonEmpty > maybe (def:|[]) id
+--NOTE not `Foldable f`
+
+-- | see 'constructorsLabeled' and 'ReifiedEnumerable'. 
+reifyEnumerable
+  :: forall a t proxy.
+     ( Bounded  a
+     , Enum     a
+     , Show     a
+     , Typeable a
+     , IsString t
+     )
+  => proxy a
+  -> ReifiedEnumerable a t
+reifyEnumerable proxy = makeReifiedEnumerable
+  (typeName            proxy)
+  (constructorsLabeled proxy)
+
+{-| like 'reifyEnumerable', but unlabeled.
+
+Useful when the enum's types and/or values can't be shown (for whatever reason); or to type-defaulting warnings.
+
+-}
+reifyEnumerable_
+  :: forall a proxy.
+     ( Bounded  a
+     , Enum     a
+     )
+  => proxy a
+  -> ReifiedEnumerable a ()
+reifyEnumerable_ proxy = makeReifiedEnumerable
+  ()
+  (xs <&> (id &&& const ()))
+  where
+  xs = constructorsUnlabeled proxy
+
+{-| Enumerate all values in the type, and label them via 'show'.
+
+Similar to:
+
+@
+['minBound'..'maxBound']
+@
+
+Example:
+
+@
+>> :set -XTypeApplications
+>> import Data.Text (Text)
+>> constructorsLabeled' @Bool @Text Nothing
+[False,True]
+
+-- (`Nothing :: Maybe a` is just an automatically inferred `proxy a` (exported by Prelude, unlike Proxy)). 
+@
+
+-}
+constructorsLabeled 
+  :: forall a t proxy.
+     ( Bounded  a
+     , Enum     a
+     , Show     a
+     , IsString t
+     )
+  => proxy a
+  -> NonEmpty (a,t)
+constructorsLabeled proxy
+  = constructorsUnlabeled proxy
+  & fmap (id &&& (show > fromString))
+
+{-| Enumerate all values in the type. 
+
+Similar to:
+
+@
+['minBound'..'maxBound']
+@
+
+-}
+constructorsUnlabeled 
+  :: forall a proxy.
+     ( Bounded  a
+     , Enum     a
+     )
+  => proxy a
+  -> NonEmpty a
+constructorsUnlabeled _ = (y :| ys)
+  where
+  y  = minBound
+  ys = enumFrom y & drop 1
+  
+  -- xs = y :| ys
+  -- y  = minBound
+  -- ys = enumFrom (succ y)
+
+{-| a finitely-enumerable, inhabited type @a@, with all values reified into an ordered set (i.e. no duplicates), and labeled with string type @t@.
+
+all the fields (besides 'enumerableTypeName') are derived from 'enumerableValuesWithLabels', as demonstrated by 'makeReifiedEnumerable'. they're provided only for convenience; haskell's laziness(/sharing) avoids wasting computation or memory.
+
+NOTE the type parameters order is "backwards" to provide the Functor instance, for converting between string types more conveniently.
+
+-}
+data ReifiedEnumerable a t = ReifiedEnumerable
+ { enumerableTypeName         :: t
+ , enumerableValuesWithLabels :: [(a,t)] --TODO or: NonEmpty (a,t)
+ , enumerableValues           :: [a]
+ , enumerableFirstLabel       :: t
+ , enumerableFirstValue       :: a
+ } deriving (Functor)
+--TODO lenses instead of redundant shared fields?
+
+makeReifiedEnumerable :: t -> NonEmpty (a,t) -> ReifiedEnumerable a t 
+makeReifiedEnumerable enumerableTypeName xs
+  = ReifiedEnumerable{..}
+  where
+
+  enumerableValues = enumerableValuesWithLabels
+   & fmap fst
+
+  enumerableValuesWithLabels
+   = xs
+   & NonEmpty.toList
+   
+  (enumerableFirstValue, enumerableFirstLabel)
+   = xs
+   & NonEmpty.head
+
+   -- <&> fst
+   -- >>> NonEmpty.toList
+
+{-NOTE
+
+Data.Void.Void, which has zero values and thus no first value, is not Bounded.
+
+-}
+
+---------------------------------------
