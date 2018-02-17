@@ -457,4 +457,21 @@ reflex-project nix
 ./reflex-platform/project/default.nix 
 
 ========================================
+?
+
+Preprocessing library cards-frontend-0.0.0...
+Warning: The documentation for the following packages are not installed. No
+links will be generated to these packages: MemoTrie-0.6.8, fail-4.9.0.0,
+ghcjs-dom-0.9.3.0
+haddock: Couldn't parse GHC options: -fbuilding-cabal-package -O -split-objs -outputdir dist/build -odir dist/build/tmp-9601 -hidir dist/build/tmp-9601 -stubdir dist/build/tmp-9601 -i -idist/build -isources -idist/build/autogen -Idist/build/autogen -Idist/build -optP-DGHCJS_BROWSER -optP-D__HADDOCK_VERSION__=2174 -optP-include -optPdist/build/autogen/cabal_macros.h -this-unit-id cards-frontend-0.0.0-Ziz8wSmLVx2khWIlvI35V -hide-all-packages -no-user-package-db -package-db /tmp/nix-build-cards-frontend-0.0.0.drv-0/package.conf.d -package-id base-4.9.0.0-1iIG6iqo2mx8AGDVd67UAJ -package-id blaze-html-0.9.0.1-2hma97SEy0Y5LZEcgMPMI8 -package-id bytestring-0.10.8.1-9nyNRTN22ZoFzkmxPppNxP -package-id cards-common-0.0.0-HV4fUlhVz4T9JTtZNbO08x -package-id clay-0.12.2-2u7Sqk9f2nybxBnZZUdCl -package-id containers-0.5.7.1-84bgGSqjZJw8aeDIt4YHcf -package-id deepseq-1.4.2.0-AXN9m3fSihQGdKj3mivvO2 -package-id exceptions-0.8.3-GdabsnxBhOxGOzgLrgXYOU -package-id ghcjs-dom-0.9.3.0-HLMt50fAp6O2z6JX5k0FCD -package-id hashable-1.2.4.0-ELWrKCyz8gJX4KFEYYUMO -package-id jsaddle-0.9.4.0-7jz2eR2IxDa5eKfH0VmPtA -package-id jsaddle-dom-0.9.2.0-8m1t5jUNKuWLXpzlPpbm9A -package-id lens-4.15.4-1y0Cc4GtMeLA9OYFuSYNyJ -package-id megaparsec-6.3.0-62g3oVVGfLW2VEkdNMy6ei -package-id memo-0.0.0-7FSgZlcliJv9IlJOBWqWFh -package-id mtl-2.2.1-HaVQXdYUbm1BzxKWcqmtoJ -package-id reflex-0.5-FbXNafvnZ6BL9LVa8MRmA7 -package-id reflex-dom-0.4-9IFDpuD4uyk4QwDsCYp1Lq -package-id reflex-dom-contrib-0.5.1.0-96MpvNhmkk63WSNFqXKIZ1 -package-id reflex-dom-core-0.4-6ySp4LdJRsh4aeQajKFiPX -package-id reflex-vinyl-0.0.0-Gog0mbs8Kpmx7jQwyqEY0 -package-id spiros-0.0.1-8hVNI1kqdBXIRShZ1ztXpY -package-id string-conv-0.1.2-CLWXd9YfM3kLHqAoPl86ti -package-id text-1.2.2.1-AbwmG88fhEHfGAxpKl2ce -package-id thyme-0.3.5.5-84v8QcUkMYB7gsVyqoGFEa -package-id time-1.6.0.1-EHDmCdhr8DyAvdpYRjsR4e -package-id transformers-0.5.2.0-5gllrcfRr8uHE8UsCDGSd7 -package-id unordered-containers-0.2.7.2-DpjBSAjdnQR7vI1uWaYZUL -XHaskell2010 -XNoImplicitPrelude -XAutoDeriveTypeable -XDeriveDataTypeable -XDeriveGeneric -XDeriveFunctor -XDeriveFoldable -XDeriveTraversable -XLambdaCase -XEmptyCase -XTypeOperators -XPostfixOperators -XViewPatterns -XBangPatterns -XKindSignatures -XNamedFieldPuns -XRecordWildCards -XTupleSections -XMultiWayIf -XDoAndIfThenElse -XEmptyDataDecls -XPackageImports -XMultiParamTypeClasses -XFlexibleContexts -XFlexibleInstances -XTypeFamilies -XFunctionalDependencies -XScopedTypeVariables -XStandaloneDeriving -Wall -Wcompat -Wno-unticked-promoted-constructors -Wincomplete-uni-patterns -Wincomplete-record-updates -Widentities -Wmissing-methods -Werror=missing-fields -fdefer-typed-holes -Wtyped-holes -dedupe
+builder for ‘/nix/store/q6shi5rsai9b6r13kw9xifh7djnail9x-cards-frontend-0.0.0.drv’ failed with exit code 1
+
+
+========================================
+??
+
+./execute-desktop-linux.sh: line 4: 31137 Segmentation fault  
+
+
+========================================
 

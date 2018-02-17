@@ -2,3 +2,10 @@ packages:
   ./cards-common
   ./cards-backend
   ./cards-frontend
+
+  -- ./cards-webapp
+  ./cards-desktop-linux
+  -- ./cards-desktop-osx
+  -- ./cards-andrioid
+  -- ./cards-ios
+

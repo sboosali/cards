@@ -194,10 +194,13 @@ myOverlaysWith = pkgs: self: super: let
  #
  skipTests         = haskell.dontCheck; 
  skipDocumentation = haskell.dontHaddock;
+ skipBenchmarks    = haskell.dontBenchmark;
  dropUpperBounds   = haskell.doJailbreak;
  #
+ quicken   = p:
+  skipDocumentation (skipTests ( p));
  loosen    = p:
-  skipDocumentation (skipTests (dropUpperBounds p));
+  skipDocumentation (skipTests (skipBenchmarks p));
  dependsOn = package: dependencies: 
   haskell.addBuildDepends package dependencies;
  #
@@ -210,6 +213,14 @@ myOverlaysWith = pkgs: self: super: let
    ########################################
    # Add Haskell Packages Below           #
    ######################################## 
+
+    #TODO
+    # make the development build quicker and more reliable
+    # (haddock in particular is both slow, and fails to parse valid sources)
+    cards-common        = quicken super.cards-common;
+    cards-backend       = quicken super.cards-backend;
+    cards-frontend      = quicken super.cards-frontend;
+    cards-desktop-linux = quicken super.cards-desktop-linux;
 
     # spiros = github_ {
     #   owner  = "sboosali";
@@ -446,11 +457,14 @@ reflex-platform.project ({ pkgs, ... }: {
     cards-common   = ./cards-common;
     cards-backend  = ./cards-backend;
     cards-frontend = ./cards-frontend;
+
+    cards-desktop-linux = ./cards-desktop-linux;
+
   };
 
   shells = {
-    ghc   = ["cards-common" "cards-backend" "cards-frontend"];
-    ghcjs = ["cards-common"                 "cards-frontend"];
+    ghc   = [ "cards-common" "cards-backend" "cards-frontend" "cards-desktop-linux" ];
+    ghcjs = [ "cards-common"                 "cards-frontend" ];
   };
     # shells :: { <platform name> :: [PackageName] }
 

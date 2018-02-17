@@ -1,0 +1,91 @@
+name:                cards-desktop-linux
+version:             0.0.0
+cabal-version:       >=1.24
+
+build-type:          Simple
+category:            Data 
+synopsis:            TODO 
+description:         
+ .
+ Run the GUI in @cards-frontend@ via @WebKitGT@
+ .
+
+author:              Spiros Boosalis
+maintainer:          samboosalis@gmail.com
+homepage:            http://github.com/sboosali/cards#readme
+bug-reports:         http://github.com/sboosali/cards/issues
+
+copyright:           2018 Spiros Boosalis
+license:             GPL-3
+license-file:        LICENSE
+
+stability:           provisional
+tested-with:
+  GHC == 8.0.2
+
+----------------------------------------
+
+-- PVP
+-- https://wiki.haskell.org/Package_versioning_policy
+-- "A.B is known as the major version number, and C the minor version number."
+
+-- extra-source-files:
+--   README.md
+--   stack.yaml
+--   .travis.yml
+--   HLint.hs
+
+source-repository head
+  type:     git
+  location: https://github.com/sboosali/cards
+
+----------------------------------------
+-- copied from https://github.com/ghcjs/jsaddle-hello/blob/master/jsaddle-hello.cabal
+
+-- card-search-webkitgtk
+executable card-search-desktop-linux
+ -- if impl(ghc) && os(linux) && arch(x86_64)
+ if impl(ghc) && os(linux)
+
+    main-is:             Main_WebKitGTK.hs
+    hs-source-dirs:      .
+   
+    default-language:    Haskell2010
+    ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+   
+    build-depends:
+       base
+     , cards-frontend     ==0.0.0
+     , jsaddle-webkit2gtk
+       -- >=0.8.0.0 && <0.9
+
+ else
+    buildable: False
+
+-- NOTES
+-- Prelude> import System.Info 
+-- Prelude System.Info> os
+-- "linux"
+-- Prelude System.Info> arch
+-- "x86_64"
+
+ -- if !impl(ghc) || !os(linux)
+ --    buildable: False
+
+-- card-search-wkwebview
+-- executable card-search-desktop-osx
+--  if impl(ghcjs) || !os(osx)
+--         buildable: False
+--  main-is:             WKWebViewMain.hs
+--  hs-source-dirs:      executables
+--  default-language:    Haskell2010
+--  ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+--  build-depends:
+--     base
+--   , cards-frontend
+--   , lens         
+-- -- >=4.0.7 && <5.0
+--   , text         
+-- -- >=1.2.2.1 && <1.3
+--   , jsaddle-wkwebview 
+-- -- >=0.8.1.0 && <0.9

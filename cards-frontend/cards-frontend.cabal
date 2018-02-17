@@ -91,7 +91,7 @@ library
  hs-source-dirs: sources
 
  if impl(ghcjs)
-    ghc-options: -dedupe
+--TODO not recognized    ghc-options: -dedupe
     cpp-options: -DGHCJS_BROWSER
 
  -- the `-dedupe` flag optimizes for generated size.
@@ -165,6 +165,9 @@ library
  other-modules:
                  Cards.AllCards
                  Cards.Frontend.Extra            
+                 Cards.Frontend.ButtonGroup 
+                   --TODO
+
                  -- Paths_cards-frontend
 -- autogen-modules:
                  -- Paths_cards-frontend

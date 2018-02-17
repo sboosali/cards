@@ -61,7 +61,13 @@ import qualified Clay as C
   
 frontend :: Frontend
 --frontend = Frontend{..}
-frontend = Frontend wHead' wBody'
+frontend = Frontend (SomeWidget wHead') (SomeJSaddleWidget wBody')
+
+-- (SomeWidget(..), SomeJSaddleWidget(..))
+
+initialize :: (MonadIO m) => m ()  
+initialize = liftIO $ do
+  forceIO defaultCardDatabase
 
 ----------------------------------------
 
@@ -90,7 +96,7 @@ wHead' = do
 {-|
 
 -}
-wBody' :: MonadW t m => m ()
+wBody' :: MonadJSaddleWidget t m => m ()
 wBody' = do
   dInterfaceConfig <- wSettingsPage
   wSearchPage dInterfaceConfig
@@ -101,7 +107,7 @@ wBody' = do
 
 ----------------------------------------
 
-wSettingsPage :: MonadW t m => m (Dynamic t InterfaceConfig)
+wSettingsPage :: MonadJSaddleWidget t m => m (Dynamic t InterfaceConfig)
 wSettingsPage = do
 
   dSearchOptions  <- wSearchSettings
@@ -123,7 +129,7 @@ wSettingsPage = do
 --  , _cResultsOptions :: ResultsOptions
 --  }
 
-wSearchSettings :: MonadW t m => m (Dynamic t SearchOptions)
+wSearchSettings :: MonadJSaddleWidget t m => m (Dynamic t SearchOptions)
 wSearchSettings = do
 
   dShouldRequireManual <- genericRadioGroup pBool
@@ -138,7 +144,7 @@ wSearchSettings = do
 
   return dSearchOptions
 
-wQuerySettings :: MonadW t m => m (Dynamic t QueryOptions)
+wQuerySettings :: MonadJSaddleWidget t m => m (Dynamic t QueryOptions)
 wQuerySettings = do
   
   dQueryLanguage <- genericRadioGroup pQueryLanguage -- dNoAttributes
@@ -148,7 +154,7 @@ wQuerySettings = do
 
   return dQueryOptions
 
-wResultsSettings :: MonadW t m => m (Dynamic t ResultsOptions)
+wResultsSettings :: MonadJSaddleWidget t m => m (Dynamic t ResultsOptions)
 wResultsSettings = do
 
   dResultsFormat <- genericRadioGroup pResultsFormat -- 
@@ -173,7 +179,7 @@ wResultsSettings = do
 
 -}
 wSearchPage
-  :: MonadW t m
+  :: MonadJSaddleWidget t m
   => Dynamic t InterfaceConfig
   -> m ()
 wSearchPage dInterfaceConfig = do
@@ -204,7 +210,7 @@ wSearchPage dInterfaceConfig = do
 
 -}
 dynamicResultsPage
-  :: MonadW t m
+  :: MonadJSaddleWidget t m
   => ResultsPageConfig t
   -> m (Event t ResultsPage)
 dynamicResultsPage (ResultsPageConfig{..}) = do
@@ -498,7 +504,7 @@ formatCard Card{..} = elDynAttr elementCardResult dAttributes $ do
 
 ----------------------------------------
 
-grid :: SomeWidget_
+grid :: AWidget_
 grid = do
  let child = blank
  

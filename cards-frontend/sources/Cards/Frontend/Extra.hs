@@ -25,7 +25,7 @@ import qualified Data.Text as T
 import Data.String.Conv as X
 import Data.Time        as X (NominalDiffTime)
 import Data.Text        as X (Text)
-import GHCJS.DOM.Types  as X (MonadJSM)
+import GHCJS.DOM.Types  as X (MonadJSM(..), JSM)
 
 -- re-export custom prelude
 import Prelude.Spiros hiding (Text,div)
@@ -54,12 +54,14 @@ fromBoolean b = fromPredicate (const b)
 
 type IO_ = IO ()
 
+type JSM_ = JSM ()
+
 {- | the `reflex-dom-contrib` widgets require @'MonadJSM'@.
 
 -}
-type MonadW t m =
+type MonadJSaddleWidget t m =
   ( MonadWidget t m
-  , MonadJSM IO
+  , MonadJSM      m -- IO
   )
 
 {-NOTE
@@ -87,10 +89,16 @@ type DynamicAttributeMap t = Dynamic t AttributeMap
 @
 
 -}
-type SomeWidget a = (forall x. Widget x a)
+-- type SomeWidget a = (forall x. Widget x a)
 
--- | 
-type SomeWidget_ = (forall x. Widget x ())
+{-|
+
+@
+> mainWidget :: AWidget_ -> IO_
+@
+
+-}
+type AWidget_ = (forall x. Widget x ())
 
 {-|
 

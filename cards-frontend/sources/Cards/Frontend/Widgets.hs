@@ -9,11 +9,12 @@
 module Cards.Frontend.Widgets where
 
 import Cards.Frontend.Extra
+import Cards.Frontend.ButtonGroup (radioGroup)
 
 import Reflex.Dom hiding (Query)
 
 import           Reflex.Dom.Contrib.Widgets.Common
-import           Reflex.Dom.Contrib.Widgets.ButtonGroup
+--import           Reflex.Dom.Contrib.Widgets.ButtonGroup
 
 import qualified Data.Text as T
 
@@ -39,7 +40,7 @@ genericRadioGroup
      , Typeable a
      -- , Default a --TODO def or minBound?
      )
-  => ( MonadW t m
+  => ( MonadJSaddleWidget t m
      )
   => proxy a --TODO DynamicAttributeMap t
   -> m (Dynamic t a)
@@ -58,7 +59,7 @@ genericRadioGroup proxy = do
   where
   go = divWith dAttributes $ do
       _ <- text name
-      radioGroup 
+      radioGroup  --TODO liftJSM?
         (constDyn name)
         (constDyn labeledValues)
         config

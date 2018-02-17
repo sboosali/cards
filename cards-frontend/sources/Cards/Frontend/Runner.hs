@@ -23,27 +23,24 @@ module Cards.Frontend.Runner
   ) where
 
 -- import Cards.Frontend.Extra (MonadJSM, IO_, SomeWidget_)
---import Cards.Frontend.Extra (IO_) 
+
+import Cards.Frontend.Extra
+
 import Cards.Frontend.Types
- (Runner, Frontend(..), JAVASCRIPT_RUNNER(..), displayJavascriptRunner)
+ (Runner, SomeWidget(..), SomeJSaddleWidget(..), Frontend(..), JAVASCRIPT_RUNNER(..), displayJavascriptRunner)
 
 import Data.Text (Text)
 
 --------------------
-#ifdef ghcjs_HOST_OS
-import Reflex.Dom (mainWidgetWithHead)
-#else
 #ifdef JSADDLE_WARP
 import Reflex.Dom.Core (mainWidgetWithHead)
 import qualified Language.Javascript.JSaddle.Warp as JSaddleWarp (run)
 #else
-import Reflex.Dom.Core (mainWidgetWithHead)
-import Language.Javascript.JSaddle.WebKitGTK as JSaddleGTK (run) -- TODO
-#endif
+import Reflex.Dom (mainWidgetWithHead)
 #endif
 --------------------
  
-import Prelude.Spiros hiding (Text)
+--import Prelude.Spiros hiding (Text)
 
 ----------------------------------------
 
@@ -55,76 +52,54 @@ __JAVASCRIPT_RUNNER_TEXT__
 -- conditional compilation...
 
 mainWidgetWithFrontend :: Runner
-#ifdef ghcjs_HOST_OS
-mainWidgetWithFrontend = ghcjs_main
-#else
+#ifdef JSADDLE_WARP
 mainWidgetWithFrontend = ghc_main
+#else
+mainWidgetWithFrontend = ghc_or_ghcjs_main
 #endif
 
-#ifdef ghcjs_HOST_OS
-ghcjs_main :: Runner
-ghcjs_main Frontend{..} = do -- liftIO $ do
-    mainWidgetWithHead wHead wBody
-#else
 #ifdef JSADDLE_WARP
 ghc_main :: Runner
-ghc_main Frontend{..}
+ghc_main
+  (Frontend (SomeWidget wHead) (SomeJSaddleWidget wBody))
   = JSaddleWarp.run __JSADDLE_WARP_PORT__ $ do -- liftIO $ do
       liftIO $ mainWidgetWithHead wHead wBody
 #else
-ghc_main :: Runner
-ghc_main Frontend{..}
-  = JSaddleGTK.run $ do
-      mainWidgetWithHead wHead wBody
-#endif
+ghc_or_ghcjs_main :: Runner --TODO lol
+ghc_or_ghcjs_main
+  (Frontend (SomeWidget wHead) (SomeJSaddleWidget wBody)) = liftIO $ do
+    mainWidgetWithHead wHead wBody
 #endif
 
-#ifdef ghcjs_HOST_OS
-#else
 #ifdef JSADDLE_WARP
 __JSADDLE_WARP_PORT__ :: Int
 __JSADDLE_WARP_PORT__ = 3911
-#else
-#endif
 #endif
 
 -- | the current executable's runner.
 -- like @System.os@, this is constant within the program's execution.
 __JAVASCRIPT_RUNNER__ :: JAVASCRIPT_RUNNER
 #ifdef ghcjs_HOST_OS
--- #ifndef JSADDLE_WARP
 __JAVASCRIPT_RUNNER__ = BROWSER -- WEBKITGTK
 #else
+#ifdef JSADDLE_WARP
 __JAVASCRIPT_RUNNER__ = JSADDLEWARP
+#else
+__JAVASCRIPT_RUNNER__ = NODEJS --TODO??
+#endif
 #endif
 
 ----------------------------------------
 
-{-
-
-
--- mainWidgetWith
---   :: () -- (MonadJSM m)
---   => Frontend
---   -> IO_
-
-
--- #ifdef ghcjs_HOST_OS
--- ghcjs_main :: Runner
--- ghcjs_main Frontend{wHead,wBody} = liftIO $ do
---   mainWidgetWithHead wHead wBody
--- #else
--- ghc_main :: Runner
--- ghc_main Frontend{wHead,wBody} = liftIO $ do
---   JSaddleWarp.run __JSADDLE_WARP_PORT__ $ do
---       liftIO $ mainWidgetWithHead wHead wBody
--- #endif
---  -- Frontend -> IO_
+{-STUFF
 
 -}
 
 
 {-NOTES
+
+-- #ifdef ghcjs_HOST_OS
+
 
 mainWidgetWithHead :: (forall x. Widget x ()) -> (forall x. Widget x ()) -> IO ()
 

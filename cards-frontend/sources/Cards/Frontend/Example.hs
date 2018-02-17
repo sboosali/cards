@@ -33,9 +33,9 @@ Naming:
 module Cards.Frontend.Example where
 
 --import qualified Cards.Frontend.GUI as GUI
-import Cards.Frontend.Extra
-import qualified Cards.Frontend        as Cards 
-import qualified Cards.Frontend.Runner as Runner 
+-- import Cards.Frontend.Extra
+-- import qualified Cards.Frontend        as Cards 
+-- import qualified Cards.Frontend.Runner as Runner 
 --import Prelude.Spiros hiding (Text,div)
 
 -- import Reflex hiding (Query)
@@ -56,11 +56,11 @@ import qualified Cards.Frontend.Runner as Runner
 
 ----------------------------------------
 
-main :: IO ()
-main = do
-  -- TODO defaultFrontend, defaultInitialization
-  forceIO Cards.defaultCardDatabase
-  Runner.mainWidgetWithFrontend Cards.frontend
+-- main :: IO ()
+-- main = do
+--   -- TODO defaultFrontend, defaultInitialization
+--   forceIO Cards.defaultCardDatabase
+--   Runner.mainWidgetWithFrontend Cards.frontend
 
 ----------------------------------------
 

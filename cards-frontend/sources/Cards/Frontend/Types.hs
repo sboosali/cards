@@ -40,15 +40,35 @@ import Data.List.NonEmpty (nonEmpty)
 ----------------------------------------
 
 --TODO
-type Runner = Frontend -> IO()
+type Runner = Frontend -> JSM ()
   
---TODO
+--TODO mv
 data Frontend = Frontend
- { wHead :: SomeWidget_
- , wBody :: SomeWidget_
+ { wHead :: SomeWidget        ()
+ , wBody :: SomeJSaddleWidget ()
 -- , wBody :: (MonadJSM IO) => SomeWidget_
 -- , wCSS  :: Either Text FilePath -- ^ `inline` or `link`ed
  }
+
+----------------------------------------
+
+--TODO store abstract constraints versus store concrete datatypes
+
+data SomeWidget a
+  = SomeWidget (forall x. Widget x a)
+
+data SomeJSaddleWidget a
+  = SomeJSaddleWidget (forall t m. MonadJSaddleWidget t m => m a)
+  
+-- data SomeJSaddleWidget a
+--   = SomeJSaddleWidget (forall t m. MonadJSaddleWidget t m => m a)
+  
+-- data SomeJSaddleWidget a
+--   = SomeJSaddleWidget (forall x.                  Widget x a)
+
+-- data SomeJSaddleWidget a
+--   = SomeJSaddleWidget (forall x. (MonadJSM IO) => Widget x a)
+
 
 ----------------------------------------
 
