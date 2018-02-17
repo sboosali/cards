@@ -63,8 +63,9 @@ megarepos = {
    jsaddle = fetchFromGitHub {
       owner  = "ghcjs";
       repo   = "jsaddle";
-      rev    = "6a8fbe20cfd4ea00e197acdf311a650b97cb9a61"; 
-      # fetchsubmodules = true;
+      rev    = "e77d303880917a66e593dc2d0d5c8718cfb085c4"; 
+               # "Make jsaddle-warp compatible with websockets-0.12"
+               # continuous-integration build isn't broken
       sha256 =
         "143r9nfglkydhp6rl0qrsyfpjnxfj04fhn96cf8hkx2mk09baa01";
     }; # https://github.com/ghcjs/jsaddle
@@ -72,7 +73,7 @@ megarepos = {
   reflex-dom = fetchFromGitHub {
     owner           = "reflex-frp";
     repo            = "reflex-dom"; 
-    rev             = "212dca4b7ff323dca423f2dd934341bdee7ea2c5";
+    rev             = "f4820df681b177fb950eb180aa97a81f855bd2aa";
     sha256          =
        "0wv8xwr4bv2zb8qz3kf7nq2ixjg2hmyccxppgpwis3wmjai89frk";
   };
@@ -253,6 +254,13 @@ myOverlaysWith = pkgs: self: super: let
      # cannot build derivation ‘/nix/store/wjgj9a89fwyij2m3klfxmphrfh68fnr5-cards-frontend-0.0.0-aarch64-unknown-linux-android.drv’: 1 dependencies couldn't be built
      # killing process 13427
      # cannot build derivation ‘/nix/store/vyzdvvkdybm6xd0fr2hn5zajw5mzg0lr-android-app.drv’: 1 dependencies couldn't be built
+
+    jsaddle            = loosen (subrepository_ subrepos.jsaddle);
+    jsaddle-warp       = loosen (subrepository_ subrepos.jsaddle-warp);
+    jsaddle-webkit2gtk = loosen (subrepository_ subrepos.jsaddle-webkit2gtk);
+
+    reflex-dom-core = loosen super.reflex-dom-core;
+    reflex-dom      = loosen super.reflex-dom;
      
     # protolude = hackage "protolude" "0.2.1" {};
     # 
@@ -316,6 +324,8 @@ myOverlaysWith = pkgs: self: super: let
     # sed: can't read /nix/store/hcqlfq5rcshf31k9cnrvgzan9jdf37cy-all-cabal-hashes-2b0bf3ddf8b75656582c1e45c51caa59458cd3ad-src/1/vinyl/0.7.0/vinyl.json: No such file or directory
     # cabal2nix: nix-prefetch-url: createProcess: runInteractiveProcess: exec: does not exist (No such file or directory)
 
+
+    # reflex-dom-contrib = self.callPackage ./deps/reflex-dom-contrib.nix {};
     reflex-dom-contrib = github_ {
       owner  = "reflex-frp";
       repo   = "reflex-dom-contrib";
@@ -324,6 +334,7 @@ myOverlaysWith = pkgs: self: super: let
       sha256 =
         "0yvjnr9xfm0bg7b6q7ssdci43ca2ap3wvjhshv61dnpvh60ldsk9";
     };
+
 
    # $ nix-prefetch-git  https://github.com/ghcjs/jsaddle  > jsaddle.json
    # jsaddle = prefetched_ ./jsaddle.json;
@@ -397,10 +408,6 @@ myOverlaysWith = pkgs: self: super: let
   #   in
   #   (skipTests (dropUpperBounds
   #     (nix_ (execCabal2nix "--subpath reflex-dom -fuse-warp" megarepo))));
-
-  # jsaddle            = loosen (subrepository_ subrepos.jsaddle);
-  # jsaddle-warp       = loosen (subrepository_ subrepos.jsaddle-warp);
-  # jsaddle-webkit2gtk = loosen (subrepository_ subrepos.jsaddle-webkit2gtk);
   
   # jsaddle-dom        = loosen (github_ {
   #     owner  = "ghcjs";
@@ -437,6 +444,7 @@ myExecutablesWith = ghc: let
   cabal-install
   chromium
   inotify-tools
+  graphviz # dot, tred
  ];
 
  haskellExecutables = with ghc; [

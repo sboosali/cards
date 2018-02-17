@@ -475,3 +475,58 @@ builder for ‘/nix/store/q6shi5rsai9b6r13kw9xifh7djnail9x-cards-frontend-0.0.0.
 
 ========================================
 
+Running 2 test suites...
+Test suite hlint: RUNNING...
+Test suite hlint: PASS
+Test suite logged to: dist/test/reflex-dom-core-0.4-hlint.log
+Test suite gc: RUNNING...
+No hints
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+Starting Chromium
+[0217/010740.964238:ERROR:devtools_http_handler.cc(786)] 
+DevTools listening on 127.0.0.1:9222
+
+[0217/010804.972945:INFO:CONSOLE(134)] "Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user's experience. For more help, check https://xhr.spec.whatwg.org/.", source: http://localhost:3911/jsaddle.js (134)
+About to start the server
+Running...
+318736
+...
+600768
+FAILED: currentBytesUsed > maxBytesAllowed
+builder for ‘/nix/store/y5dgh7nn9y8c9gaccffha8sjl9bn7fqh-reflex-dom-core-0.4.drv’ failed with exit code 1
+
+========================================
+
+
+{-| a finitely-enumerable, inhabited type @a@, with all values reified into an ordered set (i.e. no duplicates), and labeled with string type @t@.
+
+all the fields (besides 'enumerableTypeName') are derived from 'enumerableValuesWithLabels'; they're provided for convenience, and laziness(/sharing) avoids wasting computation or memory.
+
+TODO lenses instead
+
+-}
+  
+data ReifiedEnumerable a t = ReifiedEnumerable
+ { enumerableTypeName         :: t
+ , enumerableValuesWithLabels :: [(a,t)]
+ , enumerableValues           :: [a]
+ , enumerableFirstWithLabel   :: (a,t)
+ , enumerableFirst            :: a
+ } deriving (Functor)
+
+makeReifiedEnumerable :: t -> NonEmpty (a,t) -> a
+makeReifiedEnumerable enumerableTypeName enumerableValuesWithLabels = ReifiedEnumerable{..}
+ where
+ enumerableValues         = enumerableValuesWithLabels <&> fmap fst
+ enumerableFirst          = enumerable
+ enumerableFirstWithLabel = 
+
+
+
+
+========================================
