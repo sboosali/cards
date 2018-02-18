@@ -13,6 +13,7 @@ The presence of this module solves:
 
 -}
 module Paths_cards_common where
+import Prelude
 
 getDataFileName :: FilePath -> IO FilePath
 getDataFileName = return

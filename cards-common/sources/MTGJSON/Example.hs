@@ -7,17 +7,18 @@ module MTGJSON.Example where
 
 import MTGJSON.Extra -- (nothing, toSL, toS)
 
-import MTGJSON.AllSets -- .Schema 
-import MTGJSON.Paths
+import MTGJSON
+
 -- import qualified Cards.MTGJSON.Macros as Ms
 -- import qualified Cards.MTGJSON.ByteStringLiterals as Bs
 
 --import qualified Data.ByteString.Lazy.Char8 as B8
 
 --import qualified Data.Text    as T
-import qualified Data.Text.IO as T
 
-import System.IO.Error
+-- import qualified Data.Text.IO as T
+-- import System.IO.Error
+
 --import Control.Exception
 --import qualified Control.Exception as E
 
@@ -54,8 +55,20 @@ main = do
   --     print c'
 
   putStrLn ""
-  putStrLn "[readDataFile]"
+  putStrLn "[]"
   putStrLn ""
+
+  putStrLn ""
+  bSetsMetadata <- readDataFile SetsDataFile
+  --TODO filesystem requires `backend`-only
+  let x = pSetsMetadata bSetsMetadata
+  print x
+
+  putStrLn ""
+  bVersion <- readDataFile VersionDataFile
+  --TODO filesystem requires `backend`-only
+  let y = pVersionObject bVersion
+  print y
 
   -- e' <- tryIOError $ do
   --     b <- readDataFile ("cards-common/" ++ fp'RIXSetsY)

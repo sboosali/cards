@@ -8,6 +8,10 @@ module Cards.Common.Example where
 
 import System.Environment
 
+import Prelude
+
+----------------------------------------
+
 {-|
 
 @

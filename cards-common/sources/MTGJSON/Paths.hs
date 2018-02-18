@@ -23,12 +23,33 @@ import Data.FileEmbed
 import Language.Haskell.TH (ExpQ, runIO)
 import Language.Haskell.TH.Syntax (qAddDependentFile)
 
-import Prelude.Spiros ((&))
+import Prelude.Spiros --((&))
 
 ----------------------------------------
 
-readDataFile :: FilePath -> IO ByteString
-readDataFile fp = (fp & getDataFileName) >>= B.readFile
+-- | known data (in the @data-files: ...@ stanza of the @.cabal@).  
+data DATA_FILE
+  = CardsDataFile
+  | SetsDataFile
+  | VersionDataFile
+  deriving (Show)
+
+----------------------------------------
+
+-- | relative filepath for a @data-file@.
+relativeDataFilePath :: DATA_FILE -> FilePath
+relativeDataFilePath = \case
+  CardsDataFile   -> "data/json/ReealSets-y.json"
+  SetsDataFile    -> "data/json/SetList.json"
+  VersionDataFile -> "data/json/version.json"
+  -- "data/json/AllSets-x.json"
+  
+-- | absolute filepath for a @data-file@.
+absoluteDataFilePath :: DATA_FILE -> IO FilePath
+absoluteDataFilePath = relativeDataFilePath > getDataFileName
+
+readDataFile :: DATA_FILE -> IO ByteString
+readDataFile = absoluteDataFilePath >=> B.readFile
 
 ---------------------------------------
 
@@ -80,23 +101,5 @@ embedDataFile filepath = do
 -- getDataFileName'RIXSetsObject = getDataFileName fp'RIXSetsObject
 
 ----------------------------------------
-
-fp'AllSetsX :: FilePath
-fp'AllSetsX = "data/json/AllSets-x.json"  
-
-fp'RealSetsX :: FilePath
-fp'RealSetsX = "data/json/RealSets-x.json"
-
--- {-| RIX-block sets, as a "homogeneous" JSON Object. -}
--- fp'RIXSetsObject :: FilePath
--- fp'RIXSetsObject = "data/json/RIXSets-y.json"
-
-{-| RIX-block sets, as a "homogeneous" JSON Object. -}
-fp'RIXSetsY :: FilePath
-fp'RIXSetsY = "data/json/RIXSets-y.json"
-
-{-| RIX-block sets, as a JSON Array. -}
-fp'RIXSetsArray :: FilePath
-fp'RIXSetsArray = "data/json/RIXSets-z.json"
 
 ----------------------------------------

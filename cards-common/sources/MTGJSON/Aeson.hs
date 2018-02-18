@@ -1,6 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE LambdaCase, DeriveAnyClass, OverloadedStrings #-}
-{-# LANGUAGE DataKinds, PolyKinds, ScopedTypeVariables, ConstraintKinds #-}
+{-# LANGUAGE DataKinds, ConstraintKinds #-}
 
 {-| 
 
@@ -76,17 +75,28 @@ parseJSON_TypePrefix
    , IsDataType a name m p t f
    )
   => J.Value -> J.Parser a
-parseJSON_TypePrefix = genericParseJSON (myOptions (Proxy :: Proxy a)) 
+parseJSON_TypePrefix = genericParseJSON o
+  where
+  o = (options_StripTypePrefix (Proxy :: Proxy a))
+      { omitNothingFields = True
+      }
 
-myOptions 
+  -- o  = options_StripTypePrefix (Proxy :: Proxy a)
+  --   <> options_MissingMaybes
+
+options_StripTypePrefix
   :: forall a name proxy. forall m p t f. 
    ( IsDataType a name m p t f) 
   => proxy a 
   -> Options 
-myOptions proxy = defaultOptions
+options_StripTypePrefix proxy = defaultOptions
   { fieldLabelModifier = stripTypePrefixFromFieldLabel proxy  
-  , omitNothingFields  = True 
   }
+
+-- options_MissingMaybes :: Options 
+-- options_MissingMaybes = defaultOptions
+--   { omitNothingFields  = True
+--   }
 
 {-| 
 
@@ -136,3 +146,5 @@ dataTypeNameOf
   => proxy a 
   -> String 
 dataTypeNameOf _ = symbolVal (Proxy :: Proxy name) 
+
+----------------------------------------

@@ -74,7 +74,8 @@ library
   -fwarn-identities
   -fwarn-missing-fields
 
- default-extensions: PackageImports AutoDeriveTypeable DeriveDataTypeable DeriveGeneric
+ default-extensions: NoImplicitPrelude
+                     PackageImports AutoDeriveTypeable DeriveDataTypeable DeriveGeneric
                      DeriveFunctor DeriveFoldable DeriveTraversable
                      LambdaCase EmptyCase TypeOperators PostfixOperators
                      ViewPatterns BangPatterns KindSignatures
@@ -84,15 +85,20 @@ library
                      TypeFamilies FunctionalDependencies
                      ScopedTypeVariables StandaloneDeriving
 
+ other-extensions: TemplateHaskell
+
  exposed-modules:
                  Cards.Common
                  Cards.Common.Types
                  Cards.Common.Core		
                  Cards.Common.Example           
 
+                 MTGJSON
                  MTGJSON.Types
                  MTGJSON.Core
+
                  MTGJSON.Version
+
                  MTGJSON.SetList
 
                  MTGJSON.AllSets               
@@ -143,7 +149,7 @@ library
              , aeson
              , binary
              , file-embed
-             , unicode-show
+             , time
 
 ----------------------------------------
 

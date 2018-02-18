@@ -4,8 +4,7 @@ set -e
 
 #########################################
 
-./build-ghc-common.sh  
+./build-ghc-common.sh 
 
-./new-run-common.sh  
+./new-run-common.sh "$@"
 
-#########################################
