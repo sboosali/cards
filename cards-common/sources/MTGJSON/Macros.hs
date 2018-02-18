@@ -1,6 +1,5 @@
-{-TODO-}
-
 {-# LANGUAGE TemplateHaskell #-}
+{-TODO-}
 
 {-|
 
@@ -9,61 +8,45 @@ transitively imports @Paths_cards_common@.
 -}
 module MTGJSON.Macros where
 
---import Cards.MTGJSON.Paths
+-- import MTGJSON.AllSets
+-- import MTGJSON.Paths
 
---import Data.ByteString (ByteString)
+-- import Data.ByteString (ByteString)
 
---import Prelude.Spiros
-
-----------------------------------------
-
--- {-
-
--- *Cards.Common Cards.MTGJSON.Schema Cards.MTGJSON.Paths B8 B Cards.MTGJSON.Macros> 
--- writeFile "ignore/RIXSetsY.txt" (show b'RIXSetsY)
-
--- -}
-
--- b'RIXSetsY :: ByteString
--- b'RIXSetsY = ""
+-- import Prelude.Spiros hiding (ByteString)
+-- import Prelude (error)
 
 ----------------------------------------
 
--- b'RIXSetsY :: ByteString
--- b'RIXSetsY = $(embedDataFile fp'RIXSetsY)
+-- embeddedRealSetsY :: ByteString
+-- embeddedRealSetsY = $(embedDataFile CardsDataFile)
 
-{-
+-- parsedRealSetsY :: Either String SetsObject
+-- parsedRealSetsY = pSetsObject (toS embeddedRealSetsY)
 
-embedDataFile
+-- validatedRealSetsY :: SetsObject
+-- validatedRealSetsY = parsedRealSetsY
+--   & either (error) id
+--   --TODO macro
 
-    runNodeInteractive
-    haddock: internal error: /nix/store/lfwjghzhfmj6n20qma02w35ydm6xcjkd-cards-common-0.0.0-data/share/ghcjs-0.2.0/x86_64-linux-ghcjs-0.2.1-ghc8_0_2/cards-common-0.0.0/data/json/RIXSets-y.json: openBinaryFile: does not exist (no such file or directory)
-    CallStack (from HasCallStack):
-      error, called at src/Gen2/TH.hs:338:70 in ghcjs-0.2.1-ArOyRzZQt3EIHrXqYO2Mr1:Gen2.TH
+{-LOL
+
+
+1.
+
+[18 of 20] Compiling MTGJSON.Macros   ( sources/MTGJSON/Macros.hs, /home/sboo/haskell/cards/dist-newstyle/build/x86_64-linux/ghc-8.0.2/cards-common-0.0.0/build/MTGJSON/Macros.o )
+
+stack overflow: use +RTS -K<size> to increase it
+
+
+2.
+
+The build process was
+killed (i.e. SIGKILL). The typical reason for this is that there is not enough
+memory available (e.g. the OS killed a process using lots of memory).
+
+
 
 -}
-
-
--- b'AllSetsX :: ByteString
--- b'AllSetsX = $(embedDataFile fp'AllSetsX)
-
--- b'RealSetsX :: ByteString
--- b'RealSetsX = $(embedDataFile fp'RealSetsX)
-
--- b'RIXSetsArray :: ByteString
--- b'RIXSetsArray = $(embedDataFile fp'RIXSetsArray)
-
-----------------------------------------
-
--- b'RIXSetsObject :: ByteString
--- b'RIXSetsObject = $(embedDataFile fp'RIXSetsObject)
-
--- b'RealSetsX :: ByteString
--- b'RealSetsX = $(embed'RealSetsX)
-
--- b'RIXSetsObject :: ByteString
--- b'RIXSetsObject = $(embed'RIXSetsObject)
-
-{--}
 
 ----------------------------------------

@@ -4,7 +4,8 @@ set -e
 
 #########################################
 
-./build-ghc-common.sh 
+./build-ghc-common.sh  # +RTS -K2G -RTS 
 
 ./new-run-common.sh "$@"
+
 

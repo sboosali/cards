@@ -154,6 +154,10 @@ library
 ----------------------------------------
 
 executable example-cards-common
+ if !impl(ghc)
+    buildable: False
+    -- calls `readFile`
+
  hs-source-dirs:      executables
  main-is:             Main.hs
 

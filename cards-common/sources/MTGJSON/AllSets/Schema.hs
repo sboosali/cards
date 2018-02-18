@@ -6,15 +6,16 @@
 -}
 module MTGJSON.AllSets.Schema where
 
-import MTGJSON.Extra
+import MTGJSON.Extra -- hiding (ByteString)
 
 import MTGJSON.Aeson
 
-import Data.Aeson (eitherDecode) 
+import Data.Aeson (eitherDecode) --, eitherDecode') 
 import Data.Aeson.Types
  (FromJSON(..),Options(..), SumEncoding(..), defaultOptions, genericParseJSON) 
 
-import Data.ByteString.Lazy (ByteString) 
+--import Data.ByteString      (ByteString) 
+--import Data.ByteString.Lazy (ByteString) 
 
 ----------------------------------------
 

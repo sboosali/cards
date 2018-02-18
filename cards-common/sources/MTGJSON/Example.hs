@@ -54,27 +54,41 @@ main = do
   --     let c' = pSetsArray b
   --     print c'
 
+
+
+
+
+
+
+
+
   putStrLn ""
   putStrLn "[]"
   putStrLn ""
 
-  putStrLn ""
-  bSetsMetadata <- readDataFile SetsDataFile
-  --TODO filesystem requires `backend`-only
-  let theSets = pSetsMetadata bSetsMetadata
-  print theSets
+  -- putStrLn ""
+  -- bSetsMetadata <- readDataFile SetsDataFile
+  -- --TODO filesystem requires `backend`-only
+  -- let theSets = pSetsMetadata bSetsMetadata
+  -- print theSets
 
+  -- putStrLn ""
+  -- bCards <- readDataFile CardsDataFile
+  -- --TODO filesystem requires `backend`-only
+  -- let theCards = pSetsObject bCards
+  -- print theCards
+  
   putStrLn ""
   bVersion <- readDataFile VersionDataFile
   --TODO filesystem requires `backend`-only
   let theVersion = pVersionObject bVersion
   print theVersion
 
-  putStrLn ""
-  bCards <- readDataFile CardsDataFile
-  --TODO filesystem requires `backend`-only
-  let theCards = pSetsObject bCards
-  print theCards  
+  -- putStrLn ""
+  -- print validatedRealSetsY
+
+
+
 
   -- e' <- tryIOError $ do
   --     b <- readDataFile ("cards-common/" ++ fp'RIXSetsY)

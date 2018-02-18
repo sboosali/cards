@@ -53,53 +53,15 @@ readDataFile = absoluteDataFilePath >=> B.readFile
 
 ---------------------------------------
 
-{-| 'getDataFileName' plus 'embedFile'.
+{-| wraps 'getDataFileName' and 'embedFile'.
 
 -}
 embedDataFile
-  :: FilePath 
-  -- :: (FilePath -> IO ByteString)
-  -- -> FilePath
+  :: DATA_FILE 
   -> ExpQ
-embedDataFile filepath = do
-  fp <- runIO $ getDataFileName filepath
-  -- no liftIO, i.e. `MonadIO Q`?
-  qAddDependentFile fp
-  embedFile fp
-
--- embedder :: FilePath -> ExpQ
--- embedder fp = do
---   qAddDependentFile fp
---   embedFile fp
-
-----------------------------------------
-
--- embed'RIXSetsArray :: ExpQ
--- embed'RIXSetsArray = do
---   fp <- runIO getDataFileName'RIXSetsArray
---   -- no liftIO, i.e. `MonadIO Q`?
---   qAddDependentFile fp
---   embedFile fp
-
-----------------------------------------
-
--- read'RIXSets :: IO ByteString
--- read'RIXSets = read'RIXSetsArray
-
--- read'RIXSetsArray :: IO ByteString
--- read'RIXSetsArray = getDataFileName'RIXSetsArray >>= B.readFile
-
--- ----------------------------------------
-
--- getDataFileName'RealSetsX :: IO FilePath
--- getDataFileName'RealSetsX = getDataFileName fp'RealSetsX
-
--- getDataFileName'RIXSetsArray :: IO FilePath
--- getDataFileName'RIXSetsArray = getDataFileName fp'RIXSetsArray
-
--- getDataFileName'RIXSetsObject :: IO FilePath
--- getDataFileName'RIXSetsObject = getDataFileName fp'RIXSetsObject
-
-----------------------------------------
+embedDataFile datafile = do
+  p <- runIO $ absoluteDataFilePath datafile 
+  qAddDependentFile p
+  embedFile p
 
 ----------------------------------------
