@@ -5,7 +5,7 @@
 {-| 
 
 -}
-module Cards.MTGJSON.Aeson where
+module MTGJSON.Aeson where
 
 import Data.Aeson (defaultOptions, genericParseJSON) 
 import Data.Aeson.Types (Options(..)) 

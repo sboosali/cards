@@ -6,7 +6,7 @@
 {-|
 
 -}
-module Cards.MTGJSON.Schema where 
+module MTGJSON.AllSets.Schema where 
 --import Cards.Common.Extra -- hiding (ByteString)  
 import Cards.MTGJSON.Aeson
 

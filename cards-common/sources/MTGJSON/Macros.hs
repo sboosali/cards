@@ -7,7 +7,7 @@
 transitively imports @Paths_cards_common@. 
 
 -}
-module Cards.MTGJSON.Macros where
+module MTGJSON.Macros where
 
 --import Cards.MTGJSON.Paths
 

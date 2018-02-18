@@ -44,9 +44,9 @@ extra-source-files:
 ----------------------------------------
 
 data-files:
-  data/json/RealSets-x.json
-  data/json/RIXSets-y.json
---  data/json/RIXSets-z.json
+  data/json/RealSets-y.json
+  data/json/SetList.json
+  data/json/version.json
 
 ----------------------------------------
 
@@ -90,19 +90,26 @@ library
                  Cards.Common.Core		
                  Cards.Common.Example           
 
-                 Cards.MTGJSON.Schema     
-                 Cards.MTGJSON.Aeson
-                 Cards.MTGJSON.Example
-                 Cards.MTGJSON.Paths 
+                 MTGJSON.Types
+                 MTGJSON.Core
+                 MTGJSON.Version
+                 MTGJSON.SetList
 
-                 --TODO
-                 Cards.MTGJSON.ByteStringLiterals
-                 Cards.MTGJSON.Macros
-
+                 MTGJSON.AllSets               
+                 MTGJSON.AllSets.Schema
+                 MTGJSON.AllSets.Types
+                 MTGJSON.AllSets.Core
+                 
+                 MTGJSON.Aeson
+                 MTGJSON.Example
+                 MTGJSON.Paths 
+                 MTGJSON.Macros
+                 MTGJSON.Extra                 
+                 
  other-modules:
 
                  Cards.Common.Extra
-                 Cards.Common.UnicodeShow
+--                 Cards.Common.UnicodeShow
                  
                  Paths_cards_common
 

@@ -3,12 +3,12 @@
 {-|
 
 -}
-module Cards.MTGJSON.Example where 
+module MTGJSON.Example where 
 
-import Cards.Common.Extra -- (nothing, toSL, toS)
+import MTGJSON.Extra -- (nothing, toSL, toS)
 
-import Cards.MTGJSON.Schema 
-import Cards.MTGJSON.Paths
+import MTGJSON.AllSets -- .Schema 
+import MTGJSON.Paths
 -- import qualified Cards.MTGJSON.Macros as Ms
 -- import qualified Cards.MTGJSON.ByteStringLiterals as Bs
 
@@ -56,24 +56,25 @@ main = do
   putStrLn ""
   putStrLn "[readDataFile]"
   putStrLn ""
-  e' <- tryIOError $ do
-      b <- readDataFile ("cards-common/" ++ fp'RIXSetsY)
-      --TODO filesystem requires `backend`-only
-      let c' = pSetsObject b
 
-      putStrLn "[json]"
-      print c'
+  -- e' <- tryIOError $ do
+  --     b <- readDataFile ("cards-common/" ++ fp'RIXSetsY)
+  --     --TODO filesystem requires `backend`-only
+  --     let c' = pSetsObject b
 
-      putStrLn "[bytes]"
-      T.putStrLn $ toS b
+  --     putStrLn "[json]"
+  --     print c'
 
-      -- putStrLn "[ushow]"
-      -- let s = toS $ ushow b
-      -- 
-      -- T.writeFile "cards-common/includes/RIXSets-y.txt" s
-       --NOTE
+  --     putStrLn "[bytes]"
+  --     T.putStrLn $ toS b
 
-  print e'
+  --     -- putStrLn "[ushow]"
+  --     -- let s = toS $ ushow b
+  --     -- 
+  --     -- T.writeFile "cards-common/includes/RIXSets-y.txt" s
+  --      --NOTE
+
+  -- print e'
 
   {-
 

@@ -11,7 +11,7 @@ see <http://neilmitchell.blogspot.com/2008/02/adding-data-files-using-cabal.html
 
 
 -}
-module Cards.MTGJSON.Paths where
+module MTGJSON.Paths where
 
 import Paths_cards_common
 
