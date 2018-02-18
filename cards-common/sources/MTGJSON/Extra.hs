@@ -27,6 +27,12 @@ decoded  = J.eitherDecode > either fail return
 
 ----------------------------------------
 
+n2i :: Natural -> Integer
+n2i = toInteger
 
+i2n :: Integer -> Maybe Natural
+i2n i = if i >= 0
+  then Just $ fromInteger i
+  else Nothing
 
 ----------------------------------------

@@ -7,6 +7,9 @@
 module MTGJSON.AllSets.Types where
 
 import MTGJSON.Extra
+import MTGJSON.Types
+
+import Control.Lens
 
 ----------------------------------------
 
@@ -29,6 +32,7 @@ gameplay-relevant stuff, card characteristics:
 * @'_CardData_colors'@: 
 * @'_CardData_type'@: 
 * @'_CardData_text'@: 
+* @'_CardData_number'@: 
 
 quasi-derivable stuff, card characteristics: 
 
@@ -46,7 +50,7 @@ non-gameplay-relevant stuff, card characteristics:
 * @'_CardData_rarity'@: 
 * @'_CardData_flavor'@: 
 * @'_CardData_artist'@: 
-* @'_CardData_number'@: 
+* @'_CardData_ccNumber'@: 
 
 Internet data: 
 
@@ -78,7 +82,8 @@ data CardData = CardData
   , _CardData_colors        :: [CardColor] 
   , _CardData_type          :: CardTypeLine 
   , _CardData_text          :: CardText 
-
+  , _CardData_number        :: Maybe CardCharacteristicNumber
+  
   -- quasi-derivable stuff, card characteristics 
   , _CardData_cmc           :: ConvertedManaCost 
   , _CardData_colorIdentity :: [CardColorIdentity] 
@@ -90,14 +95,14 @@ data CardData = CardData
   -- non-gameplay-relevant stuff, card characteristics 
   , _CardData_layout        :: CardLayout 
   , _CardData_watermark     :: Maybe Text 
-  , _CardData_rarity        :: KnownCardRarity 
+  , _CardData_rarity        :: Probably KnownCardRarity 
   , _CardData_flavor        :: CardFlavorText 
   , _CardData_artist        :: CardArtist
-  , _CardData_number        :: CardCollectorNumber 
+  , _CardData_ccNumber      :: CardCollectorNumber 
 
   -- other resources
   , _CardData_multiverseid  :: WizardsIdentifier 
-  , _CardData_mciNumber     :: CardCollectorNumber -- ^ used by `MagicCards.info`, almost always identical to '_CardData_number'
+  , _CardData_mciNumber     :: CardCollectorNumber -- ^ used by `MagicCards.info`, almost always identical to '_CardData_ccNumber'
 
   , _CardData_rulings       :: [CardRuling] 
   , _CardData_legalities    :: [CardFormatLegality]
@@ -138,13 +143,22 @@ data CardCharacteristicNumber
   | CardCharacteristicLoyalty CardNumber 
   deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
 
-{-| for power, toughness, loyalty. 
+{-| for: power, toughness, loyalty. 
 
 -}
 data CardNumber 
   = CardIntegerNumber  Integer -- ^ the printed number, the most frequent case. can be negative: e.g. Char-Rumbler, which has a power of @'CardIntegerNumber' -1@. (Un-cards can have non-integer power/toughness, which we're ignoring)
   | CardWildcardNumber Integer -- ^ the integer represents the modifier: @1@ is @\*+1@, @0@ is just @\*@. e.g. Tarmogoyf has a power of  @'CardWildcardNumber' 0@ and a toughness of @'CardWildcardNumber' 1@. 
   deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable) 
+
+-- | the overwhelming majority of the printed numerical characteristics are just small naturals.
+_CardNaturalNumber :: Prism' CardNumber Natural
+_CardNaturalNumber = prism' inject project
+ where
+ inject  = n2i > CardIntegerNumber
+ project = \case
+   CardIntegerNumber i -> i & i2n 
+   _                   -> Nothing
 
 ----------------------------------------
 
