@@ -61,14 +61,20 @@ main = do
   putStrLn ""
   bSetsMetadata <- readDataFile SetsDataFile
   --TODO filesystem requires `backend`-only
-  let x = pSetsMetadata bSetsMetadata
-  print x
+  let theSets = pSetsMetadata bSetsMetadata
+  print theSets
 
   putStrLn ""
   bVersion <- readDataFile VersionDataFile
   --TODO filesystem requires `backend`-only
-  let y = pVersionObject bVersion
-  print y
+  let theVersion = pVersionObject bVersion
+  print theVersion
+
+  putStrLn ""
+  bCards <- readDataFile CardsDataFile
+  --TODO filesystem requires `backend`-only
+  let theCards = pSetsObject bCards
+  print theCards  
 
   -- e' <- tryIOError $ do
   --     b <- readDataFile ("cards-common/" ++ fp'RIXSetsY)

@@ -39,7 +39,7 @@ data DATA_FILE
 -- | relative filepath for a @data-file@.
 relativeDataFilePath :: DATA_FILE -> FilePath
 relativeDataFilePath = \case
-  CardsDataFile   -> "data/json/ReealSets-y.json"
+  CardsDataFile   -> "data/json/RealSets-y.json"
   SetsDataFile    -> "data/json/SetList.json"
   VersionDataFile -> "data/json/version.json"
   -- "data/json/AllSets-x.json"
