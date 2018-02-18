@@ -19,20 +19,28 @@ module Cards.Frontend.Extra
 import Reflex.Dom hiding (element)
 --import           GHCJS.DOM.Types            (MonadJSM)
 
-import qualified Data.Text as T
-
 -- re-exports
 import Data.String.Conv as X
 import Data.Time        as X (NominalDiffTime)
 import Data.Text        as X (Text)
-import GHCJS.DOM.Types  as X (MonadJSM(..), JSM)
+--import GHCJS.DOM.Types  as X (MonadJSM(..), JSM)
 
--- standard library
+import Reflex.Vinyl     {-as X-} hiding (El',HasEvent) --TODO rename themn?
+
+-- standard imports
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..), nonEmpty)
 
+-- other imports
+import qualified Data.Text as T
+
 -- re-export custom prelude
 import Prelude.Spiros hiding (Text,div)
+
+----------------------------------------
+
+--TODO 
+type EVENTS t = Rec (EventOf t)
 
 ----------------------------------------
 
@@ -58,15 +66,15 @@ fromBoolean b = fromPredicate (const b)
 
 type IO_ = IO ()
 
-type JSM_ = JSM ()
+-- type JSM_ = JSM ()
 
-{- | the `reflex-dom-contrib` widgets require @'MonadJSM'@.
+-- {- | the `reflex-dom-contrib` widgets require @'MonadJSM'@.
 
--}
-type MonadJSaddleWidget t m =
-  ( MonadWidget t m
-  , MonadJSM      m -- IO
-  )
+-- -}
+-- type MonadJSaddleWidget t m =
+--   ( MonadWidget t m
+--   , MonadJSM      m -- IO
+--   )
 
 {-NOTE
 
@@ -386,6 +394,24 @@ constructorsLabeled
 constructorsLabeled proxy
   = constructorsUnlabeled proxy
   & fmap (id &&& (show > fromString))
+
+
+constructors1'
+  :: forall a.
+     ( Bounded  a
+     , Enum     a
+     )
+  => NonEmpty a
+constructors1' = constructorsUnlabeled Nothing
+
+constructors1
+  :: forall a proxy.
+     ( Bounded  a
+     , Enum     a
+     )
+  => proxy a
+  -> NonEmpty a
+constructors1 = constructorsUnlabeled
 
 {-| Enumerate all values in the type. 
 

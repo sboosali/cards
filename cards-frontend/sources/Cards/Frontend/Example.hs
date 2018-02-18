@@ -68,7 +68,7 @@ module Cards.Frontend.Example where
 -- wHead = GUI.wHead
 
 -- --TODO lol
--- wBody :: MonadW t m => m ()
+-- wBody :: MonadWidget t m => m ()
 -- wBody = do
 --   -- test
 --   -- app

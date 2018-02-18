@@ -1,7 +1,12 @@
+{-# LANGUAGE DataKinds           #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedLabels, DuplicateRecordFields #-}
+
+{-# LANGUAGE QuasiQuotes         #-}
+{-# LANGUAGE RecursiveDo         #-}
 
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE OverloadedLists #-}
+{-# LANGUAGE OverloadedLists   #-}
 
 {-| helper widgets for the gui. 
 
@@ -9,15 +14,17 @@
 module Cards.Frontend.Widgets where
 
 import Cards.Frontend.Extra
-import Cards.Frontend.ButtonGroup (radioGroup)
+--import Cards.Frontend.ButtonGroup (radioGroup)
 
-import Reflex.Dom hiding (Query)
+import Reflex.Dom hiding (Query, value, setValue, attributes)
+import Reflex.Vinyl  --TODO mv/rename dom-specific to to Reflex.Dom.Vinyl
 
-import           Reflex.Dom.Contrib.Widgets.Common
+import           Reflex.Dom.Contrib.Widgets.Common (HtmlWidget(..))
 import           Reflex.Dom.Contrib.Widgets.CheckboxList
 --import           Reflex.Dom.Contrib.Widgets.ButtonGroup
 
 import qualified Data.Text as T
+import Control.Lens hiding ((<&>))
 
 ----------------------------------------
 
@@ -31,7 +38,9 @@ fromToggleCheckboxes = \case
   SelectEverything   -> True
   DeselectEverything -> False
 
-{-|
+{-| A simple widget to choose multiple value of some type.
+
+It's automatically derived from the type; the appearence\/behavior won't be optimal, but it's useful for prototyping. 
 
 This widgets creates:
 * a checkbox for every value in an finitely 'Enum'erable type, with labels from 'Show'.
@@ -65,8 +74,8 @@ simpleSetWidget checkedValues = do
           checkedValues
           displayedValues
 
+  --TODO
   -- let newToggleCheckboxes = ()
-
   -- let newSearchBar = ()
 
   wCheckboxes <- newCheckboxes
@@ -103,13 +112,46 @@ simpleSetWidget checkedValues = do
 
 -}
 
+----------------------------------------
+
+{-|
+
+-}
+simpleNumberInput
+  :: forall a m t.
+     ( Num  a
+     , Show a
+     , Read a
+     )
+  => ( MonadWidget t m
+     )
+  => a -- ^ the initial value
+  -> m (Dynamic t a)
+simpleNumberInput i = el "div" $ do
+  oInput <- textInput config
+  let eText = oInput & _textInput_value & updated
+
+  let eNumber = eText & fmapMaybe parseNumber
+  dNumber <- holdDyn i eNumber
+
+  return dNumber
+
+  where
+  parseNumber = T.unpack > readMay
+  
+  config = def
+    { _textInputConfig_inputType    = "number"
+    , _textInputConfig_initialValue = show i & s2t
+    }
 
 ----------------------------------------
 
 -- simpleRadioGroup
 
-{-|
+{-| A simple widget to choose a single value of some type.
 
+It's automatically derived from the type; the appearence\/behavior won't be optimal, but it's useful for prototyping. 
+ 
 A radio button for very value in an finitely 'Enum'erable type,
 with labels from being 'Show'n. The radio group is named after the type (i.e. @@a@).
 
@@ -126,45 +168,32 @@ genericRadioGroup
      , Typeable a
      -- , Default a --TODO def or minBound?
      )
-  => ( MonadJSaddleWidget t m
+  => ( MonadWidget t m
      )
   => proxy a --TODO DynamicAttributeMap t
   -> m (Dynamic t a)
   -- -> m (HtmlWidget t a)
 
 genericRadioGroup proxy = do
- 
-  w <- go
-  
-  let widget = w
-       & mapWidget (maybe minBound id)
-       & _hwidget_value
-  
-  return widget
+  dValue <- go
+  return dValue
   
   where
   go = divWith dAttributes $ do
       _ <- text name
-      radioGroup  --TODO liftJSM?
-        (constDyn name)
-        (constDyn enumerableValuesWithLabels)
+      simpleRadioGroup 
+        name
+        show'
+        show'
         config
-  
-  config = def
-    { _widgetConfig_attributes   = dNoAttributes -- constDyn mempty
-    , _widgetConfig_initialValue = Nothing -- minBound
---    , _widgetConfig_setValue     = never
-    }
 
+  show' = show > s2t
+  config = enumerableRadioConfig 
+  
   dAttributes = constDyn $
     genericRadioGroupAttributes name
-    -- dNoAttributes 
-
-  ReifiedEnumerable{enumerableValuesWithLabels} = reifyEnumerable proxy
-    -- everything
   
   name = typeName proxy -- typeRep proxy & s2t
-
   -- proxy = (Proxy :: Proxy a)
 
 genericRadioGroupAttributes :: Text -> Map Text Text
@@ -178,8 +207,229 @@ genericRadioGroupAttributes name =
     , "border-radius: 3px;"
     ]
 
+genericRadioButtonAttributes :: Text -> Map Text Text
+genericRadioButtonAttributes name = 
+  [ "class" -: name
+  , "style" -: style
+  ]
+  where
+  style = T.intercalate " "
+    [ "border: 1px solid;"
+    , "border-radius: 3px;"
+    ]
+
 ----------------------------------------
 
+-- data RadioConfig t a = RadioConfig
+--  { _radioConfig_initialValue :: a
+--  , _radioConfig_setValue     :: Event t a
+-- -- , _radioConfig_ 
+--  }
+
+data RadioConfig t a = RadioConfig
+ { initialValue   :: a
+ , possibleValues :: [a]
+ , setValue       :: Event   t a
+ , setAttributes  :: Dynamic t (AttributeMap)
+-- , _radioConfig_ :: a
+ } deriving (Functor)
+ 
+instance (Default a, Reflex t) => Default (RadioConfig t a) where
+  def = defaultRadioConfig (def:|[])
+  -- def = RadioConfig def never (constDyn mempty)
+  -- def = RadioConfig def [def] never def
+  -- def = RadioConfig def constructors' never def
+
+defaultRadioConfig :: (Reflex t) => NonEmpty a -> RadioConfig t a
+defaultRadioConfig (x:|xs) = RadioConfig x (x:xs) never dNoAttributes
+  -- RadioConfig{..}
+
+enumerableRadioConfig 
+  :: forall t a.
+     ( Bounded  a
+     , Enum     a
+     )
+  => ( Reflex t
+     )
+  => RadioConfig t a
+enumerableRadioConfig = defaultRadioConfig constructors1'
+  -- { initialValue   = enumerableFirstValue
+  -- , possibleValues = enumerableValues
+  -- }
+  -- where
+  -- ReifiedEnumerable{..} = reifyEnumerable_ Nothing
+
+------------------------------------------------------------------------------
+
+{-| A simple widget for a group of labeled buttons.
+
+Features:
+
+TODO * Keyboard Navigation/Control: pressing the up\/down arrow keys
+moves the focus to the previous\/next button; pressing the enter key selects the focused button.
+
+e.g. select an 'Ordering' (also see the MDN examples of radio groups)
+
+This reflex widget
+
+@
+orderingRadioGroup = simpleRadioGroup
+  "comparator"
+  show
+  displayOrdering
+  'enumerableRadioConfig'
+  where
+  displayOrdering = \case
+    LT -> "Strictly Less    Than (x < y)"
+    EQ -> "Exactly  Equal   To   (x = y)"
+    GT -> "Strictly Greater Than (x > y)"
+@
+
+has (inferred) type
+
+@
+orderingRadioGroup :: (...) => m (Dynamic t Ordering)
+@
+
+and produces this html:
+
+@
+<form> 
+  <div>
+
+    <input type="radio" name="comparator" id="comparator_1" value="LT">
+    <input type="radio" name="comparator" id="comparator_2" value="EQ">
+    <input type="radio" name="comparator" id="comparator_3" value="GT">
+
+    <label for="comparator_1">Strictly Less    Than (x < y)</label>
+    <label for="comparator_2">Exactly  Equal   To   (x = y)</label>
+    <label for="comparator_3">Strictly Greater Than (x > y)</label>
+
+  </div>
+</form> 
+@
+
+where the dynamic @Dynamic t Ordering@ is whichever was clicked. 
+
+-}
+simpleRadioGroup
+  :: MonadWidget t m
+  => Text
+  -> (a -> Text)
+  -> (a -> Text)
+  -> RadioConfig t a
+  -> m (Dynamic t a)
+simpleRadioGroup _groupLabel _show' display' RadioConfig{..} = do
+
+ esClicked <- makeButtons'
+
+ let eClicked = esClicked & leftmost
+ dValue <- holdDyn initialValue eClicked
+ return dValue
+
+ where
+ --dAttributes = _
+ makeButtons' = el "div" $ do
+   possibleValues & traverse button'
+-- button' :: 
+ button' x = buttonOf (display' x) x
+ -- ePressUpArrow   = never
+ -- ePressDownArrow = never
+ -- ePressEnter     = never
+ 
+ -- f2 :: Rec I '[a,()] -> a
+ -- f2 = (\(Identity a :& Identity () :& RNil) -> a) --TODO view (_2)
+
+buttonOf
+  :: MonadWidget t m
+  => Text
+  -> a
+  -> m (Event t a)
+buttonOf t x = do
+   events <- simpleButton t
+   let eClick = events ^. _Click -- events & view _Click
+   let eValue = eClick <&> const x
+   return eValue
+
+
+
+
+
+-- simpleRadioGroup
+--   :: MonadWidget t m
+--   => Text
+--   -> (a -> Text)
+--   -> RadioConfig t a
+--   -> m (Dynamic t a)
+-- simpleRadioGroup label show' RadioConfig{..} = do
+--  esTagged <- possibleValues & traverse button'
+--  let esClicked = esTagged <&> fmap f2
+--  let eClicked  = esClicked & leftmost
+--  dValue <- holdDyn initialValue eClicked
+--  return dValue
+--  where
+-- -- button' :: 
+--  button' x = buttonOf (show' x) x
+--  -- ePressUpArrow   = never
+--  -- ePressDownArrow = never
+--  -- ePressEnter     = never
+--  f2 :: Rec I '[a,()] -> a
+--  f2 = (\(Identity a :& Identity () :& RNil) -> a) --TODO view (_2)
+ 
+-- buttonOf
+--   :: MonadWidget t m
+--   => Text
+--   -> a
+--   -> m (Rec I '[a,()])
+-- buttonOf t x = do
+--    events <- simpleButton t
+--    let tagged = events & _Click %~ fmap (const x)
+--    return tagged
+
+--TODO
+    -- • Could not deduce (Field2
+    --                       (Rec I '[a, ()]) (Rec I '[a, ()]) (Event t0 a0) (Event t0 a0))
+    --     arising from a use of ‘_2’
+
+{-
+
+
+simpleRadioGroup label show' RadioConfig{..} = do
+ taggedEvents <- possibleValues & traverse (pure &&& button')
+ let esClick = taggedEvents <&> view (_2 . _Click)
+ let eValue  = esClick & _
+ dValue
+ where
+ dValue = _
+ button' x = do
+   simpleButton t
+   where
+   t = show' x
+
+-}
+
+------------------------------------------------------------------------------
+
+{-| A simple widget for a single button. 
+
+-}  
+simpleButton
+  :: MonadWidget t m
+  => Text
+  -> m (DOMEvents t [ClickTag,FocusTag])
+simpleButton label = do
+  (es, _) <- elFor'
+             (Click :& Focus :& RNil)
+             "button" 
+             dAttributes
+             (text label)
+
+  return es
+  
+  where
+  dAttributes = dNoAttributes -- constDyn def
+
+----------------------------------------
   
 {-NOTES
 
@@ -227,6 +477,20 @@ checkboxList showFunc filterFunc blanketEvent searchString onItems items = do
 
   -- -> Event t ToggleCheckboxes
   -- -- ^ 
+
+
+-- | A widget to construct a tabbed view that shows only one of its child widgets at a time.
+--   Creates a header bar containing a <ul> with one <li> per child; clicking a <li> displays
+--   the corresponding child and hides all others.
+tabDisplay :: forall t m k. (MonadFix m, DomBuilder t m, MonadHold t m, PostBuild t m, Ord k)
+  => Text               -- ^ Class applied to <ul> element
+  -> Text               -- ^ Class applied to currently active <li> element
+  -> Map k (Text, m ()) -- ^ Map from (arbitrary) key to (tab label, child widget)
+  -> m ()
+tabDisplay ulClass activeClass tabItems = do
+
+
+
 
 
 -}

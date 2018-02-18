@@ -2,14 +2,18 @@
 
 module Main ( main ) where
 
-import Prelude (IO)
+import Prelude                (IO)
+import Control.Monad.IO.Class (liftIO)
 
 import qualified "cards-frontend" Cards.Frontend.Main as Frontend
 
 import qualified "jsaddle-webkit2gtk" Language.Javascript.JSaddle.WebKitGTK as GTK
 
 main :: IO ()
-main = GTK.run Frontend.mainjs
+main = GTK.run mainjs
+  where
+  mainjs = liftIO Frontend.main --TODO lol
+  -- mainWithRunner
 
 {-NOTE
 

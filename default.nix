@@ -255,12 +255,12 @@ myOverlaysWith = pkgs: self: super: let
      # killing process 13427
      # cannot build derivation ‘/nix/store/vyzdvvkdybm6xd0fr2hn5zajw5mzg0lr-android-app.drv’: 1 dependencies couldn't be built
 
-    jsaddle            = loosen (subrepository_ subrepos.jsaddle);
-    jsaddle-warp       = loosen (subrepository_ subrepos.jsaddle-warp);
-    jsaddle-webkit2gtk = loosen (subrepository_ subrepos.jsaddle-webkit2gtk);
+    # jsaddle            = loosen (subrepository_ subrepos.jsaddle);
+    # jsaddle-warp       = loosen (subrepository_ subrepos.jsaddle-warp);
+    # jsaddle-webkit2gtk = loosen (subrepository_ subrepos.jsaddle-webkit2gtk);
 
-    reflex-dom-core = loosen super.reflex-dom-core;
-    reflex-dom      = loosen super.reflex-dom;
+    # reflex-dom-core = loosen super.reflex-dom-core;
+    # reflex-dom      = loosen super.reflex-dom;
      
     # protolude = hackage "protolude" "0.2.1" {};
     # 

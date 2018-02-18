@@ -1,31 +1,27 @@
-{-# LANGUAGE GADTs               #-}
-{-# LANGUAGE RankNTypes          #-}
+{-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE DataKinds          #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+
 {-# LANGUAGE QuasiQuotes         #-}
 {-# LANGUAGE RecursiveDo         #-}
-{-# LANGUAGE TypeFamilies        #-}
-{-# LANGUAGE TemplateHaskell     #-}
-{-# LANGUAGE FlexibleContexts    #-}
-{-# LANGUAGE OverloadedStrings   #-}
-{-# LANGUAGE ScopedTypeVariables #-}
+
+{-# LANGUAGE GADTs               #-}
+{-# LANGUAGE RankNTypes          #-}
 
 {-|
 
-copied from @reflex-dom-contrib@.
+modified from @reflex-dom-contrib@.
 
 -}
-module Cards.Frontend.ButtonGroup (
-  radioGroup,
-  bootstrapButtonGroup,
-  buttonGroup
-) where
+module Cards.Frontend.ButtonGroup where
+
+{-
+
+------------------------------------------------------------------------------
+--import Reflex.Vinyl
 
 ------------------------------------------------------------------------------
 import Prelude
---import           Control.Monad.IO.Class     (liftIO)
---NOTE ^ modified
-
---import Control.Monad.Fail (MonadFail)
-
 import           Data.Bool                  (bool)
 import qualified Data.Map                   as Map
 import           Data.Maybe                 (fromMaybe, listToMaybe)
@@ -38,7 +34,6 @@ import           Reflex.Dom.Core
 ------------------------------------------------------------------------------
 import           Reflex.Dom.Contrib.Widgets.Common
 ------------------------------------------------------------------------------
-
 
 ------------------------------------------------------------------------------
 -- | A general container for collecting drawable buttons into a group with
@@ -207,3 +202,5 @@ radioGroup dynName dynEntryList cfg = do
         castTo_ elementType elementValue = liftJSM $ do
           castTo elementType elementValue 
         setChecked_ e = liftJSM . setChecked e
+
+-}

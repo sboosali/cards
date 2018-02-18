@@ -35,18 +35,22 @@ import Reflex.Dom
 --import Data.Time (NominalDiffTime)
 
 --import qualified Data.List.NonEmpty as NonEmpty
-import Data.List.NonEmpty (nonEmpty)
 
 ----------------------------------------
 
 --TODO
-type Runner = Frontend -> JSM ()
-  
+type Runner = Frontend -> IO_  -- JSM ()
+
 --TODO mv
 data Frontend = Frontend
- { wHead :: SomeWidget        ()
- , wBody :: SomeJSaddleWidget ()
--- , wBody :: (MonadJSM IO) => SomeWidget_
+ { _widgetHead :: SomeWidget ()
+ , _widgetBody :: JAVASCRIPT_RUNNER -> SomeWidget ()
+ 
+-- , _widgetBody :: SomeWidget (())
+-- , _widgetBody :: SomeWidget (JAVASCRIPT_RUNNER -> ())
+-- , _widgetBody :: JAVASCRIPT_RUNNER -> SomeWidget ()
+
+ -- , wBody :: (MonadJSM IO) => SomeWidget_
 -- , wCSS  :: Either Text FilePath -- ^ `inline` or `link`ed
  }
 
@@ -54,11 +58,22 @@ data Frontend = Frontend
 
 --TODO store abstract constraints versus store concrete datatypes
 
-data SomeWidget a
-  = SomeWidget (forall x. Widget x a)
+-- | existentially-quantified widget (alias).
+type XWidget a = forall x. Widget x a
 
-data SomeJSaddleWidget a
-  = SomeJSaddleWidget (forall t m. MonadJSaddleWidget t m => m a)
+-- | existentially-quantified widget (alias).
+type XWidget_  = XWidget ()
+
+-- | existentially-quantified widget (datatype).  
+data SomeWidget a
+  = SomeWidget (XWidget a)
+
+-- | existentially-quantified widget (datatype).  
+data SomeWidget_ 
+  = SomeWidget_ XWidget_
+
+-- data SomeJSaddleWidget a
+--   = SomeJSaddleWidget (forall t m. MonadJSaddleWidget t m => m a)
   
 -- data SomeJSaddleWidget a
 --   = SomeJSaddleWidget (forall t m. MonadJSaddleWidget t m => m a)
@@ -217,7 +232,7 @@ pResultsFormat = Proxy
 
 {-| SortResultsBy... -}
 data ResultsOrder = ResultsOrder
-  { fromResultsOrder :: (NonEmpty SortResultsBy) -- ^ a @Set@
+  { fromResultsOrder :: (NonEmpty SortResultsBy) -- ^ a non-empty @Set@
   }
   deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
   --NOTE we don't use Set itself because (1) we want it to be non-empty and (2) Sets aren't Generic
@@ -227,7 +242,7 @@ instance Default ResultsOrder where
 
 instance IsList ResultsOrder where
   type Item ResultsOrder = SortResultsBy
-  fromList = nonEmpty > maybe [def] id > ResultsOrder
+  fromList = toNonEmptyDefaulting > ResultsOrder
   toList   = fromResultsOrder > toList
 
 defaultResultsOrder :: ResultsOrder
@@ -235,6 +250,9 @@ defaultResultsOrder =
   [ SortResultsByEdition
   , SortResultsByName
   ]
+
+toResultsOrder :: Set SortResultsBy -> ResultsOrder
+toResultsOrder = toNonEmptyDefaulting > ResultsOrder
 
 singularResultsOrder :: SortResultsBy -> ResultsOrder 
 singularResultsOrder = (:|[]) > ResultsOrder

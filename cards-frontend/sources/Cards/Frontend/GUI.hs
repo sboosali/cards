@@ -61,7 +61,9 @@ import qualified Clay as C
   
 frontend :: Frontend
 --frontend = Frontend{..}
-frontend = Frontend (SomeWidget wHead') (SomeJSaddleWidget wBody')
+frontend = Frontend (SomeWidget wHead) xBody
+ where
+ xBody runner = (SomeWidget (wBodyWithRunner runner))
 
 -- (SomeWidget(..), SomeJSaddleWidget(..))
 
@@ -77,8 +79,8 @@ Naming:
 * "w" for widget.
 
 -}
-wHead' :: MonadWidget t m => m ()
-wHead' = do
+wHead :: MonadWidget t m => m ()
+wHead = do
   el "title" $ text "MTG Card Search"
   styleSheet "static/css/style.css"
   --TODO data-files, then post-build cp; `nix`, copy "share", not just "bin", into result-frontend?
@@ -93,11 +95,28 @@ wHead' = do
    , "href"-: url
    ] 
 
+----------------------------------------
+
+wBodyWithRunner :: MonadWidget t m => JAVASCRIPT_RUNNER -> m ()
+wBodyWithRunner runner = do
+  wDebug runner
+  wBody
+
+wDebug :: MonadWidget t m => JAVASCRIPT_RUNNER -> m ()
+wDebug runner = do
+  div $ text t
+  where
+  t = displayJavascriptRunner runner
+
+--TODO {-# SPECIALIZE wDebug :: #-}
+
+----------------------------------------
+
 {-|
 
 -}
-wBody' :: MonadJSaddleWidget t m => m ()
-wBody' = do
+wBody :: MonadWidget t m => m ()
+wBody = do
   dInterfaceConfig <- wSettingsPage
   wSearchPage dInterfaceConfig
   blank
@@ -107,7 +126,7 @@ wBody' = do
 
 ----------------------------------------
 
-wSettingsPage :: MonadJSaddleWidget t m => m (Dynamic t InterfaceConfig)
+wSettingsPage :: MonadWidget t m => m (Dynamic t InterfaceConfig)
 wSettingsPage = do
 
   dSearchOptions  <- wSearchSettings
@@ -129,7 +148,7 @@ wSettingsPage = do
 --  , _cResultsOptions :: ResultsOptions
 --  }
 
-wSearchSettings :: MonadJSaddleWidget t m => m (Dynamic t SearchOptions)
+wSearchSettings :: MonadWidget t m => m (Dynamic t SearchOptions)
 wSearchSettings = do
 
   dShouldRequireManual <- genericRadioGroup pBool
@@ -144,7 +163,7 @@ wSearchSettings = do
 
   return dSearchOptions
 
-wQuerySettings :: MonadJSaddleWidget t m => m (Dynamic t QueryOptions)
+wQuerySettings :: MonadWidget t m => m (Dynamic t QueryOptions)
 wQuerySettings = do
   
   dQueryLanguage <- genericRadioGroup pQueryLanguage -- dNoAttributes
@@ -154,7 +173,7 @@ wQuerySettings = do
 
   return dQueryOptions
 
-wResultsSettings :: MonadJSaddleWidget t m => m (Dynamic t ResultsOptions)
+wResultsSettings :: MonadWidget t m => m (Dynamic t ResultsOptions)
 wResultsSettings = do
 
   dResultsFormat <- genericRadioGroup pResultsFormat -- 
@@ -179,7 +198,7 @@ wResultsSettings = do
 
 -}
 wSearchPage
-  :: MonadJSaddleWidget t m
+  :: MonadWidget t m
   => Dynamic t InterfaceConfig
   -> m ()
 wSearchPage dInterfaceConfig = do
@@ -210,16 +229,13 @@ wSearchPage dInterfaceConfig = do
 
 -}
 dynamicResultsPage
-  :: MonadJSaddleWidget t m
+  :: MonadWidget t m
   => ResultsPageConfig t
   -> m (Event t ResultsPage)
 dynamicResultsPage (ResultsPageConfig{..}) = do
-
-  --TODO
-  let aSearchConfig = def & _cSearchOptions
   
   let eEnter = oSearchBar & _textInput_keypress
-       & fmapMaybe _onlyEnterKey
+       & fmapMaybe onlyEnterKey'
    -- pressing enter in the search bar
       
   let eSubmitOrEnter = mconcat
@@ -231,29 +247,27 @@ dynamicResultsPage (ResultsPageConfig{..}) = do
   let dSearchValue = oSearchBar & value
    -- the input text
 
-  let eQueryManual = eSubmitOrEnter
-       & tagPromptlyDyn dSearchValue
+  --TODO
+  let dSearchOptions = dInterfaceConfig <&> _cSearchOptions
 
-  let eQueryEveryKeypress
-       = dSearchValue
-       & updated
+  -- eQuery :: Event t Text <- dSearchOptions
+  --                            <&> dynamicQuery eSubmitButton dSearchValue
+                             
+  mQuery <- dSearchOptions
+                & fmap (dynamicQuery eSubmitOrEnter dSearchValue)
+                & dyn
+                
+  eQuery <- mQuery
+                & switchHold' never
+                --TODO is the intial `never` correct?
+  
+{-NOTE
 
-  eQueryDebounced <- eQueryEveryKeypress 
-       & debounce (_convertDebounceDelay aSearchConfig)
-         --TODO debounce only for display, eagerly compute
+-- Similar to above, for Events.  Created Event initially tracks the first argument.
+-- At switchover, the output Event immediately tracks the new Event.
+[H]   switchHold        ::       Event a ->    Event (Event a)  -> m (Event a)
 
-  let eQueryAutomatic = eQueryDebounced
-       & fmapMaybe (_dropShortQueries aSearchConfig)
-       & fmapMaybe (_keepLiveQueries  aSearchConfig)
-
-  let eQuery = leftmost
-       [ eQueryManual
-         -- "form search", the user pressed submit
-         -- (not debounced)
-       , eQueryAutomatic
-         -- "live search", the user has stopped typing
-         -- for long enough (i.e. debounced)
-       ]
+-}
 
   -- dSearchDebounced <- dSearchContinuous
   --   & debounceD searchbarDebouncingInterval ""
@@ -279,28 +293,70 @@ dynamicResultsPage (ResultsPageConfig{..}) = do
   return eResultsPage
 
   where
+  onlyEnterKey' :: Word -> Maybe () --  KeyCode
+  onlyEnterKey' = fromPredicate isEnterKey > fmap (const ())
+      where
+      isEnterKey = (==13)
 
-  _convertDebounceDelay :: SearchOptions -> NominalDiffTime
-  _convertDebounceDelay SearchOptions{..} 
+  --TODO bump to the recent (Feb 2018) reflex for the "explicitly/prefereably non-prompt" `switchHold`
+  switchHold' :: (Reflex t, MonadHold t m) => Event t a -> Event t (Event t a) -> m (Event t a)
+  switchHold' ea0 eea = switch <$> hold ea0 eea
+
+  --  Validator Int
+  
+{-|
+
+-}
+dynamicQuery
+  :: MonadWidget t m
+  => Event   t ()
+  -> Dynamic t Text
+  -> SearchOptions
+  -> m (Event t RawQuery)
+dynamicQuery eSubmitted dSearchValue aSearchConfig = do
+  
+  let eQueryManual = eSubmitted
+       & tagPromptlyDyn dSearchValue
+
+  let eQueryEveryKeypress
+       = dSearchValue
+       & updated
+
+  eQueryDebounced <- eQueryEveryKeypress 
+       & debounce (convertDebounceDelay' aSearchConfig)
+         --TODO debounce only for display, eagerly compute
+
+  let eQueryAutomatic = eQueryDebounced
+       & fmapMaybe (dropShortQueries' aSearchConfig)
+       & fmapMaybe (keepLiveQueries'  aSearchConfig)
+
+  let eQuery = leftmost
+       [ eQueryManual
+         -- "form search", the user pressed submit
+         -- (not debounced)
+       , eQueryAutomatic
+         -- "live search", the user has stopped typing
+         -- for long enough (i.e. debounced)
+       ]
+
+  return eQuery
+    
+  where
+  convertDebounceDelay' :: SearchOptions -> NominalDiffTime
+  convertDebounceDelay' SearchOptions{..} 
     = (_debouncingDelayInMilliseconds/1000)
        -- convert to seconds for `debounce`
     & toRational
     & fromRational
 
-  _dropShortQueries :: SearchOptions -> Validator RawQuery
-  _dropShortQueries SearchOptions{..} = fromPredicate $ \t ->
+  dropShortQueries' :: SearchOptions -> Validator RawQuery
+  dropShortQueries' SearchOptions{..} = fromPredicate $ \t ->
     T.length t >= (_minimumQueryLengthForLiveSearch & fromIntegral)
 
-  _keepLiveQueries :: SearchOptions -> Validator RawQuery  
-  _keepLiveQueries SearchOptions{..} = fromBoolean
+  keepLiveQueries' :: SearchOptions -> Validator RawQuery  
+  keepLiveQueries' SearchOptions{..} = fromBoolean
     (not _requireSubmitOrEnter) -- i.e. only if we don't require it
 
-  _onlyEnterKey :: Word -> Maybe () --  KeyCode
-  _onlyEnterKey = fromPredicate isEnterKey > fmap (const ())
-      where
-      isEnterKey = (==13)
-
-  --  Validator Int
 
     --(\t -> fromPredicate $ length t >= _minimumQueryLengthForLiveSearch)
 
