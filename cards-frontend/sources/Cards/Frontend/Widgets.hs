@@ -28,6 +28,23 @@ import Control.Lens hiding ((<&>))
 
 ----------------------------------------
 
+simpleCheckbox
+  :: ( MonadWidget t m
+     )
+  => Bool
+  -- ^ initially checked
+  -> Text
+  -- ^ the label to show the user
+  -> m (Dynamic t Bool)
+  -- ^ whether its currently checked
+simpleCheckbox b t = el "label" $ do
+    oCheckbox <- checkbox b def
+    text t
+    let dBool = oCheckbox & _checkbox_value
+    return dBool
+
+----------------------------------------
+
 data ToggleCheckboxes
   = SelectEverything
   | DeselectEverything
@@ -117,6 +134,65 @@ simpleSetWidget checkedValues = do
 {-|
 
 -}
+simpleNumericalWidget
+  :: forall a m t.
+     ( Num  a
+     , Show a
+     , Read a   
+     )
+  => ( MonadWidget t m
+     )
+  => a
+  -- ^ the initial value
+  -> Text
+  -- ^ the label to show the user  
+  -> m (Dynamic t a)
+simpleNumericalWidget initial label = el "div" $ do
+
+  oInput <- wInput
+  wLabel
+
+  --
+  
+  let eText = oInput & _textInput_value & updated
+  let eNumber = eText & fmapMaybe parseNumber
+  dNumber <- holdDyn initial eNumber
+
+  return dNumber
+
+  where
+  wLabel = el "span" $ text label
+
+  wInput = textInput config
+  
+  config = def
+    { _textInputConfig_inputType    = "number"
+    , _textInputConfig_initialValue = initialText
+    }
+  
+  parseNumber = T.unpack > readMay
+
+  initialText = show initial & s2t
+
+{-|
+
+-}
+simpleNaturalWidget
+  :: ( MonadWidget t m
+     )
+  => Natural
+  -- ^ the initial value
+  -> Text
+  -- ^ the label to show the user  
+  -> m (Dynamic t Natural)
+simpleNaturalWidget initial name = do
+  --TODO
+  simpleNumericalWidget initial name
+
+{-
+{-|
+
+-}
 simpleNumberInput
   :: forall a m t.
      ( Num  a
@@ -125,9 +201,12 @@ simpleNumberInput
      )
   => ( MonadWidget t m
      )
-  => a -- ^ the initial value
+  => a
+  -- ^ the initial value
+  -> Text
+  -- ^ the label to show the user  
   -> m (Dynamic t a)
-simpleNumberInput i = el "div" $ do
+simpleNumberInput i t = el "div" $ do
   oInput <- textInput config
   let eText = oInput & _textInput_value & updated
 
@@ -143,6 +222,7 @@ simpleNumberInput i = el "div" $ do
     { _textInputConfig_inputType    = "number"
     , _textInputConfig_initialValue = show i & s2t
     }
+-}
 
 ----------------------------------------
 

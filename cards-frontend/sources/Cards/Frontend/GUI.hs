@@ -19,7 +19,7 @@ import Cards.Frontend.DB (defaultCardDatabase)
 import Cards.Frontend.Query (validateQuery)
 import Cards.Frontend.Search (runQuery)
 --import Cards.Frontend.Result (noResults)
-import Cards.Frontend.Widgets (genericRadioGroup)
+import Cards.Frontend.Widgets -- (genericRadioGroup)
 
 import Reflex hiding (Query)
 --import qualified Reflex as R
@@ -151,11 +151,19 @@ wSettingsPage = do
 wSearchSettings :: MonadWidget t m => m (Dynamic t SearchOptions)
 wSearchSettings = do
 
-  dShouldRequireManual <- genericRadioGroup pBool
+  dChecked <- simpleCheckbox 
+       (def & _requireSubmitOrEnter)  
+       "Check to require pressing the Enter key or the Submit button."
+  let dShouldRequireManual = dChecked -- genericRadioGroup pBool
 
-  dDebounceInterval    <- return $ pure 500--def
-  dQueryLength         <- return $ pure 3--def
+  dDebounceInterval    <- simpleNumericalWidget
+    (def & _debouncingDelayInMilliseconds)
+    "How long to wait, after you stop typing in the search bar, before automatically searching, in milliseconds."
 
+  dQueryLength         <- simpleNaturalWidget
+    (def & _minimumQueryLengthForLiveSearch)  
+    "How long must the query in the search bar be (in letters), for live search to use that query."
+  
   let dSearchOptions = SearchOptions
        <$> dShouldRequireManual
        <*> dDebounceInterval
@@ -176,11 +184,13 @@ wQuerySettings = do
 wResultsSettings :: MonadWidget t m => m (Dynamic t ResultsOptions)
 wResultsSettings = do
 
-  dResultsFormat <- genericRadioGroup pResultsFormat -- 
-  dSortResultsBy <- genericRadioGroup pSortResultsBy
+  dResultsFormat  <- genericRadioGroup pResultsFormat -- 
+  dSortResultsBys <- simpleSetWidget
+       (defaultResultsOrder & fromResultsOrder')
+  -- genericRadioGroup pSortResultsBy
 
-  let dResultsOrder = dSortResultsBy
-       <&> singularResultsOrder
+  let dResultsOrder = dSortResultsBys
+       <&> toResultsOrder
 
   let dResultsOptions = ResultsOptions
        <$> dResultsFormat
@@ -440,6 +450,7 @@ queryAttributes = constDyn as
  where
  as = mconcat
      [ "placeholder" =: placeholderQuery  -- /= initialQuery
+     , "autofocus" =: ""
      ]
 
  -- as = mempty

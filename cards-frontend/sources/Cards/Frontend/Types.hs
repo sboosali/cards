@@ -34,7 +34,9 @@ import Reflex.Dom
 
 --import Data.Time (NominalDiffTime)
 
---import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Set           as Set
+import qualified Data.List.NonEmpty as NonEmpty
+
 
 ----------------------------------------
 
@@ -149,6 +151,13 @@ fasterSearchOptions :: SearchOptions
 fasterSearchOptions = SearchOptions
  { _requireSubmitOrEnter              = False
  , _debouncingDelayInMilliseconds     = 100
+ , _minimumQueryLengthForLiveSearch   = 1
+ }
+
+manualSearchOptions :: SearchOptions
+manualSearchOptions = SearchOptions
+ { _requireSubmitOrEnter              = False
+ , _debouncingDelayInMilliseconds     = 0
  , _minimumQueryLengthForLiveSearch   = 0
  }
 
@@ -177,9 +186,9 @@ pQueryOptions = Proxy
 {-| ParseQueryLike... -}
 data QueryLanguage
   = ParseQueryLikeMCI    -- ^ @magiccards.info@'s sytax
-  | ParseQueryLikeProlog -- ^
   | ParseQueryAsFreeText -- ^
-  | ParseQueryLikeSQL    -- ^
+ --TODO  | ParseQueryLikeProlog -- ^
+ --TODO  | ParseQueryLikeSQL    -- ^
   deriving (Show,Read,Eq,Ord,Enum,Bounded,Ix,Generic,NFData,Hashable)
 
 instance Default QueryLanguage where def = ParseQueryLikeMCI
@@ -218,12 +227,12 @@ pResultsOptions = Proxy
 
 {-| DisplayResultsAs... -}
 data ResultsFormat
-  = DisplayResultsAsText
-  | DisplayResultsAsImages
-  | DisplayResultsAsHTML
+  = DisplayResultsAsTextOnly
+  | DisplayResultsAsImagesOnly
+  | DisplayResultsAsRichTextWithCroppedImagesViaHTML
   deriving (Show,Read,Eq,Ord,Enum,Bounded,Ix,Generic,NFData,Hashable)
 
-instance Default ResultsFormat where def = DisplayResultsAsText
+instance Default ResultsFormat where def = DisplayResultsAsTextOnly
 
 pResultsFormat :: Proxy ResultsFormat
 pResultsFormat = Proxy
@@ -250,6 +259,12 @@ defaultResultsOrder =
   [ SortResultsByEdition
   , SortResultsByName
   ]
+
+fromResultsOrder' :: ResultsOrder -> Set SortResultsBy
+fromResultsOrder'
+  = fromResultsOrder
+  > NonEmpty.toList
+  > Set.fromList
 
 toResultsOrder :: Set SortResultsBy -> ResultsOrder
 toResultsOrder = toNonEmptyDefaulting > ResultsOrder
