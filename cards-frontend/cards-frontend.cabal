@@ -255,7 +255,7 @@ executable example-cards-frontend
 ----------------------------------------
 -- from https://github.com/ghcjs/jsaddle-hello/blob/master/jsaddle-hello.cabal
 
-executable example-cards-webapp
+executable card-search-webapp
 -- if !impl(ghcjs)
 --        buildable: False
  main-is:             Main_Browser.hs
@@ -269,10 +269,9 @@ executable example-cards-webapp
   , reflex-dom
   , reflex-dom-core
              
--- card-search-jsaddle-warp
-executable card-search-development
+executable card-search-jsaddle-warp
  -- if !impl(ghc)
- --        buildable: False
+ --     buildable: False
  main-is:             Main_Warp.hs
  hs-source-dirs:      executables
  default-language:    Haskell2010
@@ -282,6 +281,40 @@ executable card-search-development
   , cards-frontend
   , jsaddle-warp 
   , reflex-dom-core
+
+executable card-search-development
+ if !impl(ghc)
+     buildable: False
+ main-is:             Main_Development.hs
+ hs-source-dirs:      executables
+
+ -- `exposed-modules` is not an `executable` field, but `cabal (new-)repl` still loads all `other-modules` into scope
+
+ other-modules:
+   -- JSaddleWebSocketsRunner
+   JSaddleWebSocketsReloader
+
+ default-language:    Haskell2010
+ ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+ build-depends:
+    base >=4.9 && <4.10
+  , cards-frontend
+  , mtl
+-- >=2.2 && <2.3
+  , filepath
+-- >=1.4 && <1.5
+  , directory
+-- >=1.3 && <1.4
+  , text
+-- >=1.2 && <1.3
+  , containers
+-- >=0.5 && <0.6
+  , reflex-dom-core
+  , jsaddle
+  , jsaddle-warp
+  , warp
+  , wai-middleware-static
+  , websockets
 
 -- -- card-search-webkitgtk
 -- executable card-search-desktop-linux

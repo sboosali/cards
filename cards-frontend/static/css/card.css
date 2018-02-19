@@ -1,8 +1,12 @@
 /* by Hari Narayanan */
 
 body {
-  background-color: #efefef;
+    
+  background-color: #85144b;
 }
+
+/* MAROON #85144b */
+/* GRAY   #efefef */
 
 .card {
   position: relative;

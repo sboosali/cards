@@ -50,3 +50,11 @@ __JAVASCRIPT_RUNNER__ :: JAVASCRIPT_RUNNER
 __JAVASCRIPT_RUNNER__ = JSADDLEWARP
 
 ----------------------------------------
+
+{-
+
+JSaddleWarp.run
+
+JSaddleWarp.debug
+
+-}

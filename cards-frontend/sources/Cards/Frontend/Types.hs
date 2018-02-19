@@ -320,6 +320,7 @@ data JAVASCRIPT_RUNNER
   = BROWSER --TODO???
   | NODEJS --TODO???
   | JSADDLEWARP
+  | JSADDLEWEBSOCKETS
   | WEBKITGTK
   | WKWEBVIEW
   deriving (Show)
@@ -327,11 +328,12 @@ data JAVASCRIPT_RUNNER
 
 displayJavascriptRunner :: JAVASCRIPT_RUNNER -> Text
 displayJavascriptRunner = \case
-  BROWSER     -> "browser"
-  NODEJS      -> "node.js"
-  JSADDLEWARP -> "JSaddle-Warp" -- "jsaddle-warp"
-  WEBKITGTK   -> "WebKitGTK"    -- "webkit-gtk"
-  WKWEBVIEW   -> "WKWebView"
+  BROWSER           -> "browser"
+  NODEJS            -> "node.js"
+  JSADDLEWARP       -> "JSaddle-Warp" -- "jsaddle-warp"
+  JSADDLEWEBSOCKETS -> "JSaddle-WebSockets" 
+  WEBKITGTK         -> "WebKitGTK"    -- "webkit-gtk"
+  WKWEBVIEW         -> "WKWebView"
 
 ----------------------------------------
 {-
