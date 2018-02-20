@@ -2,7 +2,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE OverloadedStrings #-}
 module JSaddleWebSocketsRunner
-  ( runAt
+  ( runWith
   ) where
 
 import Data.Foldable (traverse_)
@@ -25,12 +25,12 @@ import qualified Data.Map                               as Map
 
 ----------------------------------------
 
-runAt ::
+runWith ::
   FilePath ->
   Int ->
   (forall x. Widget x ()) ->
   IO ()
-runAt cssPath port w =
+runWith cssPath port w =
   do
     cssFiles <- listDirectory $ "." </> cssPath
     let

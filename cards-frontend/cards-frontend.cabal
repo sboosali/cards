@@ -248,7 +248,6 @@ library cards-frontend-development
  ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
  build-depends:
     base >=4.9 && <4.10
---  , cards-frontend
   , mtl
   , filepath
   , directory

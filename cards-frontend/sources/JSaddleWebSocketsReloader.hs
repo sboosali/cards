@@ -1,49 +1,46 @@
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE RankNTypes, RecordWildCards #-}
 
 {-|
 
 -}
 module JSaddleWebSocketsReloader
-  ( reloadFrontend
+  ( reloadWidgetWith
  --  , runWith
   ) where
 
-import qualified JSaddleWebSocketsRunner
-
-import Cards.Frontend.Types
+import qualified JSaddleWebSocketsRunner as JSaddleWebSockets
 
 import Reflex.Dom.Core (Widget)
 
--- import Spiros.Prelude (IO, FilePath, Int)
+import Prelude 
+--import Spiros.Prelude (IO, FilePath, Int, Show)
 
 ----------------------------------------
+  
+data DevelopmentConfig = DevelopmentConfig
+ { developmentServerPort      :: Int
+ , developmentStaticDirectory :: FilePath
+ } deriving (Show)
+ -- JSaddleRunnerConfig
+ 
+----------------------------------------
 
--- reloadWidget
-reloadFrontend :: Frontend -> IO ()
-reloadFrontend (Frontend (SomeWidget _) wBodyWithRunner)
-  = case wBodyWithRunner __JAVASCRIPT_RUNNER__ of
-      SomeWidget wBody -> do
-        runWith $ do
-          wBody
+{-|
+
+-}
+reloadWidgetWith
+  :: DevelopmentConfig
+  -> (forall x. Widget x ())
+  -> IO ()
+reloadWidgetWith = runWith
 
 ----------------------------------------
 
 runWith 
-  :: (forall x. Widget x ())
+  :: DevelopmentConfig
+  -> (forall x. Widget x ())
   -> IO ()
-runWith =
-  JSaddleWebSocketsRunner.runAt static_directory port_jsaddle_warp
-
-static_directory :: FilePath
-static_directory = "static/css"
-  
-port_jsaddle_warp :: Int
-port_jsaddle_warp = 3911
-
--- | the current executable's runner.
--- like @System.os@, this is constant within the program's execution.
-__JAVASCRIPT_RUNNER__ :: JAVASCRIPT_RUNNER
-__JAVASCRIPT_RUNNER__ = JSADDLEWEBSOCKETS -- JSADDLEWARP6
+runWith DevelopmentConfig{..} = JSaddleWebSockets.runWith developmentStaticDirectory developmentServerPort
 
 ----------------------------------------
   
