@@ -1,7 +1,7 @@
 # reflex-dom-contrib.nix
 { mkDerivation, aeson, base, base64-bytestring, bifunctors
 , bytestring, containers, data-default, exception-transformers
-, fetchgit, ghcjs-dom, http-types, jsaddle, lens, mtl, random
+, fetchgit, ghcjs-dom, http-types, lens, mtl, random
 , readable, ref-tf, reflex, reflex-dom-core, safe, stdenv, stm
 , string-conv, text, time, transformers, uri-bytestring
 }:
@@ -15,7 +15,7 @@ mkDerivation {
   };
   libraryHaskellDepends = [
     aeson base base64-bytestring bifunctors bytestring containers
-    data-default exception-transformers ghcjs-dom http-types jsaddle
+    data-default exception-transformers ghcjs-dom http-types 
     lens mtl random readable ref-tf reflex reflex-dom-core safe stm
     string-conv text time transformers uri-bytestring
   ];

@@ -8,6 +8,7 @@ emacsclient ./cards-frontend/ghcid.txt &
 
 ########################################
 
-nix-shell -A shells.ghc --run './ghcid-frontend.sh'
+DEVELOP=true nix-shell -A shells.ghc --run './ghcid-frontend.sh'
+#TODO pass args explicitly via nix, not via env-vars
 
 ########################################

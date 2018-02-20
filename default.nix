@@ -1,3 +1,4 @@
+#TODO args
 
 ########################################
 ### "Imports"...
@@ -6,17 +7,54 @@ let
 nixpkgs = import <nixpkgs> {};
 haskell = nixpkgs.haskell.lib;
 
-reflex-platform = import ./reflex-platform {};
-  # `reflex-platform` uses a pinned/older `nixpkgs` version.
-
 inherit (builtins)
- fromJSON readFile baseNameOf;
+ fromJSON readFile baseNameOf getEnv
+;
 
 inherit (nixpkgs)
  pkgs;
 
 inherit (pkgs)   
  fetchFromGitHub;
+
+########################################
+### "Reflex-Platform"...
+let 
+
+reflex-platform = import ./reflex-platform {
+  inherit (nixpkgs) cabal-install; # Cabal v2.0 ?
+};
+  # `reflex-platform` uses a pinned/older `nixpkgs` version.
+
+/*
+
+{ nixpkgsFunc ? import ./nixpkgs
+, system ? builtins.currentSystem
+, config ? {}
+, enableLibraryProfiling ? false
+, enableExposeAllUnfoldings ? true
+, enableTraceReflexEvents ? false
+, useFastWeak ? true
+, useReflexOptimizer ? false
+, useTextJSString ? true
+, iosSdkVersion ? "10.2"
+, iosSdkLocation ? "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS${iosSdkVersion}.sdk"
+, iosSupportForce ? false
+}:
+
+*/
+
+in
+########################################
+### "Arguments"...
+let
+
+# :: Bool
+develop = 
+  getEnv "DEVELOP" != ""; 
+   # check whether the environment variable is set
+
+# $ echo "$DEVELOP"
 
 in
 ########################################
@@ -43,67 +81,85 @@ in
 ### Haskell Dependencies...
 let
 
-# Source repositories
-sources = {
+# # Source repositories
+# sources = {
 
-  # reflex = fetchFromGitHub {
-  #   owner           = "reflex-frp";
-  #   repo            = "reflex";
-  #   rev             = "8e0177ff28c25436452dba1222cbf8d1a20424fd";
-  #   fetchSubmodules = true;
-  #   sha256          = "1f0xhwq4wvf5c6w8qhvpcn30jaxxq29s2x3iy8bml3a65fpvj0sh";
-  # };
+#   # reflex = fetchFromGitHub {
+#   #   owner           = "reflex-frp";
+#   #   repo            = "reflex";
+#   #   rev             = "8e0177ff28c25436452dba1222cbf8d1a20424fd";
+#   #   fetchSubmodules = true;
+#   #   sha256          = "1f0xhwq4wvf5c6w8qhvpcn30jaxxq29s2x3iy8bml3a65fpvj0sh";
+#   # };
 
-};
+# };
 
-# "Megarepos",
-# repositories which have multiple packages as subdirectories.
-megarepos = {
+# repositories = {
 
-  jsaddle = fetchFromGitHub {
-      owner  = "ghcjs";
-      repo   = "jsaddle";
-      rev    = "e77d303880917a66e593dc2d0d5c8718cfb085c4"; 
-               # "Make jsaddle-warp compatible with websockets-0.12"
-               # continuous-integration build isn't broken
-      sha256 =
-        "143r9nfglkydhp6rl0qrsyfpjnxfj04fhn96cf8hkx2mk09baa01";
-  }; # https://github.com/ghcjs/jsaddle
+#   reflex-dom = {
+#     subrepositories = [
+#       "reflex-dom-core"
+#       "reflex-dom"
+#     ];
+#     source = fetchFromGitHub {
+#       owner           = "reflex-frp";
+#       repo            = "reflex-dom"; 
+#       rev             = "f4820df681b177fb950eb180aa97a81f855bd2aa";
+#       sha256          =
+#          "11hx9yrqnxxl98nz2q7cvdg3h1mmy2145fv9qva84rv4w4fqnisk";
+#     };
+#   };
 
-  reflex-dom = fetchFromGitHub {
-    owner           = "reflex-frp";
-    repo            = "reflex-dom"; 
-    rev             = "f4820df681b177fb950eb180aa97a81f855bd2aa";
-    sha256          =
-       "11hx9yrqnxxl98nz2q7cvdg3h1mmy2145fv9qva84rv4w4fqnisk";
-  };
+# };
 
-};
+# # "Megarepos",
+# # repositories which have multiple packages as subdirectories.
+# megarepos = {
 
-# subrepositories of a megarepo
-subrepos = {
+#   jsaddle = fetchFromGitHub {
+#       owner  = "ghcjs";
+#       repo   = "jsaddle";
+#       rev    = "e77d303880917a66e593dc2d0d5c8718cfb085c4"; 
+#                # "Make jsaddle-warp compatible with websockets-0.12"
+#                # continuous-integration build isn't broken
+#       sha256 =
+#         "143r9nfglkydhp6rl0qrsyfpjnxfj04fhn96cf8hkx2mk09baa01";
+#   }; # https://github.com/ghcjs/jsaddle
 
-   jsaddle = { 
-    path    = megarepos.jsaddle; 
-    subpath = "jsaddle";
-   };
+#   reflex-dom = fetchFromGitHub {
+#     owner           = "reflex-frp";
+#     repo            = "reflex-dom"; 
+#     rev             = "f4820df681b177fb950eb180aa97a81f855bd2aa";
+#     sha256          =
+#        "11hx9yrqnxxl98nz2q7cvdg3h1mmy2145fv9qva84rv4w4fqnisk";
+#   };
 
-   jsaddle-warp = { 
-    path    = megarepos.jsaddle; 
-    subpath = "jsaddle-warp";
-   };
+# };
 
-   reflex-dom-core = { 
-    path    = megarepos.reflex-dom; 
-    subpath = "reflex-dom-core";
-   };
+# # subrepositories of a megarepo
+# subrepos = {
+
+#    jsaddle = { 
+#     path    = megarepos.jsaddle; 
+#     subpath = "jsaddle";
+#    };
+
+#    jsaddle-warp = { 
+#     path    = megarepos.jsaddle; 
+#     subpath = "jsaddle-warp";
+#    };
+
+#    reflex-dom-core = { 
+#     path    = megarepos.reflex-dom; 
+#     subpath = "reflex-dom-core";
+#    };
   
-   reflex-dom = { 
-    path    = megarepos.reflex-dom; 
-    subpath = "reflex-dom";
-   };
+#    reflex-dom = { 
+#     path    = megarepos.reflex-dom; 
+#     subpath = "reflex-dom";
+#    };
 
-};
+# };
 
 #NOTES  
 # jsaddle-warp        - runs JSaddle in a warp server with a web browser connected to it.
@@ -182,9 +238,22 @@ myOverlaysWith = pkgs: self: super: let
              #        sha256          :: String
              #      } 
 
- subrepository = {path, subpath}:
-                 nix
-                   (execCabal2nix "--subpath ${subpath}" path);
+ # # the megarepo provides a "package set" of its subrepos 
+ # # (they're named after their paths)
+ # subrepositoryNix = {path, subpath}: 
+ #   let
+ #   megarepo = self.callPackage path;
+ #   subrepo  = megarepo."${subpath}"; 
+ #   in
+ #   subrepo;
+
+ # subrepositoryNix = {path, subpath}: 
+ #  nix 
+ #   (import path)."${subpath}"; 
+ 
+ # call cabal2nix with subpath                  
+ subrepositoryCabal = {path, subpath}: nix
+   (execCabal2nix "--subpath ${subpath}" path);
 
  # override the package without overriding any dependencies
  cabal2nix_     = name: source:   cabal2nix  name source  {};
@@ -193,7 +262,24 @@ myOverlaysWith = pkgs: self: super: let
  local_         = path:           local      path         {};
  prefetched_    = path:           prefetched path         {};
  github_        = o:              github     o            {};
- subrepository_ = paths:          subrepository paths     {};
+
+ # subrepositoryNix_   = paths: subrepositoryNix   paths {};
+ subrepositoryCabal_ = paths: subrepositoryCabal paths {};
+
+ # callReflexDom = {path, subpath}:
+ #   let
+ #   megarepo = (self.callPackage path) pkgs;
+ #   subrepo  = megarepo."${subpath}"; 
+ #   in
+ #   loosen subrepo;
+  # https://github.com/reflex-frp/reflex-dom/blob/develop/default.nix
+  #
+  # haskellPackages: nixpkgs: {
+  #   reflex-dom = haskellPackages.callPackage ./reflex-dom {};
+  #   reflex-dom-core = haskellPackages.callPackage ./reflex-dom-core {
+  #     inherit (nixpkgs) iproute chromium;
+  #   };
+  # }
 
  # more (local) utilities
  haskell = pkgs.haskell.lib; 
@@ -213,6 +299,19 @@ myOverlaysWith = pkgs: self: super: let
  inherit (haskell);
  #
 
+ # #NOTE
+ # reflex-dom-repo = 
+ #   let 
+ #   src = fetchFromGitHub {
+ #     owner           = "reflex-frp";
+ #     repo            = "reflex-dom"; 
+ #     rev             = "f4820df681b177fb950eb180aa97a81f855bd2aa";
+ #     sha256          =
+ #        "11hx9yrqnxxl98nz2q7cvdg3h1mmy2145fv9qva84rv4w4fqnisk";
+ #   };
+ #   in
+ #   self.callPackage
+ #    (self: src self pkgs) {});
  in
 
  {
@@ -220,13 +319,43 @@ myOverlaysWith = pkgs: self: super: let
    # Add Haskell Packages Below           #
    ######################################## 
 
+#     reflex-dom-core = loosen (nix_
+#       ./vendor/reflex-dom/reflex-dom-core); 
+#     reflex-dom      = loosen (nix_
+#       ./vendor/reflex-dom/reflex-dom); 
+
+    # ^
+    # src/Foreign/JavaScript/Utils.hs:49:32-40: error:
+    #     • Could not deduce (GHCJS.Marshal.Internal.FromJSVal Value)
+    #         arising from a use of ‘fromJSVal’
+    #       from the context: FromJSON a
+    #         bound by the type signature for:
+    #                    jsonDecode :: FromJSON a => JSString -> Maybe a
+    #         at src/Foreign/JavaScript/Utils.hs:46:1-47
+    #     • In the first argument of ‘(=<<)’, namely ‘fromJSVal’
+    #       In the first argument of ‘catch’, namely
+    #         ‘(fromJSVal =<< js_jsonParse t)’
+    #       In the second argument of ‘($)’, namely
+    #         ‘(fromJSVal =<< js_jsonParse t)
+
+
+    # inherit (reflex-dom-repo) 
+    #   reflex-dom-core
+    #   reflex-dom
+    # ;
+
     #TODO
     # make the development build quicker and more reliable
     # (haddock in particular is both slow, and fails to parse valid sources)
-    cards-common        = quicken super.cards-common;
-    cards-backend       = quicken super.cards-backend;
-    cards-frontend      = quicken super.cards-frontend;
-    cards-desktop-linux = quicken super.cards-desktop-linux;
+
+    # cards-frontend      = nix_ ./cards-frontend;
+    #     # ./cards-frontend/default.nix;
+    #     # ./nix/cards-frontend.nix;
+
+    # cards-common        = quicken super.cards-common;
+    # cards-frontend      = quicken super.cards-frontend;
+    # cards-backend       = quicken super.cards-backend;
+    # cards-desktop-linux = quicken super.cards-desktop-linux;
 
     # spiros = github_ {
     #   owner  = "sboosali";
@@ -260,18 +389,12 @@ myOverlaysWith = pkgs: self: super: let
      # killing process 13427
      # cannot build derivation ‘/nix/store/vyzdvvkdybm6xd0fr2hn5zajw5mzg0lr-android-app.drv’: 1 dependencies couldn't be built
 
-    reflex-dom-core      = loosen (subrepository_ subrepos.reflex-dom-core);
-    reflex-dom           = loosen (subrepository_ subrepos.reflex-dom);
-
     # jsaddle-warp       = loosen (subrepository_ subrepos.jsaddle-w
 
     # jsaddle            = loosen (subrepository_ subrepos.jsaddle);
     # jsaddle-warp       = loosen (subrepository_ subrepos.jsaddle-warp);
     # jsaddle-webkit2gtk = loosen (subrepository_ subrepos.jsaddle-webkit2gtk);
 
-    # reflex-dom-core = loosen super.reflex-dom-core;
-    # reflex-dom      = loosen super.reflex-dom;
-     
     # protolude = hackage "protolude" "0.2.1" {};
     # 
 
@@ -434,6 +557,9 @@ in
 ### Executables..
 let
 
+#TODO Setup: cards-frontend.cabal: This package requires at least Cabal version 2.0
+
+
 /*
 
 NOTE
@@ -471,32 +597,39 @@ in
 ### 
 reflex-platform.project ({ pkgs, ... }: {
 
+  name = "cards";
+
   packages = {
-    cards-common   = ./cards-common;
-    cards-backend  = ./cards-backend;
-    cards-frontend = ./cards-frontend;
-
+    cards-common        = ./cards-common;
+    cards-frontend      = ./cards-frontend;
+    cards-backend       = ./cards-backend;
     cards-desktop-linux = ./cards-desktop-linux;
-
   };
 
   shells = {
-    ghc   = [ "cards-common" "cards-backend" "cards-frontend" "cards-desktop-linux" ];
+    ghc   = [ "cards-common" "cards-backend" "cards-frontend" ];
     ghcjs = [ "cards-common"                 "cards-frontend" ];
   };
     # shells :: { <platform name> :: [PackageName] }
 
-  android.cards-frontend = {
-    executableName = "example-cards-frontend";
-    applicationId  = "org.example.cards_frontend";
-    displayName    = "Example Android App";
+  custom = {
+    cards-frontend = 
+      if develop
+      then ./cards-frontend/develop.nix
+      else ./cards-frontend/default.nix;
   };
 
-  ios.cards-frontend = {
-    executableName   = "example-cards-frontend";
-    bundleIdentifier = "org.example.cards_frontend";
-    bundleName       = "Example iOS App";
-  };
+  # android.cards-frontend = {
+  #   executableName = "example-cards-frontend";
+  #   applicationId  = "org.example.cards_frontend";
+  #   displayName    = "Example Android App";
+  # };
+
+  # ios.cards-frontend = {
+  #   executableName   = "example-cards-frontend";
+  #   bundleIdentifier = "org.example.cards_frontend";
+  #   bundleName       = "Example iOS App";
+  # };
 
   tools = myExecutablesWith;
 

@@ -530,3 +530,11 @@ makeReifiedEnumerable enumerableTypeName enumerableValuesWithLabels = ReifiedEnu
 
 
 ========================================
+
+e.g.
+
+> hs.callCabal2nix "cards-common" ./cards-common {}
+
+
+
+========================================

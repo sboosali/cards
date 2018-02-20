@@ -15,8 +15,8 @@ description:
  .
  <<cards-frontend.png>>
 
-homepage:            http://github.com/sboosali/cards-frontend#readme
-bug-reports:         http://github.com/sboosali/cards-frontend/issues
+homepage:            http://github.com/sboosali/cards#readme
+bug-reports:         http://github.com/sboosali/cards/issues
 author:              Spiros Boosalis
 maintainer:          samboosalis@gmail.com
 copyright:           2018 Spiros Boosalis
@@ -45,7 +45,7 @@ data-files:
 
 source-repository head
   type:     git
-  location: https://github.com/sboosali/cards-frontend
+  location: https://github.com/sboosali/cards
 
 ----------------------------------------
 
@@ -171,13 +171,11 @@ library
  -- autogen-modules:
                  -- Paths_cards-frontend
 
- -- if impl(ghc) && flag(develop)
- --    other-modules:
- --       Cards.Frontend.Development
-
- -- if impl(ghc) && flag(develop)    
- --    build-depends:
- --       cards-frontend-development
+ if impl(ghc) && flag(develop)
+    other-modules:
+       Cards.Frontend.Development
+    build-depends:
+       cards-frontend-development
 
  build-depends:
                base >=4.7 && <5
@@ -221,7 +219,6 @@ library
              , transformers
              , mtl
              , string-conv
-
              , time
              , thyme
 
@@ -237,7 +234,7 @@ library
 
 library cards-frontend-development
 
-  if impl(ghc)
+  if impl(ghc) && flag(develop)
     
      hs-source-dirs: sources
      other-modules:
