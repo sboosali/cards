@@ -2,10 +2,12 @@
 set -e
 ########################################
 
+GHCID_FILE=./cards-common/ghcid.txt
+
+echo '...' > "$GHCID_FILE"
+emacsclient "$GHCID_FILE" &
 
 ########################################
-
-emacsclient ./cards-common/ghcid.txt &
 
 nix-shell -A shells.ghc --run 'ghcid --directory="./cards-common/" --reload="./sources/" --restart="./cards-common.cabal" --project="cards-common" --command "cabal new-repl cards-common" --outputfile=./ghcid.txt'
 

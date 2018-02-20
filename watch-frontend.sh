@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################
 
-GHCID_FILE="./cards-frontend/ghcid.txt"
+GHCID_FILE=./cards-frontend/ghcid.txt
 
 echo '...' > "$GHCID_FILE"
-emacsclient ./cards-frontend/ghcid.txt &
+emacsclient "$GHCID_FILE" &
 
 ########################################
 
