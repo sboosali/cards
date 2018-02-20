@@ -1,7 +1,12 @@
 #!/bin/bash
 set -e
+#########################################
 
-chromium ./dist-ghcjs/build/x86_64-linux/ghcjs-0.2.1/cards-frontend-0.0.0/c/example-cards-frontend/build/example-cards-frontend/example-cards-frontend.jsexe/index.html  2>/dev/null
+TARGET=cards-frontend
+EXECUTABLE=card-search-webapp
 
-#TODO
-# chromium ./webapp-result/bin/example-cards-frontend.jsexe/index.html 2>/dev/null
+#########################################
+
+chromium "./dist-ghcjs/build/x86_64-linux/ghcjs-0.2.1/$TARGET-0.0.0/c/$EXECUTABLE/build/$EXECUTABLE/$EXECUTABLE.jsexe/index.html" "$@" 2>/dev/null
+
+#########################################

@@ -143,7 +143,7 @@ pSearchOptions = Proxy
 defaultSearchOptions :: SearchOptions
 defaultSearchOptions = SearchOptions
  { _requireSubmitOrEnter              = False
- , _debouncingDelayInMilliseconds     = 500
+ , _debouncingDelayInMilliseconds     = 100
  , _minimumQueryLengthForLiveSearch   = 3
  }
 

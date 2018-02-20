@@ -17,12 +17,13 @@ inherit (nixpkgs)
 inherit (pkgs)   
  fetchFromGitHub;
 
+in
 ########################################
 ### "Reflex-Platform"...
 let 
 
 reflex-platform = import ./reflex-platform {
-  inherit (nixpkgs) cabal-install; # Cabal v2.0 ?
+  # inherit (nixpkgs) cabal-install; # Cabal v2.0 ?
 };
   # `reflex-platform` uses a pinned/older `nixpkgs` version.
 
