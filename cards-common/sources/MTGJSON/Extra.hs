@@ -1,4 +1,3 @@
-{-# LANGUAGE NoImplicitPrelude #-}
 
 {-|
 
@@ -34,5 +33,10 @@ i2n :: Integer -> Maybe Natural
 i2n i = if i >= 0
   then Just $ fromInteger i
   else Nothing
+
+----------------------------------------
+
+concatenateA :: (Applicative f) => (a -> f [b]) -> [a] -> f [b]
+concatenateA f = traverse f >>> fmap concat
 
 ----------------------------------------

@@ -81,7 +81,7 @@ data CardData = CardData
   , _CardData_manaCost      :: Maybe ManaCost 
   , _CardData_colors        :: [CardColor] 
   , _CardData_type          :: CardTypeLine 
-  , _CardData_text          :: CardText 
+  , _CardData_oracle        :: OracleText 
   , _CardData_number        :: Maybe CardCharacteristicNumber
   
   -- quasi-derivable stuff, card characteristics 
@@ -131,11 +131,11 @@ data CardData = CardData
 
 -}
 
-{-| the number on the right of some cards. 
+{-| the number on the bottom-right of some cards. 
 
-nothing has either power or toughness without having both. 
+no card has either power or toughness without having both. 
 
-nothing with a power/toughness has a loyalty.
+no card with a power/toughness has a loyalty.
 
 -}
 data CardCharacteristicNumber 
@@ -147,18 +147,28 @@ data CardCharacteristicNumber
 
 -}
 data CardNumber 
-  = CardIntegerNumber  Integer -- ^ the printed number, the most frequent case. can be negative: e.g. Char-Rumbler, which has a power of @'CardIntegerNumber' -1@. (Un-cards can have non-integer power/toughness, which we're ignoring)
-  | CardWildcardNumber Integer -- ^ the integer represents the modifier: @1@ is @\*+1@, @0@ is just @\*@. e.g. Tarmogoyf has a power of  @'CardWildcardNumber' 0@ and a toughness of @'CardWildcardNumber' 1@. 
+  = CardIntegerNumber  Integer
+  -- ^ the printed number, the most frequent case. can be negative: e.g. Char-Rumbler, which has a power of @'CardIntegerNumber' -1@. (Un-cards can have non-integer power/toughness, which we're ignoring)
+  | CardWildcardNumber Integer
+  -- ^ the integer represents the modifier: @1@ is @\*+1@, @0@ is just @\*@. e.g. Tarmogoyf has a power of  @'CardWildcardNumber' 0@ and a toughness of @'CardWildcardNumber' 1@. 
   deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable) 
 
--- | the overwhelming majority of the printed numerical characteristics are just small naturals.
-_CardNaturalNumber :: Prism' CardNumber Natural
-_CardNaturalNumber = prism' inject project
- where
- inject  = n2i > CardIntegerNumber
- project = \case
-   CardIntegerNumber i -> i & i2n 
-   _                   -> Nothing
+-- {-| for: power, toughness, loyalty. 
+
+-- -}
+-- data CardNumber 
+--   = CardIntegerNumber  Integer -- ^ the printed number, the most frequent case. can be negative: e.g. Char-Rumbler, which has a power of @'CardIntegerNumber' -1@. (Un-cards can have non-integer power/toughness, which we're ignoring)
+--   | CardWildcardNumber Integer -- ^ the integer represents the modifier: @1@ is @\*+1@, @0@ is just @\*@. e.g. Tarmogoyf has a power of  @'CardWildcardNumber' 0@ and a toughness of @'CardWildcardNumber' 1@. 
+--   deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable) 
+
+-- -- | the overwhelming majority of the printed numerical characteristics are just small naturals.
+-- _CardNaturalNumber :: Prism' CardNumber Natural
+-- _CardNaturalNumber = prism' inject project
+--  where
+--  inject  = n2i > CardIntegerNumber
+--  project = \case
+--    CardIntegerNumber i -> i & i2n 
+--    _                   -> Nothing
 
 ----------------------------------------
 
@@ -249,6 +259,12 @@ data CardColor = CardColor Text
 -}
 data CardTypeLine = CardTypeLine Text 
   deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+
+{-| 
+
+-}
+data OracleText = OracleText Text 
+  deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable) 
 
 {-| 
 

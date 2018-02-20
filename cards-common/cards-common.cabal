@@ -105,6 +105,7 @@ library
                  MTGJSON.AllSets.Schema
                  MTGJSON.AllSets.Types
                  MTGJSON.AllSets.Core
+                 MTGJSON.AllSets.Lens 
                  
                  MTGJSON.Aeson
                  MTGJSON.Example

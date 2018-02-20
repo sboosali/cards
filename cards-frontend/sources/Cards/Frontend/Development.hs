@@ -26,7 +26,7 @@ import qualified Cards.Frontend.GUI as GUI
 
 import           JSaddleWebSocketsReloader (DevelopmentConfig(..))
 import qualified JSaddleWebSocketsReloader as JSaddleWebSockets
-
+x
 ----------------------------------------
 
 {-| hotswap the frontend ('GUI.frontend'). 

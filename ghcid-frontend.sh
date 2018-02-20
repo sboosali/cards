@@ -1,7 +1,14 @@
 #!/bin/bash
 ########################################
 
-ghcid  --directory="./cards-frontend/"   --reload="./sources/"   --restart="./cards-frontend.cabal"   --project="cards-frontend"   --outputfile="./ghcid.txt"  --command "cabal new-repl cards-frontend"
+ghcid  --directory="./cards-frontend/"   --reload="./sources/"   --restart="./cards-frontend.cabal"   --project="cards-frontend"   --outputfile="./ghcid.txt"  --command 'cabal new-repl cards-frontend'
+
+#NOTE cabal new-repl -fdevelop cards-frontend
+#
+# [nix-shell:~/haskell/cards]$ cabal new-repl -fdevelop cards-frontend
+# cabal: Cannot open a repl for multiple components at once. The target
+# 'cards-frontend' refers to the package cards-frontend-0.0.0 which includes the
+# libraries cards-frontend-development and cards-frontend.
 
 #NOTE unsupported: --ghci-options -ferror-spans"
 
