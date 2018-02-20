@@ -1,19 +1,57 @@
 {-# LANGUAGE DeriveAnyClass #-}
---{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DataKinds #-}
 
 {-|
 
 -}
 module MTGJSON.AllSets.Types where
 
+import MTGJSON.AllSets.Kinds
 import MTGJSON.Extra
 import MTGJSON.Types
 
-----------------------------------------
+----------------------------------------  
 
--- data Card = Card
---  {
---  }
+data Card (f :: CHARACTERISTIC -> *) = Card
+  { _identifier    :: f 'IDENTIFIER
+
+  -- gameplay-relevant stuff, card characteristic 
+  , _name          :: f 'NAME
+  , _manaCost      :: f 'MANACOST
+  , _colors        :: f 'COLOR 
+  , _type          :: f 'TYPE
+  , _oracle        :: f 'ORACLE
+  , _number        :: Maybe (f 'NUMBER)
+  
+  -- quasi-derivable stuff, card characteristics 
+  , _cmc           :: f 'CMC
+  , _colorIdentity :: f 'COLORIDENTITY
+  , _names         :: [f 'NAME]
+  , _supertypes    :: [f 'SUPERTYPE]
+  , _types         :: [f 'TYPE]
+  , _subtypes      :: [f 'SUBTYPE]
+
+  -- non-gameplay-relevant stuff, card characteristics 
+  , _layout        :: f 'LAYOUT
+  , _watermark     :: f 'WATERMARK
+  , _rarity        :: f 'RARITY
+  , _flavor        :: f 'FLAVOR
+  , _artist        :: f 'ARTIST
+  , _ccNumber      :: f 'COLLECTORNUMBER
+
+  -- other resources
+  , _multiverseid  :: f 'MULTIVERSEID
+  , _mciNumber     :: f 'COLLECTORNUMBER
+
+  , _rulings       :: [f 'RULING]
+  , _legalities    :: [f 'LEGALITY]
+
+  , _variations    :: [f 'VARIATION]
+  , _printings     :: [f 'PRINTING]
+  , _originalText  :: f 'TEXT
+  , _originalType  :: f 'TEXT
+  , _foreignNames  :: [f 'FOREIGNVARIATION]
+  } -- deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
 
 ----------------------------------------
 
@@ -71,7 +109,7 @@ miscellaneous data:
 * @'_CardData_legalities'@: 
 
 -}
-data CardData f = CardData 
+data CardData = CardData 
   { _CardData_id            :: CardId 
 
   -- gameplay-relevant stuff, card characteristic 
@@ -80,7 +118,7 @@ data CardData f = CardData
   , _CardData_colors        :: [CardColor] 
   , _CardData_type          :: CardTypeLine 
   , _CardData_oracle        :: OracleText 
-  , _CardData_number        :: Maybe (NumericalCharacteristic (Printed Arithmetic) Integer) -- rintedNumericalCharacteristic
+  , _CardData_number        :: Maybe NumericCharacteristic
   
   -- quasi-derivable stuff, card characteristics 
   , _CardData_cmc           :: ConvertedManaCost 
@@ -139,9 +177,9 @@ the numerical characteristic which may be
 on the "south east" corner of a card.
 
 -}
-data NumericalCharacteristic f a -- SouthEastCharacteristic -- Size
-  = BodyCharacteristic    (Body    f a)
-  | LoyaltyCharacteristic (Loyalty f a) 
+data NumericCharacteristic  
+  = BodyCharacteristic    (Body    )
+  | LoyaltyCharacteristic (Loyalty ) 
   deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
 
 {-|  
@@ -150,15 +188,17 @@ data NumericalCharacteristic f a -- SouthEastCharacteristic -- Size
 Body { bodyPower = Literal Wildcard, bodyToughness = Arithmetic Addition [Literal Wildcard, Literal 1] }
 
 -}
-data Body f a = Body
-  { power     :: f a
-  , toughness :: f a
-  }
+data Body  = Body
+  { power     :: Integer
+  , toughness :: Integer
+  } deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+
 
 data Arithmetic
   = Addition
   | Subtraction
  -- data Operator = Addition
+ deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
 
 {-|
 e.g. /Tarmogoyf/:
@@ -169,46 +209,20 @@ Literal Wildcard
 (Power Toughness
 
 -}
-data Printed b a
- = Literal ( a)
- | Operator ( b) [Printed b a]
+data Printed 
+ = Literal Integer
+ | Operator Arithmetic [Printed]
  | Wildcard -- ^ e.g. @*/*+1@. the @*@'s are the same. 
+ deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
 
--- data Printed f b a
---  = Literal (f a)
---  | Operator (f b) [Printed f b a]
---  | Wildcard -- ^ e.g. @*/*+1@. the @*@'s are the same. 
-
-data Loyalty f a = Loyalty
- { getLoyalty :: f a
- }
- 
--- {-| for: power, toughness, loyalty. 
-
--- -}
--- data CardNumber 
---   = CardIntegerNumber  Integer
+data Loyalty = Loyalty
+ { getLoyalty :: Integer
+ } deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+  
 --   -- ^ the printed number, the most frequent case. can be negative: e.g. Char-Rumbler, which has a power of @'CardIntegerNumber' -1@. (Un-cards can have non-integer power/toughness, which we're ignoring)
---   | CardWildcardNumber Integer
+
 --   -- ^ the integer represents the modifier: @1@ is @\*+1@, @0@ is just @\*@. e.g. Tarmogoyf has a power of  @'CardWildcardNumber' 0@ and a toughness of @'CardWildcardNumber' 1@. 
 --   deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable) 
-
--- {-| for: power, toughness, loyalty. 
-
--- -}
--- data CardNumber 
---   = CardIntegerNumber  Integer -- ^ the printed number, the most frequent case. can be negative: e.g. Char-Rumbler, which has a power of @'CardIntegerNumber' -1@. (Un-cards can have non-integer power/toughness, which we're ignoring)
---   | CardWildcardNumber Integer -- ^ the integer represents the modifier: @1@ is @\*+1@, @0@ is just @\*@. e.g. Tarmogoyf has a power of  @'CardWildcardNumber' 0@ and a toughness of @'CardWildcardNumber' 1@. 
---   deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable) 
-
--- -- | the overwhelming majority of the printed numerical characteristics are just small naturals.
--- _CardNaturalNumber :: Prism' CardNumber Natural
--- _CardNaturalNumber = prism' inject project
---  where
---  inject  = n2i > CardIntegerNumber
---  project = \case
---    CardIntegerNumber i -> i & i2n 
---    _                   -> Nothing
 
 ----------------------------------------
 

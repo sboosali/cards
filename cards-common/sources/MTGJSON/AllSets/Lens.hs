@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE PolyKinds #-}
 
 module MTGJSON.AllSets.Lens where
 
@@ -15,9 +16,10 @@ import Control.Lens hiding ((<&>)) -- (makeLenses,makePrisms)
 concatenateA makeLenses
   [ ''CardData
   ]
+  --NOTE ``Expecting one more argument to ‘CardData’``
 
 concatenateA makePrisms
-  [ ''CardCharacteristicNumber
+  [ ''NumericCharacteristic
   ]  
 
 ----------------------------------------
