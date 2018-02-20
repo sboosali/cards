@@ -1,6 +1,7 @@
 name:                cards-frontend
 version:             0.0.0
-cabal-version:       >=1.24
+cabal-version:       >=2.0
+                     -- for internal libraries
 build-type:          Simple 
 category:            Data 
 synopsis:            TODO 
@@ -52,7 +53,7 @@ flag dump-splices
   description: make the `template` test suite dump its template-haskell splices
   manual:      True
 
-flag jsaddle-warp
+flag develop
   default:     False
   -- ^ NOTE should be False,
   -- but reflex-platform's project.nix doesn't support cabal flags,
@@ -94,6 +95,12 @@ library
 --TODO not recognized    ghc-options: -dedupe
     cpp-options: -DGHCJS_BROWSER
 
+ -- toggles between main being a `jsaddle-warp` server 
+ -- or a (?) `webkitgtk` non-server. 
+ if flag(develop)
+    cpp-options: -DDEVELOP
+    -- TODO check
+
  -- the `-dedupe` flag optimizes for generated size.
  -- the -DGHCJS_BROWSER option strips the node code (linked by default) from the generated executable.
  -- see:
@@ -124,12 +131,6 @@ library
 --     • No explicit implementation for
 --         ‘GHC.Exts.fromList’ and ‘GHC.Exts.toList’
 --     • In the instance declaration for ‘IsList Results’
-
- -- toggles between main being a `jsaddle-warp` server 
- -- or a (?) `webkitgtk` non-server. 
- if flag(jsaddle-warp)
-    cpp-options: -DJSADDLE_WARP
-    -- TODO check
 
  default-language:   Haskell2010
  default-extensions: NoImplicitPrelude                    
@@ -165,23 +166,17 @@ library
  other-modules:
                  Cards.AllCards
                  Cards.Frontend.Extra            
- --                Cards.Frontend.ButtonGroup 
-                   --TODO
-
                  -- Paths_cards-frontend
--- autogen-modules:
+ -- autogen-modules:
                  -- Paths_cards-frontend
 
+ -- if impl(ghc) && flag(develop)
+ --    other-modules:
+ --       Cards.Frontend.Development
 
- -- if impl(ghc)
- --    -- && flag(jsaddle-warp)
+ -- if impl(ghc) && flag(develop)    
  --    build-depends:
- --               --TODO
- --               jsaddle-warp
- --             , jsaddle-webkit2gtk
- -- else
- --    build-depends:
- --               jsaddle
+ --       cards-frontend-development
 
  build-depends:
                base >=4.7 && <5
@@ -194,11 +189,11 @@ library
              , memo
 
 -- reflex
-             , reflex
+             , reflex              >=0.5 && <1
              , reflex-dom
              , reflex-dom-core
              , reflex-dom-contrib
-             , reflex-vinyl
+             , reflex-vinyl       
 -- browser             
              , ghcjs-dom
 
@@ -236,6 +231,35 @@ library
 -- other packages
 
              , megaparsec
+
+----------------------------------------
+
+library cards-frontend-development
+
+ if !impl(ghc)
+     buildable: False
+
+ hs-source-dirs:      sources
+ other-modules:
+   JSaddleWebSocketsRunner
+   JSaddleWebSocketsReloader
+
+ default-language:    Haskell2010
+ ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+ build-depends:
+    base >=4.9 && <4.10
+--  , cards-frontend
+  , mtl
+  , filepath
+  , directory
+  , text
+  , containers
+  , reflex-dom-core
+  , jsaddle
+  , jsaddle-warp
+  , warp
+  , wai-middleware-static
+  , websockets
 
 ----------------------------------------
 
@@ -282,39 +306,34 @@ executable card-search-jsaddle-warp
   , jsaddle-warp 
   , reflex-dom-core
 
-executable card-search-development
- if !impl(ghc)
-     buildable: False
- main-is:             Main_Development.hs
- hs-source-dirs:      executables
+-- executable card-search-development
+--  if !impl(ghc)
+--      buildable: False
+--  main-is:             Main_Development.hs
+--  hs-source-dirs:      executables
 
- -- `exposed-modules` is not an `executable` field, but `cabal (new-)repl` still loads all `other-modules` into scope
+--  -- `exposed-modules` is not an `executable` field, but `cabal (new-)repl` still loads all `other-modules` into scope
 
- other-modules:
-   -- JSaddleWebSocketsRunner
-   JSaddleWebSocketsReloader
+--  other-modules:
+--    -- JSaddleWebSocketsRunner
+--    JSaddleWebSocketsReloader
 
- default-language:    Haskell2010
- ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
- build-depends:
-    base >=4.9 && <4.10
-  , cards-frontend
-  , mtl
--- >=2.2 && <2.3
-  , filepath
--- >=1.4 && <1.5
-  , directory
--- >=1.3 && <1.4
-  , text
--- >=1.2 && <1.3
-  , containers
--- >=0.5 && <0.6
-  , reflex-dom-core
-  , jsaddle
-  , jsaddle-warp
-  , warp
-  , wai-middleware-static
-  , websockets
+--  default-language:    Haskell2010
+--  ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+--  build-depends:
+--     base >=4.9 && <4.10
+--   , cards-frontend
+--   , mtl
+--   , filepath
+--   , directory
+--   , text
+--   , containers
+--   , reflex-dom-core
+--   , jsaddle
+--   , jsaddle-warp
+--   , warp
+--   , wai-middleware-static
+--   , websockets
 
 -- -- card-search-webkitgtk
 -- executable card-search-desktop-linux

@@ -60,7 +60,7 @@ sources = {
 # repositories which have multiple packages as subdirectories.
 megarepos = {
 
-   jsaddle = fetchFromGitHub {
+  jsaddle = fetchFromGitHub {
       owner  = "ghcjs";
       repo   = "jsaddle";
       rev    = "e77d303880917a66e593dc2d0d5c8718cfb085c4"; 
@@ -68,14 +68,14 @@ megarepos = {
                # continuous-integration build isn't broken
       sha256 =
         "143r9nfglkydhp6rl0qrsyfpjnxfj04fhn96cf8hkx2mk09baa01";
-    }; # https://github.com/ghcjs/jsaddle
+  }; # https://github.com/ghcjs/jsaddle
 
   reflex-dom = fetchFromGitHub {
     owner           = "reflex-frp";
     repo            = "reflex-dom"; 
     rev             = "f4820df681b177fb950eb180aa97a81f855bd2aa";
     sha256          =
-       "0wv8xwr4bv2zb8qz3kf7nq2ixjg2hmyccxppgpwis3wmjai89frk";
+       "11hx9yrqnxxl98nz2q7cvdg3h1mmy2145fv9qva84rv4w4fqnisk";
   };
 
 };
@@ -93,9 +93,14 @@ subrepos = {
     subpath = "jsaddle-warp";
    };
 
-   jsaddle-webkit2gtk = { 
-    path    = megarepos.jsaddle; 
-    subpath = "jsaddle-webkit2gtk";
+   reflex-dom-core = { 
+    path    = megarepos.reflex-dom; 
+    subpath = "reflex-dom-core";
+   };
+  
+   reflex-dom = { 
+    path    = megarepos.reflex-dom; 
+    subpath = "reflex-dom";
    };
 
 };
@@ -255,6 +260,11 @@ myOverlaysWith = pkgs: self: super: let
      # killing process 13427
      # cannot build derivation ‘/nix/store/vyzdvvkdybm6xd0fr2hn5zajw5mzg0lr-android-app.drv’: 1 dependencies couldn't be built
 
+    reflex-dom-core      = loosen (subrepository_ subrepos.reflex-dom-core);
+    reflex-dom           = loosen (subrepository_ subrepos.reflex-dom);
+
+    # jsaddle-warp       = loosen (subrepository_ subrepos.jsaddle-w
+
     # jsaddle            = loosen (subrepository_ subrepos.jsaddle);
     # jsaddle-warp       = loosen (subrepository_ subrepos.jsaddle-warp);
     # jsaddle-webkit2gtk = loosen (subrepository_ subrepos.jsaddle-webkit2gtk);
@@ -265,7 +275,7 @@ myOverlaysWith = pkgs: self: super: let
     # protolude = hackage "protolude" "0.2.1" {};
     # 
 
-    unicode-show = skipTests super.unicode-show;
+    # unicode-show = skipTests super.unicode-show;
 
      # Linking dist/build/unicode-show-test/unicode-show-test ...
      # running tests

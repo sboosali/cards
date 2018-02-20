@@ -6,6 +6,8 @@ set -e
 
 ########################################
 
+nix-shell -A shells.ghc --run './new-configure-develop.sh'
+
 nix-shell -A shells.ghc --run './new-build-develop.sh'
 
 #nix-shell -A shells.ghc --run './new-run-develop.sh'
