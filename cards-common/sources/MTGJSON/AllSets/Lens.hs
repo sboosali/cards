@@ -7,7 +7,7 @@ import MTGJSON.Extra (concatenateA)
 
 import Control.Lens hiding ((<&>)) -- (makeLenses,makePrisms) 
 
-import Prelude.Spiros
+--import Prelude.Spiros
 
 ----------------------------------------
 -- generated

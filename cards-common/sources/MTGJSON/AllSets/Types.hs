@@ -9,8 +9,6 @@ module MTGJSON.AllSets.Types where
 import MTGJSON.Extra
 import MTGJSON.Types
 
-import Control.Lens
-
 ----------------------------------------
 
 -- data Card = Card
@@ -73,7 +71,7 @@ miscellaneous data:
 * @'_CardData_legalities'@: 
 
 -}
-data CardData = CardData 
+data CardData f = CardData 
   { _CardData_id            :: CardId 
 
   -- gameplay-relevant stuff, card characteristic 
@@ -82,7 +80,7 @@ data CardData = CardData
   , _CardData_colors        :: [CardColor] 
   , _CardData_type          :: CardTypeLine 
   , _CardData_oracle        :: OracleText 
-  , _CardData_number        :: Maybe CardCharacteristicNumber
+  , _CardData_number        :: Maybe (NumericalCharacteristic (Printed Arithmetic) Integer) -- rintedNumericalCharacteristic
   
   -- quasi-derivable stuff, card characteristics 
   , _CardData_cmc           :: ConvertedManaCost 
@@ -131,27 +129,69 @@ data CardData = CardData
 
 -}
 
-{-| the number on the bottom-right of some cards. 
+{-| the number on the bottom-right of some cards: power and toughness, or loyalty. 
 
 no card has either power or toughness without having both. 
 
 no card with a power/toughness has a loyalty.
 
+the numerical characteristic which may be
+on the "south east" corner of a card.
+
 -}
-data CardCharacteristicNumber 
-  = CardCharacteristicPowerToughness CardNumber CardNumber 
-  | CardCharacteristicLoyalty CardNumber 
+data NumericalCharacteristic f a -- SouthEastCharacteristic -- Size
+  = BodyCharacteristic    (Body    f a)
+  | LoyaltyCharacteristic (Loyalty f a) 
   deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
 
-{-| for: power, toughness, loyalty. 
+{-|  
+
+>>> parseBody _ "*/*+1" :: Body Printed Operator Natural
+Body { bodyPower = Literal Wildcard, bodyToughness = Arithmetic Addition [Literal Wildcard, Literal 1] }
 
 -}
-data CardNumber 
-  = CardIntegerNumber  Integer
-  -- ^ the printed number, the most frequent case. can be negative: e.g. Char-Rumbler, which has a power of @'CardIntegerNumber' -1@. (Un-cards can have non-integer power/toughness, which we're ignoring)
-  | CardWildcardNumber Integer
-  -- ^ the integer represents the modifier: @1@ is @\*+1@, @0@ is just @\*@. e.g. Tarmogoyf has a power of  @'CardWildcardNumber' 0@ and a toughness of @'CardWildcardNumber' 1@. 
-  deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable) 
+data Body f a = Body
+  { power     :: f a
+  , toughness :: f a
+  }
+
+data Arithmetic
+  = Addition
+  | Subtraction
+ -- data Operator = Addition
+
+{-|
+e.g. /Tarmogoyf/:
+
+>>> "*/1+*" :: Printed Arithmetic Natural
+Literal Wildcard
+
+(Power Toughness
+
+-}
+data Printed b a
+ = Literal ( a)
+ | Operator ( b) [Printed b a]
+ | Wildcard -- ^ e.g. @*/*+1@. the @*@'s are the same. 
+
+-- data Printed f b a
+--  = Literal (f a)
+--  | Operator (f b) [Printed f b a]
+--  | Wildcard -- ^ e.g. @*/*+1@. the @*@'s are the same. 
+
+data Loyalty f a = Loyalty
+ { getLoyalty :: f a
+ }
+ 
+-- {-| for: power, toughness, loyalty. 
+
+-- -}
+-- data CardNumber 
+--   = CardIntegerNumber  Integer
+--   -- ^ the printed number, the most frequent case. can be negative: e.g. Char-Rumbler, which has a power of @'CardIntegerNumber' -1@. (Un-cards can have non-integer power/toughness, which we're ignoring)
+--   | CardWildcardNumber Integer
+--   -- ^ the integer represents the modifier: @1@ is @\*+1@, @0@ is just @\*@. e.g. Tarmogoyf has a power of  @'CardWildcardNumber' 0@ and a toughness of @'CardWildcardNumber' 1@. 
+--   deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable) 
 
 -- {-| for: power, toughness, loyalty. 
 
