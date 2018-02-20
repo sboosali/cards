@@ -91,8 +91,16 @@ library
                  Cards.Common
                  Cards.Common.Types
                  Cards.Common.Core		
-                 Cards.Common.Example           
+                 Cards.Common.Example   
 
+                 Cards.Query
+                 Cards.Query.Types
+
+                 Cards.Syntax.MagicCardsInfo
+                 Cards.Syntax.MagicCardsInfo.Types
+                 Cards.Syntax.MagicCardsInfo.Parser
+                 Cards.Syntax.MagicCardsInfo.Compiler
+                 
                  MTGJSON
                  MTGJSON.Types
                  MTGJSON.Core

@@ -9,15 +9,8 @@ module Cards.Frontend.Query where
 
 import Cards.Frontend.Extra
 import Cards.Frontend.Types
--- import Cards.Frontend.DB
--- import Cards.Frontend.Result
 
 import qualified Data.Text as T
-
---import qualified Text.Megaparsec as P
--- 
-
---import Data.Char
   
 ----------------------------------------
 
