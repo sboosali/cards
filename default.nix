@@ -482,6 +482,8 @@ myOverlaysWith = pkgs: self: super: let
    #      "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
    #  };        
 
+    frisby = prefetched_ ./frisby.json; 
+
     megaparsec = github {
       owner  = "mrkkrp";
       repo   = "megaparsec";

@@ -4,6 +4,7 @@
 
 {-|
 
+
 MagicCards.Info Syntax: <https://magiccards.info/syntax.html>
 
 
@@ -135,6 +136,9 @@ e.g. Saboteurs
 o:"whenever ~" ((o:"deals damage to a" or o:"deals combat damage to a") (o:opponent or o:player)) or o:"attacks and isn't blocked")
 
 
+========================================
+
+
 
 -}
 module Cards.Syntax.MagicCardsInfo.Types where
@@ -148,7 +152,7 @@ import Prelude.Spiros
 -}
 data Syntax = Syntax
  { mciFreeText :: Maybe Text
- , mciFields   :: Map Text [Text]
+ , mciFields   :: Map (Maybe Text) [Text]
  }
 
 ----------------------------------------

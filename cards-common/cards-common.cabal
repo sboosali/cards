@@ -165,7 +165,8 @@ library
              , lens
 
 -- parsing
-             , megaparsec
+             , frisby >=0.2
+--             , megaparsec
 
 -- other packages 
              , aeson
