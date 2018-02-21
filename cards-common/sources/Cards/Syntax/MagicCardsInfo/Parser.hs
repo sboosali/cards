@@ -31,13 +31,49 @@ freeform t = Syntax mciFreeText mciFields
 
 ----------------------------------------
 
-prefixOperators :: [Text]
-prefixOperators =
-  [ "!", "-", "not" ]
+prefixKeywords :: SyntaxTable ()
+prefixKeywords = --  [ "", "", "" ]
+  [ "o"          -: ()
+  , "t"          -: ()
+  , "cmc"        -: ()
+  , "mana"       -: ()
+  , "c"          -: ()
+  , "ci"         -: ()
+  , "in"         -: ()
+  , "r"          -: ()
+  , "pow"        -: ()
+  , "tou"        -: ()
+  , "e"          -: ()
+  , "f"          -: ()
+  , "year"       -: ()
+  , "banned"     -: ()
+  , "legal"      -: ()
+  , "restricted" -: ()
+  , "a"          -: ()
+  , "is"         -: ()
+  , "has"        -: ()
+  , "l"          -: ()
+  ]
 
-infixOperators :: [Text]
+prefixOperators :: SyntaxTable ()
+prefixOperators =
+  [ "!"          -: ()
+  , "-"          -: ()
+  , "not"        -: ()
+  ]
+
+infixOperators :: SyntaxTable ()
 infixOperators =
-  [ ":", "!", "=", "<", ">", "<=", ">=", "or", "and" ]
+  [ ":"          -: ()
+  , "!"          -: ()
+  , "="          -: ()
+  , "<"          -: ()
+  , ">"          -: ()
+  , "<="         -: ()
+  , ">="         -: ()
+  , "or"         -: ()
+  , "and"        -: ()
+  ]
 
 invalidNakedChars :: [Char]
 invalidNakedChars =
@@ -68,7 +104,6 @@ additive = mdo
     decimal <- newRule $ do
                   many1 (oneOf ['0' .. '9']) ## read
     return additive
-
 
 
 ----------------------------------------

@@ -155,6 +155,8 @@ data Syntax = Syntax
  , mciFields   :: Map (Maybe Text) [Text]
  }
 
+type SyntaxTable a = Map Text a
+
 ----------------------------------------
 
 {-| @magiccards.info@'s behavior, features, predicates, etc.
