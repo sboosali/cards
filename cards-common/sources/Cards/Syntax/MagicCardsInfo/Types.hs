@@ -163,12 +163,20 @@ data Syntax = Syntax
  , mciAttributes :: Attributes -- Map (Maybe Text) [Text]
  } deriving (Show,Read,Eq,Ord,Generic)
 
-type Attributes = [Attribute] -- [(Text, Text)]
+newtype Attributes = Attributes
+  { getAttributes :: [Attribute] -- [(Text, Text)]
+  } deriving (Show,Read,Eq,Ord,Generic) 
 
 data Attribute = Attribute
-  { identifier :: Text
-  , constraint :: Text
+  { subject :: Text
+  , verb    :: Text
+  , object  :: Text
   } deriving (Show,Read,Eq,Ord,Generic)
+
+-- data Attribute = Attribute
+--   { identifier :: Text
+--   , constraint :: Text
+--   } deriving (Show,Read,Eq,Ord,Generic)
 
 -- freeform :: Text -> Syntax
 -- freeform t = Syntax mciFreeform mciAttributes
@@ -182,15 +190,15 @@ data Attribute = Attribute
  
 data GenericComparison a =
   GenericComparison GenericComparator a a
-  deriving (Functor,Show,Read,Eq,Ord,Generic)
+  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic)
 
 data BooleanComparison a =
   BooleanComparison BooleanComparator a a
-  deriving (Functor,Show,Read,Eq,Ord,Generic)
+  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic)
 
 data NumericComparison a =
   NumericComparison NumericComparator a a
-  deriving (Functor,Show,Read,Eq,Ord,Generic)
+  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic)
 
 data GenericComparator
   = Has
@@ -225,12 +233,12 @@ data NumericComparator
 data Numeric i
   = Constant (NumericConstant i)
   | Variable NumericVariable  
-  deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,Enumerable)
 
 data NumericConstant i
-  = IntegerConstant i
+  = NumericLiteral i
   | WildcardConstant
-  deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,Enumerable)
 
 data NumericVariable
   = PowerVariable
@@ -293,9 +301,13 @@ data ColorIndication
 
 -}
 data ManaCost i
- = ManaSymbols (ManaSymbol i)
- deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+ = ManaCost (Maybe (ManaSymbols i))
+ deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic)
 
+newtype ManaSymbols i = ManaSymbols 
+ { getManaSymbols :: [ManaSymbol i]
+ } deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic) --,Enumerable)
+  
 -- data ManaCost f i
 --  = ManaSymbols (f (ManaSymbol i))
 --  deriving (Show,Read,Eq,Ord,Generic,Enumerable)
@@ -305,12 +317,12 @@ data ManaSymbol i
  | HueSymbol       Hue
  | HybridSymbol    (Hybrid i)
  | PhyrexianSymbol Phyrexian
- deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+ deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,Enumerable)
 
 data Hybrid i
  = GuildHybrid Guild
  | GrayHybrid i Color
- deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+ deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,Enumerable)
  --TODO GrayHybrid Natural Color
  --deriving (Show,Read,Eq,Ord,Generic)
 

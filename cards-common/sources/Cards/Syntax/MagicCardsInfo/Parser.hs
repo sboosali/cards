@@ -184,25 +184,38 @@ import Cards.Syntax.MagicCardsInfo.Types
 -- import qualified Text.Megaparsec as P
 
 import qualified Text.Parsers.Frisby as Frisby
-import           Text.Parsers.Frisby hiding (text)
+import           Text.Parsers.Frisby hiding (text, (<>))
 
 import Enumerate
 import Enumerate.Function
 
-import qualified Data.Text as T
+import qualified Data.Text.Lazy as T
 
-import Prelude.Spiros hiding (P, (<>))
+import qualified Data.Map as Map
+
+import Prelude.Spiros hiding (P)
 import Prelude (read)
 
 ----------------------------------------
 
+braces :: Text -> Text
+braces t = "{" <> t <> "}"
+
+char2text :: Char -> Text
+char2text = T.singleton 
+
+show' :: (Show a, StringConv String s) => a -> s
+show' = show > toS
+
+----------------------------------------
+  
 rule :: P s a -> G s a
 rule = newRule
 
 complete :: PM s (P s a) -> PM s (P s (Complete a))
 complete grammar = mdo
   p <- grammar
-  let q = (fmap Just (p <<- eof) // unit Nothing) <> rest
+  let q = (,) <$> (fmap Just (p <<- eof) // unit Nothing) <*> rest
   return q
 
 text :: Text -> P s Text
@@ -217,27 +230,72 @@ alias t x = text t $> x
 aliases :: [(Text,a)] -> P s a
 aliases = fmap (alias&uncurry) > choice
 
+vocabulary :: [(Text,a)] -> P s a
+vocabulary = aliases 
+
 -- aliases :: [(Text,a)] -> P s a
 -- aliases = fmap (alias&uncurry) > choice 
 
-gQuotable :: P s a -> G s a
-gQuotable pUnquoted = do
-  pQuoted <- rule$ quoted pUnquoted
-  p       <- rule$ pUnquoted // pQuoted
-  return p
- 
+quotable :: P s a -> P s a
+quotable pUnquoted = p
+  where
+  pQuoted = quoted pUnquoted
+  p       = pUnquoted // pQuoted
+
+  -- pQuoted = {- <- rule$ -} quoted pUnquoted
+  -- p       = {- <- rule$ -} pUnquoted // pQuoted
+
 quoted :: P s a -> P s a
 quoted = between (char '"') (char '"') 
 
 ----------------------------------------
 
-gAttribute :: [Text] -> P s Text -> G s Attribute
-gAttribute ks pConstraint = do
-  v <- gQuotable pConstraint
-  k <- rule$ texts ks
-  p <- rule$
-    Attribute <$> (k <* char ':') <*> v
-  return p
+{-|
+
+Parses a keyword (or a set of aliases for that keyword),
+with the given separator (or, variations for the separator),
+and the given parser.
+
+e.g.
+
+@
+cmc:3
+@
+
+is parsed by
+
+@
+attribute ["cmc", ...] [":", ...] number
+-- where number :: P s Numeric
+@
+
+
+-}
+
+attribute :: [Text] -> [Text] -> P s Text -> P s Attribute
+attribute keywords seperators pConstraint = a
+  where
+  -- "subject / verb / object"
+  s = texts keywords
+  v = texts seperators
+  o = quotable pConstraint
+  a = Attribute <$> s <*> v <*> o
+
+-- attribute :: [Text] -> SyntaxTable a -> P s Text -> P s Attribute
+-- attribute keywords seperators pConstraint = p
+--   where
+--   v = quotable pConstraint
+--   o = vocabulary seperators
+--   k = texts keywords
+--   p = Attribute <$> k <*> o <*> v
+
+-- pAttribute :: [Text] -> P s Text -> P s Attribute
+-- pAttribute ks pConstraint = do
+--   v <- pQuotable pConstraint
+--   k <- rule$ texts ks
+--   p <- rule$
+--     Attribute <$> (k <* char ':') <*> v
+--   return p
 
 ----------------------------------------
   
@@ -410,33 +468,50 @@ pNumericOperators = aliases numericOperators
 
 ----------------------------------------
 
-gNumericComparison :: G s Attribute
-gNumericComparison = _ -- gAttribute' pNumeric
+pNumericComparison :: P s Attribute
+pNumericComparison = _ -- pAttribute' pNumeric
 
 pNumeric :: P s (Numeric i)
 pNumeric = _
 
-gIs :: G s Attribute
+pIs :: P s Attribute
 --pIs :: Grammar Attribute --gIdentity
-gIs = gAttribute ["is", "not"] [":"] (texts identityKeywords)
+pIs = attribute ["is", "not"] [":"] (texts identityKeywords)
 
-gHas :: G s Attribute
-gHas = gAttribute ["has"] [":"] (texts possessionKeywords)
+pHas :: P s Attribute
+pHas = attribute ["has"] [":"] (texts possessionKeywords)
 
 ---------------------------------------
 
-displayManaCost :: Pretty (ManaCost i)
+displayManaCost :: (Show i) => Pretty (ManaCost i)
 displayManaCost = \case
-  ManaSymbols symbols -> intercalate "" ts
+  ManaCost mana -> mana & maybe "" displayManaSymbols
+
+displayManaSymbols :: (Show i) => Pretty (ManaSymbols i)
+displayManaSymbols (ManaSymbols symbols) = t
     where
-    ts = symbols <&> displayManaSymbol
+    t  = ts & T.intercalate ""         -- e.g. "{2}{U}{G}"
+    ts = symbols <&> displayManaSymbol -- e.g. ["{2}","{U}","{G}"]
 
 displayManaSymbol :: (Show i) => Pretty (ManaSymbol i)
 displayManaSymbol = \case
-  GenericSymbol i           -> displayGenericManaCost i
-  HueSymbol hue             -> displayHue hue
-  HybridSymbol hybrid       -> displayHybrid hybrid
-  PhyrexianSymbol phyrexian -> displayPhyrexian phyrexian
+  GenericSymbol      i         -> displayGenericManaCost i
+  HueSymbol          hue       -> displayHue             hue
+  HybridSymbol       hybrid    -> displayHybrid          hybrid
+  PhyrexianSymbol    phyrexian -> displayPhyrexian       phyrexian
+
+displayGenericManaCost :: (Show i) => Pretty i
+displayGenericManaCost = show > toS > braces
+
+displayHue :: Pretty Hue
+displayHue = hue2letter > char2text > braces
+
+-- \case
+--   TrueColor c -> displayColor c
+--   Colorless c -> "{C}"
+
+-- displayColor :: Pretty Color
+-- displayColor = color2letter > braces
 
 displayHybrid :: (Show i) => Pretty (Hybrid i)
 displayHybrid = \case
@@ -446,14 +521,16 @@ displayHybrid = \case
 displayGuildHybrid :: Pretty Guild
 displayGuildHybrid
   = fromGuild'
-  > fmap (color2letter)
+  > fmap (color2text) -- e.g. ["U","G"]
+  > T.intercalate "/" -- e.g. "U/G"
+  > braces            -- e.g. "{U/G}"
   --displayColorHybrid colors = (colors & fromGuild) & 
 
 displayGrayHybrid :: (Show i) => i -> Color -> Text
 displayGrayHybrid i c = displayRawHybrid i' c'
   where
-  i' = show i
-  c' = T.singleton (color2letter c)
+  i' = show' i
+  c' = char2text (color2letter c)
 
 displayRawHybrid :: Text -> Text -> Text
 displayRawHybrid x y = "{" <> t <> "}"
@@ -462,14 +539,11 @@ displayRawHybrid x y = "{" <> t <> "}"
 
 displayPhyrexian :: Pretty Phyrexian
 displayPhyrexian = \case
-  Phyrexian color -> "{P" <> t <> "}"
+  Phyrexian c -> "{P" <> t <> "}"
                      where
-                     t = T.singleton (color2letter c)
+                     t = char2text (color2letter c)
 
 ---------------------------------------
-
-braces :: Text -> Text
-braces cs = "{" <> cs <> "}"
 
 -- | in ascending (canonical, i.e. WUBRG) order
 fromGuild' :: Guild -> [Color]
@@ -490,6 +564,12 @@ fromGuild = \case
  Izzet    -> (Blue,  Red)
  Boros    -> (Red,   White)
 
+hue2text :: Hue -> Text
+hue2text = hue2letter > char2text
+
+color2text :: Color -> Text
+color2text = color2letter > char2text
+
 hue2letter :: Hue -> Char
 hue2letter = \case
   TrueColor color -> color2letter color
@@ -506,9 +586,10 @@ color2letter = \case
 ---------------------------------------
 -- Defined inverted for verifying surjectivity via pattern matching, can be inverted again.
 
-parseIs' :: Text -> Is
-parseIs' = invert' displayIs
-  
+-- parseIs' :: Text -> Is
+-- parseIs' = invert' displayIs
+-- --Map Text Is’
+
 displayIs :: Is -> Text
 displayIs = \case
  IsFace      face      -> face      & displayFace
@@ -516,36 +597,36 @@ displayIs = \case
  IsBorder    border    -> border    & displayBorder
  IsPredicate predicate -> predicate & displayPredicate
 
-displayFace :: Face                     -> Text
+displayFace :: Face -> Text
 displayFace = \case
- NormalFace                             -> "normal"
- DoubleFace                             -> "double"
- SplitFace                              -> "split"
- FlipFace                               -> "flip"
+ NormalFace       -> "normal"
+ DoubleFace       -> "double"
+ SplitFace        -> "split"
+ FlipFace         -> "flip"
  
-displayFrame :: Frame                   -> Text
+displayFrame :: Frame -> Text
 displayFrame = \case
- OldFrame                               -> "old"
- TimeshiftedFrame                       -> "timeshifted"
- NewFrame                               -> "new"
- FutureFrame                            -> "future"
+ OldFrame         -> "old"
+ TimeshiftedFrame -> "timeshifted"
+ NewFrame         -> "new"
+ FutureFrame      -> "future"
 
-displayBorder :: Border                 -> Text
+displayBorder :: Border -> Text
 displayBorder = \case
- BlackBordered                          -> "black"
- WhiteBordered                          -> "white"
- SilverBordered                         -> "silver"
+ BlackBordered    -> "black"
+ WhiteBordered    -> "white"
+ SilverBordered   -> "silver"
 
-displayKnownPredicate :: KnownPredicate -> Text
-displayKnownPredicate = \case
- Spell                                  -> "spell"
- Permanent                              -> "permanent"
- Vanilla                                -> "vanilla"
+displayPredicate :: KnownPredicate -> Text
+displayPredicate = \case
+ Spell            -> "spell"
+ Permanent        -> "permanent"
+ Vanilla          -> "vanilla"
 
 ----------------------------------------
 
 invert' :: (Enumerable a, Ord a, Ord b) => (a -> b) -> (Map b a)
-invert' f = invert f
+invert' = fromFunction > invertMap > _ -- Map.
 
 ----------------------------------------
 
