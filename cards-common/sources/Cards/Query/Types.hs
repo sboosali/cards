@@ -12,7 +12,7 @@ The @.Syntax._.Compiler@ modules convert some syntax into this query type.
 -}
 module Cards.Query.Types where
 
-import qualified Data.Text as T
+--import qualified Data.Text as T
 
 ----------------------------------------
 
