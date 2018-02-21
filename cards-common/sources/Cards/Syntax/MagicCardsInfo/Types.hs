@@ -1,6 +1,9 @@
 
+{-# LANGUAGE OverloadedLabels, DuplicateRecordFields #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE OverloadedLists #-}
+
+{-# LANGUAGE GADTs #-}
 
 {-|
 
@@ -41,7 +44,8 @@ c!wu (Cards that are only white or blue, or both)
 c!wum (Cards that are only white and blue, and multicolored)
 c!wubrgm (Cards that are all five colors)
 c:m (Any multicolored card)
-c:l or c:c (Lands and colorless cards)
+c:l (Lands)
+c:c (colorless cards)
 
 Color Identity
 --------------------
@@ -143,7 +147,10 @@ o:"whenever ~" ((o:"deals damage to a" or o:"deals combat damage to a") (o:oppon
 -}
 module Cards.Syntax.MagicCardsInfo.Types where
 
-import Prelude.Spiros
+
+import Text.Parsers.Frisby (P,PM)
+
+import Prelude.Spiros hiding (P)
 
 ----------------------------------------
 
@@ -151,9 +158,129 @@ import Prelude.Spiros
 
 -}
 data Syntax = Syntax
- { mciFreeText :: Maybe Text
- , mciFields   :: Map (Maybe Text) [Text]
+ { mciFreeform    :: [Text] -- Maybe Text
+ , mciAttributes :: Attributes -- Map (Maybe Text) [Text]
  }
+
+type Attributes = [Attribute] -- [(Text, Text)]
+
+data Attribute = Attribute
+  { identifier :: Text
+  , constraint :: Text
+  }
+
+-- freeform :: Text -> Syntax
+-- freeform t = Syntax mciFreeform mciAttributes
+--  where
+--  mciFreeform    = [t]
+--  mciAttributes = []
+
+----------------------------------------
+
+data SetComparison a =
+  SetComparison SetComparator a a
+
+data NumericComparison a =
+  NumericComparison NumericComparator a a
+
+data SetComparator
+  = Has
+  | Is
+
+data NumericComparator 
+  = Equals
+  | Lesser
+  | Greater
+  | LesserEquals
+  | GreaterEquals
+
+-- data Comparison a
+--   HAS :: a -> a -> Comparison a
+--   IS  :: a -> a -> Comparison a
+--   EQ  :: a -> a -> Comparison a
+--   LT  :: a -> a -> Comparison a
+--   GT  :: a -> a -> Comparison a
+--   LQ  :: a -> a -> Comparison a
+--   GQ  :: a -> a -> Comparison a
+
+----------------------------------------
+
+--type Numeric = Either NumericConstant NumericVariable
+data Numeric
+  = Constant NumericConstant
+  | Variable NumericVariable  
+
+data NumericConstant
+  = IntegerConstant Integer
+  | WildcardConstant
+
+data NumericVariable
+  = PowerVariable
+  | ToughnessVariable
+  | CostVariable
+
+----------------------------------------
+
+data Chromatic = Chromatic [Chroma]
+
+data Chroma
+ = Hue Hue
+ | Multicolored
+ | LandColor
+
+data Hue
+  = TrueColor Color
+  | Colorless
+
+data Color
+ = White
+ | Blue
+ | Black
+ | Red
+ | Green
+
+-- data Chroma
+--  = TrueColor Color
+--  | Colorless 
+--  | Multicolored
+--  | LandColor
+
+-- data Chroma
+--  = FakeColor FakeColor
+--  | Multicolored
+--  | LandColor
+
+-- data FakeColor 
+--  = TrueColor Color
+--  | Colorless
+
+----------------------------------------
+
+data ManaCost
+ = ManaSymbols (Set ManaSymbol)
+
+data ManaSymbol
+ = GenericSymbol Natural
+ | HueSymbol Hue
+ | HybridSymbol Hybrid
+ | PhyrexianSymbol Phyrexian
+
+data Hybrid
+ = ColorHybrid (UnorderedPair Color Color)
+ | GrayHybrid Natural Color
+
+data Phyrexian
+ = Phyrexian Color
+
+-- data ManaSymbol
+--  | ColorSymbol Color
+--  | ColorlessSymbol
+
+---------------------------------------- 
+
+type UnorderedPair a b = (a,b) --TODO
+
+----------------------------------------
 
 type SyntaxTable a = Map Text a
 
@@ -162,5 +289,13 @@ type SyntaxTable a = Map Text a
 {-| @magiccards.info@'s behavior, features, predicates, etc.
 
 -}
+
+----------------------------------------
+
+type G s a = PM s (P s a)  
+--type Grammar s a = PM s (P s a)
+--type Parser  s a = P s a
+
+type Complete a = (Maybe a, String)
 
 ----------------------------------------

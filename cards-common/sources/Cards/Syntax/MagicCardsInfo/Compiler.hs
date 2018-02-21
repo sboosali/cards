@@ -14,6 +14,6 @@ import Cards.Query.Types
 ----------------------------------------
 
 compile :: Syntax -> Query
-compile = _
+compile _ = Query
 
 ----------------------------------------

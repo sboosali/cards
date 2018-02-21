@@ -29,6 +29,10 @@ mainWith _ = do
  putStrLn ""
  putStrLn "(Cards.Common.Example...)"
 
+
+----------------------------------------
+
+{-
  good
  bad
 
@@ -56,6 +60,7 @@ bad = do
  let z = runAdditive' s
  print y
  print z
+-}
 
 {-
 
