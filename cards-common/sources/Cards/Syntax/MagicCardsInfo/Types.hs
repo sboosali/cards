@@ -3,7 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE OverloadedLists #-}
 
-{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GADTs, DeriveAnyClass #-}
 
 {-|
 
@@ -147,8 +147,9 @@ o:"whenever ~" ((o:"deals damage to a" or o:"deals combat damage to a") (o:oppon
 -}
 module Cards.Syntax.MagicCardsInfo.Types where
 
-
 import Text.Parsers.Frisby (P,PM)
+
+import Enumerate
 
 import Prelude.Spiros hiding (P)
 
@@ -158,16 +159,16 @@ import Prelude.Spiros hiding (P)
 
 -}
 data Syntax = Syntax
- { mciFreeform    :: [Text] -- Maybe Text
+ { mciFreeform   :: [Text] -- Maybe Text
  , mciAttributes :: Attributes -- Map (Maybe Text) [Text]
- }
+ } deriving (Show,Read,Eq,Ord,Generic)
 
 type Attributes = [Attribute] -- [(Text, Text)]
 
 data Attribute = Attribute
   { identifier :: Text
   , constraint :: Text
-  }
+  } deriving (Show,Read,Eq,Ord,Generic)
 
 -- freeform :: Text -> Syntax
 -- freeform t = Syntax mciFreeform mciAttributes
@@ -177,15 +178,29 @@ data Attribute = Attribute
 
 ----------------------------------------
 
-data SetComparison a =
-  SetComparison SetComparator a a
+--data Comparison a =
+ 
+data GenericComparison a =
+  GenericComparison GenericComparator a a
+  deriving (Functor,Show,Read,Eq,Ord,Generic)
+
+data BooleanComparison a =
+  BooleanComparison BooleanComparator a a
+  deriving (Functor,Show,Read,Eq,Ord,Generic)
 
 data NumericComparison a =
   NumericComparison NumericComparator a a
+  deriving (Functor,Show,Read,Eq,Ord,Generic)
 
-data SetComparator
+data GenericComparator
   = Has
   | Is
+  deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
+
+data BooleanComparator
+  = Yes
+  | Not
+  deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
 
 data NumericComparator 
   = Equals
@@ -193,6 +208,7 @@ data NumericComparator
   | Greater
   | LesserEquals
   | GreaterEquals
+  deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
 
 -- data Comparison a
 --   HAS :: a -> a -> Comparison a
@@ -206,31 +222,37 @@ data NumericComparator
 ----------------------------------------
 
 --type Numeric = Either NumericConstant NumericVariable
-data Numeric
-  = Constant NumericConstant
+data Numeric i
+  = Constant (NumericConstant i)
   | Variable NumericVariable  
+  deriving (Show,Read,Eq,Ord,Generic,Enumerable)
 
-data NumericConstant
-  = IntegerConstant Integer
+data NumericConstant i
+  = IntegerConstant i
   | WildcardConstant
+  deriving (Show,Read,Eq,Ord,Generic,Enumerable)
 
 data NumericVariable
   = PowerVariable
   | ToughnessVariable
   | CostVariable
+  deriving (Show,Read,Eq,Ord,Generic,Enumerable)
 
 ----------------------------------------
 
 data Chromatic = Chromatic [Chroma]
+ deriving (Show,Read,Eq,Ord,Generic)
 
 data Chroma
  = Hue Hue
  | Multicolored
  | LandColor
+ deriving (Show,Read,Eq,Ord,Generic,Enumerable)
 
 data Hue
-  = TrueColor Color
-  | Colorless
+ = TrueColor Color
+ | Colorless
+ deriving (Show,Read,Eq,Ord,Generic,Enumerable)
 
 data Color
  = White
@@ -238,6 +260,7 @@ data Color
  | Black
  | Red
  | Green
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
 
 -- data Chroma
 --  = TrueColor Color
@@ -256,33 +279,148 @@ data Color
 
 ----------------------------------------
 
-data ManaCost
- = ManaSymbols (Set ManaSymbol)
+data ColorIdentity
+ = ColorIdentity Hue
+ deriving (Show,Read,Eq,Ord,Generic,Enumerable)
 
-data ManaSymbol
- = GenericSymbol Natural
- | HueSymbol Hue
- | HybridSymbol Hybrid
+data ColorIndication
+ = ColorIndication Color
+ deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+
+----------------------------------------
+
+{-| All mana symbols are parametrized by the numeric type @i@, used by generic mana costs. When it's finite, the whole type is finite, and can thus be enumerated. 
+
+-}
+data ManaCost i
+ = ManaSymbols (ManaSymbol i)
+ deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+
+-- data ManaCost f i
+--  = ManaSymbols (f (ManaSymbol i))
+--  deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+
+data ManaSymbol i
+ = GenericSymbol   i
+ | HueSymbol       Hue
+ | HybridSymbol    (Hybrid i)
  | PhyrexianSymbol Phyrexian
+ deriving (Show,Read,Eq,Ord,Generic,Enumerable)
 
-data Hybrid
- = ColorHybrid (UnorderedPair Color Color)
- | GrayHybrid Natural Color
+data Hybrid i
+ = GuildHybrid Guild
+ | GrayHybrid i Color
+ deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+ --TODO GrayHybrid Natural Color
+ --deriving (Show,Read,Eq,Ord,Generic)
 
+--(UnorderedPair Color Color)
+
+-- | like an (inductive) unordered pair of 'Color'
+data Guild
+ = Azorius
+ | Dimir
+ | Rakdos
+ | Gruul
+ | Selesnya
+ | Orzhov
+ | Izzet
+ | Golgari
+ | Boros
+ | Simic
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
+
+{-
+{W}{U} Azorius Senate
+{U}{B} House Dimir
+{B}{R} Cult of Rakdos
+{R}{G} Gruul Clans
+{G}{W} Selesnya Conclave
+{W}{B} Orzhov Syndicate
+{U}{R} Izzet League
+{B}{G} Golgari Swarm
+{R}{W} Boros Legion
+{G}{U} Simic Combine
+-}
+
+
+-- -- | inductive unordered pair
+-- data Guild = UnorderedPair Color
+--  deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+--  -- inductive set?
+  
 data Phyrexian
  = Phyrexian Color
+ deriving (Show,Read,Eq,Ord,Generic,Enumerable)
 
 -- data ManaSymbol
 --  | ColorSymbol Color
 --  | ColorlessSymbol
 
----------------------------------------- 
+----------------------------------------
 
-type UnorderedPair a b = (a,b) --TODO
+data Is
+ = IsFace        Face
+ | IsFrame       Frame
+ | IsBorder      Border
+ | IsPredicate   KnownPredicate
+ deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+ 
+data Face
+ = NormalFace
+ | DoubleFace
+ | SplitFace
+ | FlipFace
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
+ 
+data Frame
+ = OldFrame
+ | TimeshiftedFrame
+ | NewFrame
+ | FutureFrame
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
+
+data Border
+ = BlackBordered
+ | WhiteBordered
+ | SilverBordered
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
+
+data KnownPredicate
+ = Spell
+ | Permanent
+ | Vanilla
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
+
+ {-
+
+ , "funny"
+ , "promo"
+
+ -}
 
 ----------------------------------------
 
-type SyntaxTable a = Map Text a
+data Rarity
+ = Common
+ | Uncommon
+ | Rare
+ | Mythic
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
+
+---------------------------------------- 
+
+--type UnorderedPair a b = (a,b) --TODO
+
+-- data UnorderedPair a
+--  = UnorderedPair 
+
+type Pretty a = a -> Text --TODO
+
+----------------------------------------
+
+type SyntaxTable a = [(Text,a)]
+--type SyntaxTable a = Map Text a
 
 ----------------------------------------
 
@@ -299,3 +437,4 @@ type G s a = PM s (P s a)
 type Complete a = (Maybe a, String)
 
 ----------------------------------------
+

@@ -146,7 +146,8 @@ library
 
 -- mine 
              , spiros
---              , enumerate 
+             , enumerate          >=0.2
+             , enumerate-function >=0.0.1
 
              , template-haskell
 

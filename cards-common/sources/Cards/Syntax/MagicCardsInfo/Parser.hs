@@ -186,6 +186,11 @@ import Cards.Syntax.MagicCardsInfo.Types
 import qualified Text.Parsers.Frisby as Frisby
 import           Text.Parsers.Frisby hiding (text)
 
+import Enumerate
+import Enumerate.Function
+
+import qualified Data.Text as T
+
 import Prelude.Spiros hiding (P, (<>))
 import Prelude (read)
 
@@ -205,6 +210,15 @@ text = toS > Frisby.text > fmap toS
 
 texts :: [Text] -> P s Text  
 texts = fmap text > choice
+
+alias :: Text -> a -> P s a
+alias t x = text t $> x
+
+aliases :: [(Text,a)] -> P s a
+aliases = fmap (alias&uncurry) > choice
+
+-- aliases :: [(Text,a)] -> P s a
+-- aliases = fmap (alias&uncurry) > choice 
 
 gQuotable :: P s a -> G s a
 gQuotable pUnquoted = do
@@ -297,23 +311,22 @@ invalidNakedChars =
 -- | for @"is"@ and @"not"@.
 identityKeywords :: [Text]
 identityKeywords =
- [ "split"
- , "flip"
- , "vanilla"
-
- , "old"
- , "new"
- , "future"
-
- , "timeshifted"
- , "funny"
- , "promo"
- , "promo"
- , "old"
-
+ [ "vanilla" 
  , "permanent"
  , "spell"
 
+ , "split"
+ , "flip"
+
+ , "new"
+ , "old"
+ 
+ , "future"
+ , "timeshifted"
+
+ , "funny"
+ , "promo"
+ 
  , "black-bordered"
  , "white-bordered"
  , "silver-bordered"
@@ -334,7 +347,7 @@ numericKeywords =
   , "pow"
   , "tou"
   ]
-  
+
 colorKeywords :: [Text]
 colorKeywords = 
   [ "c"
@@ -355,7 +368,7 @@ pColorKeywords = texts colorKeywords
 
 ---------------------------------------
 
-genericOperators :: SyntaxTable (SetComparator)
+genericOperators :: SyntaxTable (GenericComparator)
 genericOperators =
   [ ":"          -: Has
   , "!"          -: Is
@@ -372,6 +385,12 @@ numericOperators =
   , ">="         -: GreaterEquals
   ]
 
+-- booleanPrefixes :: SyntaxTable (GenericComparator)
+-- booleanPrefixes =
+--   [ "is"          -: Is
+--   , "not"         -: Isnt
+--   ]
+
 -- numericOperators :: SyntaxTable (Comparison Numeric)
 -- numericOperators =
 --   [ ":"          -: (Contains)
@@ -383,15 +402,18 @@ numericOperators =
 --   , ">="         -: (GEQ)
 --   ]
 
-pNumericOperators :: P s Text
-pNumericOperators = texts numericOperators
+pGenericOperators :: P s GenericComparator
+pGenericOperators = aliases genericOperators
+
+pNumericOperators :: P s NumericComparator
+pNumericOperators = aliases numericOperators
 
 ----------------------------------------
 
 gNumericComparison :: G s Attribute
-gNumericComparison = gAttribute' pNumeric
+gNumericComparison = _ -- gAttribute' pNumeric
 
-pNumeric :: P s Numeric
+pNumeric :: P s (Numeric i)
 pNumeric = _
 
 gIs :: G s Attribute
@@ -400,6 +422,130 @@ gIs = gAttribute ["is", "not"] [":"] (texts identityKeywords)
 
 gHas :: G s Attribute
 gHas = gAttribute ["has"] [":"] (texts possessionKeywords)
+
+---------------------------------------
+
+displayManaCost :: Pretty (ManaCost i)
+displayManaCost = \case
+  ManaSymbols symbols -> intercalate "" ts
+    where
+    ts = symbols <&> displayManaSymbol
+
+displayManaSymbol :: (Show i) => Pretty (ManaSymbol i)
+displayManaSymbol = \case
+  GenericSymbol i           -> displayGenericManaCost i
+  HueSymbol hue             -> displayHue hue
+  HybridSymbol hybrid       -> displayHybrid hybrid
+  PhyrexianSymbol phyrexian -> displayPhyrexian phyrexian
+
+displayHybrid :: (Show i) => Pretty (Hybrid i)
+displayHybrid = \case
+  GuildHybrid  guild -> displayGuildHybrid guild
+  GrayHybrid i color -> displayGrayHybrid i color
+
+displayGuildHybrid :: Pretty Guild
+displayGuildHybrid
+  = fromGuild'
+  > fmap (color2letter)
+  --displayColorHybrid colors = (colors & fromGuild) & 
+
+displayGrayHybrid :: (Show i) => i -> Color -> Text
+displayGrayHybrid i c = displayRawHybrid i' c'
+  where
+  i' = show i
+  c' = T.singleton (color2letter c)
+
+displayRawHybrid :: Text -> Text -> Text
+displayRawHybrid x y = "{" <> t <> "}"
+  where
+  t = x <> "/" <> y -- [x,y]
+
+displayPhyrexian :: Pretty Phyrexian
+displayPhyrexian = \case
+  Phyrexian color -> "{P" <> t <> "}"
+                     where
+                     t = T.singleton (color2letter c)
+
+---------------------------------------
+
+braces :: Text -> Text
+braces cs = "{" <> cs <> "}"
+
+-- | in ascending (canonical, i.e. WUBRG) order
+fromGuild' :: Guild -> [Color]
+fromGuild' = fromGuild > pair2list > sort
+ where
+ pair2list (x,y) = [x,y]
+
+fromGuild :: Guild -> (Color,Color)
+fromGuild = \case
+ Azorius  -> (White, Blue)
+ Dimir    -> (Blue,  Black)
+ Rakdos   -> (Black, Red)
+ Gruul    -> (Red,   Green)
+ Selesnya -> (Green, White)
+ Orzhov   -> (White, Black)
+ Golgari  -> (Black, Green)
+ Simic    -> (Green, Blue)
+ Izzet    -> (Blue,  Red)
+ Boros    -> (Red,   White)
+
+hue2letter :: Hue -> Char
+hue2letter = \case
+  TrueColor color -> color2letter color
+  Colorless       -> 'C'
+
+color2letter :: Color -> Char
+color2letter = \case
+   White -> 'W'
+   Blue  -> 'U'
+   Black -> 'B'
+   Red   -> 'R'
+   Green -> 'G'
+
+---------------------------------------
+-- Defined inverted for verifying surjectivity via pattern matching, can be inverted again.
+
+parseIs' :: Text -> Is
+parseIs' = invert' displayIs
+  
+displayIs :: Is -> Text
+displayIs = \case
+ IsFace      face      -> face      & displayFace
+ IsFrame     frame     -> frame     & displayFrame
+ IsBorder    border    -> border    & displayBorder
+ IsPredicate predicate -> predicate & displayPredicate
+
+displayFace :: Face                     -> Text
+displayFace = \case
+ NormalFace                             -> "normal"
+ DoubleFace                             -> "double"
+ SplitFace                              -> "split"
+ FlipFace                               -> "flip"
+ 
+displayFrame :: Frame                   -> Text
+displayFrame = \case
+ OldFrame                               -> "old"
+ TimeshiftedFrame                       -> "timeshifted"
+ NewFrame                               -> "new"
+ FutureFrame                            -> "future"
+
+displayBorder :: Border                 -> Text
+displayBorder = \case
+ BlackBordered                          -> "black"
+ WhiteBordered                          -> "white"
+ SilverBordered                         -> "silver"
+
+displayKnownPredicate :: KnownPredicate -> Text
+displayKnownPredicate = \case
+ Spell                                  -> "spell"
+ Permanent                              -> "permanent"
+ Vanilla                                -> "vanilla"
+
+----------------------------------------
+
+invert' :: (Enumerable a, Ord a, Ord b) => (a -> b) -> (Map b a)
+invert' f = invert f
 
 ----------------------------------------
 
