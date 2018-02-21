@@ -66,13 +66,23 @@ library
  default-language:    Haskell2010
  ghc-options:
   -Wall
--- disable
-  -fno-warn-unticked-promoted-constructors
--- enable
-  -fwarn-incomplete-uni-patterns
-  -fwarn-incomplete-record-updates
-  -fwarn-identities
-  -fwarn-missing-fields
+  -Wcompat
+
+  -- disable
+  -Wno-unticked-promoted-constructors
+
+  -- enable
+  -Wincomplete-uni-patterns
+  -Wincomplete-record-updates
+  -Widentities
+  -Wmissing-methods
+
+  -- raise a warning into an error
+  --TODO -Werror=missing-fields
+
+  -- use `typed-holes`, not `undefined`, during development
+  -fdefer-typed-holes
+  -Wtyped-holes
 
  default-extensions: NoImplicitPrelude
                      PackageImports AutoDeriveTypeable DeriveDataTypeable DeriveGeneric
@@ -153,6 +163,9 @@ library
 -- ekmett 
              , exceptions
              , lens
+
+-- parsing
+             , megaparsec
 
 -- other packages 
              , aeson

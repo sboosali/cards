@@ -63,15 +63,25 @@ flag dump-splices
 library
  hs-source-dirs:      sources
 
- ghc-options:
+ ghc-options:  
   -Wall
--- disable
-  -fno-warn-unticked-promoted-constructors
--- enable
-  -fwarn-incomplete-uni-patterns
-  -fwarn-incomplete-record-updates
-  -fwarn-identities
-  -fwarn-missing-fields
+  -Wcompat
+
+  -- disable
+  -Wno-unticked-promoted-constructors
+
+  -- enable
+  -Wincomplete-uni-patterns
+  -Wincomplete-record-updates
+  -Widentities
+  -Wmissing-methods
+
+  -- raise a warning into an error
+  --TODO -Werror=missing-fields
+
+  -- use `typed-holes`, not `undefined`, during development
+  -fdefer-typed-holes
+  -Wtyped-holes
 
  default-language:   Haskell2010
  default-extensions: PackageImports AutoDeriveTypeable DeriveDataTypeable DeriveGeneric
@@ -126,39 +136,39 @@ library
 
 ----------------------------------------
 
--- executable example-cards-backend
---  hs-source-dirs:      executables
---  main-is:             Main.hs
+executable example-cards-backend
+ hs-source-dirs:      executables
+ main-is:             Main.hs
 
---  default-language:    Haskell2010
---  ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+ default-language:    Haskell2010
+ ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
 
---  build-depends:
---     base
---   , cards-backend
+ build-depends:
+    base
+  , cards-backend
 
 
--- -- mtgjson.com
--- executable mtgjson 
---  hs-source-dirs:      executables
---  main-is:             DownloadAndUnzip.hs
+-- mtgjson.com
+executable mtgjson 
+ hs-source-dirs:      executables
+ main-is:             DownloadAndUnzip.hs
 
---  default-language:    Haskell2010
---  ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
---  ghc-options:         -fno-warn-missing-signatures -fno-warn-dodgy-exports -fno-warn-unused-imports
+ default-language:    Haskell2010
+ ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+ ghc-options:         -fno-warn-missing-signatures -fno-warn-dodgy-exports -fno-warn-unused-imports
 
---  build-depends:
---     base
---   , zlib
---   , tar
---   , zip-archive
---   , bytestring
---   , http-client 
---   , http-client-tls
---   , http-types 
---   , wreq
---   , lens
---   , lens-aeson
+ build-depends:
+    base
+  , zlib
+  , tar
+  , zip-archive
+  , bytestring
+  , http-client 
+  , http-client-tls
+  , http-types 
+  , wreq
+  , lens
+  , lens-aeson
 
 -- ----------------------------------------
 

@@ -14,23 +14,6 @@ import qualified Data.Text as T
   
 ----------------------------------------
 
-{-| @magiccards.info@'s sytax
-
--}
-data MCISyntax = MCISyntax
- { mciFreeText :: Maybe Text
- , mciFields   :: Map Text [Text]
- }
-
-----------------------------------------
-
-{-| @magiccards.info@'s behavior, features, predicates, etc.
-
--}
-data MCIQuery
-
-----------------------------------------
-
 -- {-|
 
 -- -}
@@ -47,10 +30,6 @@ data MCIQuery
 
 ----------------------------------------
 
-parseMCISyntax :: Text -> Maybe MCISyntax
-parseMCISyntax t = Just $ MCISyntax (Just t) []
-
-----------------------------------------
 
 ----------------------------------------
 

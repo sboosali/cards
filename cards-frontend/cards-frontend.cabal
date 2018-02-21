@@ -121,7 +121,7 @@ library
   -Wmissing-methods
 
   -- raise a warning into an error
-  -Werror=missing-fields
+  --TODO -Werror=missing-fields
 
   -- use `typed-holes`, not `undefined`, during development
   -fdefer-typed-holes

@@ -1,4 +1,7 @@
 
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedLists #-}
+
 {-| 
 
 -}
