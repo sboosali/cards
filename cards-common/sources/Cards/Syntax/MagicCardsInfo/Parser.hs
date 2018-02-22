@@ -1,4 +1,10 @@
 
+{-# LANGUAGE CPP #-}
+
+#ifdef USE_TEMPLATE_HASKELL
+{-# LANGUAGE TemplateHaskell #-}
+#endif
+
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE RecursiveDo #-}
@@ -188,6 +194,8 @@ import Cards.Syntax.MagicCardsInfo.Printer
 --import qualified Text.Parsers.Frisby as Frisby
 import           Text.Parsers.Frisby hiding (text, (<>))
 
+import Data.Thyme (Day)
+
 import Enumerate
 -- import Enumerate.Function
 
@@ -199,12 +207,60 @@ import qualified Data.Map as Map
 import Prelude.Spiros hiding (P)
 
 ----------------------------------------
+  
+runMagicCardsInfo' :: String -> (Complete Syntax_)
+runMagicCardsInfo' = runPeg gMagicCardsInfo' 
 
-display2parse
-  :: (Enumerable a, Ord a)
-  => (a -> Text)
-  -> (Text -> Maybe a)
-display2parse f = (Map.lookup&flip) (invert' f)
+gMagicCardsInfo' :: PM s (P s (Complete Syntax_))
+gMagicCardsInfo' = complete gMagicCardsInfo
+
+runMagicCardsInfo :: String -> Syntax_
+runMagicCardsInfo = runPeg gMagicCardsInfo 
+
+---------------------------------------
+
+--NOTE leading or trailing whitespace, whether around the whole query or between attributes, never matters. 
+
+{-|
+
+e.g.
+
+@
+-- a:"Quinton Hoover"
+Statement "a" ":" (Text' "Quinton Hoover")
+
+-- e:al/en
+Statement "e" ":" (Separated "/" ["al", "en"])
+
+-- e:al/en,be -e:al+be
+Separated " "
+ [ Statement "e" ":"
+   ( Separated ","
+     [ Separated "/" ["al", "en"]
+     , "be"
+     ])
+ , Prefixed "-"
+     ( Statement "e" ":"
+        ( Separated "+" ["al", "be"]))
+ ]
+
+-- year<=1995
+Statement "year" "<=" (Date' 1995)
+@
+
+i.e.: we don't interpret the meaning of anything, like the string "<=", but we do: (1) parse into simple types, like strings, dates, or some enums (like color); and (2), group substrings via the associativity / precedence of the operators, both alphabetic and symbolic, like the unary prefixes "-" and "not", or distinguishing @"/"@ from @","@ in @"al/en,be"@ (i.e., as an sexp, @(("al" "/" "en") "," "be")", including pseudo-operators ("whitepsace juxtaposition" and parentheses). 
+
+
+-}
+gMagicCardsInfo :: PM s (P s Syntax_)
+gMagicCardsInfo = mdo
+    p <- rule $ _
+    
+    return p
+ -- numbers / dates?
+
+----------------------------------------
+
 
 ----------------------------------------
 
@@ -223,13 +279,12 @@ cmc:3
 is parsed by
 
 @
-attribute ["cmc", ...] [":", ...] number
+attribute ["cmc", ...] [":", ...] 'pNumeric'
 -- where number :: P s Numeric
 @
 
 
 -}
-
 attribute :: [Text] -> [Text] -> P s Text -> P s Attribute
 attribute keywords seperators pConstraint = a
   where
@@ -238,6 +293,51 @@ attribute keywords seperators pConstraint = a
   v = texts seperators
   o = quotable pConstraint
   a = Attribute <$> s <*> v <*> o
+
+{-|
+
+
+-}  
+enumAttribute :: [Text] -> [Text] -> [Text] -> P s Attribute
+enumAttribute x y constraints = attribute x y (texts constraints)
+
+{-|
+
+
+-}  
+numericAttribute :: [Text] -> P s Attribute
+numericAttribute x = attribute x numericOperators_ pNumeric
+
+{-|
+
+
+-}  
+chromaticAttribute :: [Text] -> P s Attribute
+chromaticAttribute x = attribute x numericOperators_ pChromatic
+
+{-|
+
+e.g.
+
+@
+t:"arcane instant"
+@
+
+is parsed by
+
+@
+textAttribute ["t", ...]
+@
+
+aka
+
+@
+attribute ["t", ...] [":", "!"] 'pText'
+@
+
+-}  
+textAttribute :: [Text] -> P s Attribute
+textAttribute keywords = attribute keywords genericOperators_ pText
 
 -- attribute :: [Text] -> SyntaxTable a -> P s Text -> P s Attribute
 -- attribute keywords seperators pConstraint = p
@@ -256,22 +356,107 @@ attribute keywords seperators pConstraint = a
 --   return p
 
 ----------------------------------------
+
+pOracle :: P s Attribute
+pOracle = textAttribute ["o"] 
+--pOracle = attribute ["o"] genericOperators_ pText
+-- TODO magiccards.info doesn't support equality, e.g. `o!Flying`
+
+pTypes :: P s Attribute
+pTypes = textAttribute ["t"] 
+--pTypes = attribute ["t"] genericOperators_ pText
+
+pArtist :: P s Attribute
+pArtist = textAttribute ["a"] 
   
-runMagicCardsInfo' :: String -> (Complete Syntax)
-runMagicCardsInfo' = runPeg gMagicCardsInfo' 
+----------------------------------------
 
-gMagicCardsInfo' :: PM s (P s (Complete Syntax))
-gMagicCardsInfo' = complete gMagicCardsInfo
+pCMC :: P s Attribute
+pCMC = numericAttribute ["cmc"] 
 
-runMagicCardsInfo :: String -> Syntax
-runMagicCardsInfo = runPeg gMagicCardsInfo 
+pPower :: P s Attribute
+pPower = numericAttribute ["pow"]
+
+pToughness :: P s Attribute
+pToughness = numericAttribute ["tou"] 
 
 ----------------------------------------
 
+pYear :: P s Attribute
+pYear = attribute ["year"] numericOperators_ pDate
+
+pMana :: P s Attribute
+pMana = attribute ["mana"] 
 
 ----------------------------------------
 
+pColor :: P s Attribute
+pColor = colorAttribute ["c"] []
 
+pColorIdentity :: P s Attribute
+pColorIdentity = colorAttribute ["ci"] []
+
+pColorIndication :: P s Attribute
+pColorIndication = colorAttribute ["in"]  []
+
+----------------------------------------
+  
+pEdition :: P s Attribute
+pEdition = enumAttribute ["e"] []
+
+pFormat :: P s Attribute
+pFormat = enumAttribute ["f"]  []
+  
+pRarity :: P s Attribute
+pRarity = enumAttribute ["r"]  []
+
+pLegality :: P s Attribute
+pLegality = enumAttribute ["banned", "legal", "restricted"] []
+
+pLanguage :: P s Attribute
+pLanguage = enumAttribute ["l"]  []
+
+pIs :: P s Attribute
+--pIs :: Grammar Attribute --gIdentity
+pIs = enumAttribute ["is", "not"] [":"] identityKeywords
+
+pHas :: P s Attribute
+pHas = enumAttribute ["has"] [":"] possessionKeywords
+
+----------------------------------------
+
+pText :: P s Text
+pText = _
+
+pNumeric :: P s (Numeric i)
+pNumeric = _
+
+pChromatic :: P s Chromatic
+pChromatic = _
+
+pDate :: P s Day
+pDate = _  
+
+-- pGenericOperators :: P s GenericComparator
+-- pGenericOperators = aliases genericOperators
+
+-- pNumericOperators :: P s NumericComparator
+-- pNumericOperators = aliases numericOperators
+
+-- pNumericComparison :: P s Attribute
+-- pNumericComparison = _ -- pAttribute' pNumeric
+
+----------------------------------------
+
+pValidText :: P s Text
+pValidText = many1 pValidChar 
+
+pValidChar :: P s Char
+pValidChar = noneOf
+
+invalidNakedChars :: [Char]
+invalidNakedChars =
+  " :!\"()"
 
 ----------------------------------------
 
@@ -320,10 +505,6 @@ allInfixOperators =
   , "and"        -: ()
   ]
 
-invalidNakedChars :: [Char]
-invalidNakedChars =
-  " :!\"()"
-
 -- | for @"is"@ and @"not"@.
 identityKeywords :: [Text]
 identityKeywords =
@@ -355,7 +536,7 @@ possessionKeywords =
   ]
 
 ----------------------------------------
-  
+
 numericKeywords :: [Text]
 --tsNumeric
 numericKeywords = 
@@ -390,6 +571,9 @@ genericOperators =
   , "!"          -: Is
   ]
 
+genericOperators_ :: [Text]
+genericOperators_ = genericOperators & fmap fst
+
 numericOperators :: SyntaxTable (NumericComparator)
 numericOperators =
   [ ":"          -: Equals -- HAS
@@ -418,27 +602,6 @@ numericOperators =
 --   , ">="         -: (GEQ)
 --   ]
 
-pGenericOperators :: P s GenericComparator
-pGenericOperators = aliases genericOperators
-
-pNumericOperators :: P s NumericComparator
-pNumericOperators = aliases numericOperators
-
-----------------------------------------
-
-pNumericComparison :: P s Attribute
-pNumericComparison = _ -- pAttribute' pNumeric
-
-pNumeric :: P s (Numeric i)
-pNumeric = _
-
-pIs :: P s Attribute
---pIs :: Grammar Attribute --gIdentity
-pIs = attribute ["is", "not"] [":"] (texts identityKeywords)
-
-pHas :: P s Attribute
-pHas = attribute ["has"] [":"] (texts possessionKeywords)
-
 ---------------------------------------  
 
 parseManaCost
@@ -454,12 +617,14 @@ parseManaSymbol = display2parse displayManaSymbol
 parseIs :: Text -> Maybe Is
 parseIs = display2parse displayIs
 
----------------------------------------
+----------------------------------------
 
-gMagicCardsInfo :: PM s (P s Syntax)
-gMagicCardsInfo = mdo
-    p <- rule $ _
-    return p
+display2parse
+  :: (Enumerable a, Ord a)
+  => (a -> Text)
+  -> (Text -> Maybe a)
+display2parse = injection
+--display2parse f = (Map.lookup&flip) (invert' f)
 
 ----------------------------------------
 

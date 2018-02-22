@@ -18,7 +18,6 @@ import Prelude.Spiros hiding (P)
 
 ----------------------------------------
 
-
 displayManaCost :: (Show i) => Pretty (ManaCost i)
 displayManaCost = \case
   ManaCost mana -> mana & maybe "" displayManaSymbols
@@ -120,7 +119,6 @@ color2letter = \case
    Green -> 'G'
 
 ---------------------------------------
--- Defined inverted for verifying surjectivity via pattern matching, can be inverted again.
 
 -- --Map Text Is’
 
