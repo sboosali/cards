@@ -147,8 +147,6 @@ o:"whenever ~" ((o:"deals damage to a" or o:"deals combat damage to a") (o:oppon
 -}
 module Cards.Syntax.MagicCardsInfo.Types where
 
-import Text.Parsers.Frisby (P,PM)
-
 import Enumerate
 
 import Prelude.Spiros hiding (P)
@@ -439,14 +437,6 @@ type SyntaxTable a = [(Text,a)]
 {-| @magiccards.info@'s behavior, features, predicates, etc.
 
 -}
-
-----------------------------------------
-
-type G s a = PM s (P s a)  
---type Grammar s a = PM s (P s a)
---type Parser  s a = P s a
-
-type Complete a = (Maybe a, String)
 
 ----------------------------------------
 

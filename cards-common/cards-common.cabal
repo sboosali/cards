@@ -109,6 +109,7 @@ library
                  Cards.Syntax.MagicCardsInfo
                  Cards.Syntax.MagicCardsInfo.Types
                  Cards.Syntax.MagicCardsInfo.Parser
+                 Cards.Syntax.MagicCardsInfo.Printer
                  Cards.Syntax.MagicCardsInfo.Compiler
                  
                  MTGJSON
@@ -132,6 +133,8 @@ library
                  MTGJSON.Extra                 
                  
  other-modules:
+
+                 Cards.Syntax.Extra
 
                  Cards.Common.Extra
 --                 Cards.Common.UnicodeShow

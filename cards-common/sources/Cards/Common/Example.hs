@@ -4,7 +4,7 @@
 module Cards.Common.Example where
 
 -- import Cards.Common
-import Cards.Syntax.MagicCardsInfo.Parser 
+--import Cards.Syntax.MagicCardsInfo.Parser 
 
 import System.Environment
 
