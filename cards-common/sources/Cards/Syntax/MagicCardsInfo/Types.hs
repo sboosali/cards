@@ -786,9 +786,10 @@ data Language
 
 ----------------------------------------
 
-data QualifiedEdition
- = QualifiedEdition Edition (Maybe Language)
- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
+data QualifiedEdition = QualifiedEdition
+ { _qEdition  :: Edition
+ , _qLanguage :: Maybe Language
+ } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
 
 data EditionInfo = EditionInfo
  { _editionBlock        :: Block

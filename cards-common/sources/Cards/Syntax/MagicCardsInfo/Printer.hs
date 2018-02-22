@@ -1,6 +1,4 @@
---{-# LANGUAGE OverloadedLabels, DuplicateRecordFields #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE OverloadedLists #-}
 
 {-|
 
@@ -17,6 +15,15 @@ import qualified Data.Text.Lazy as T
 import Prelude.Spiros hiding (P)
 
 ----------------------------------------
+----------------------------------------
+-- non-finite types...
+-- (i.e. not necessarily finite)
+
+displayChromatic :: Pretty Chromatic
+displayChromatic (Chromatic cs)
+  = cs
+  & fmap displayChroma
+  & T.intercalate "" 
 
 displayManaCost :: (Show i) => Pretty (ManaCost i)
 displayManaCost = \case
@@ -28,18 +35,56 @@ displayManaSymbols (ManaSymbols symbols) = t
     t  = ts & T.intercalate ""         -- e.g. "{2}{U}{G}"
     ts = symbols <&> displayManaSymbol -- e.g. ["{2}","{U}","{G}"]
 
+----------------------------------------
+----------------------------------------
+-- finite types...
+
+----------------------------------------
+
+displayNumeric :: (Show i) => Pretty (Numeric i)
+displayNumeric = \case
+  Constant i -> displayNumericConstant i
+  Variable i -> displayNumericVariable i
+
+displayNumericConstant :: (Show i) => Pretty (NumericConstant i)
+displayNumericConstant = \case
+  NumericLiteral i -> show' i
+  WildcardConstant -> "*"
+
+displayNumericVariable :: Pretty NumericVariable
+displayNumericVariable = \case
+  PowerVariable     -> "pow"
+  ToughnessVariable -> "tou"
+  CostVariable      -> "cmc"
+
+----------------------------------------
+
+displayChroma :: Pretty Chroma
+displayChroma = \case
+ Hue          hue -> hue2text hue
+ Multicolored     -> "m"
+ LandColor        -> "l"
+
+displayColorIdentity :: Pretty ColorIdentity
+displayColorIdentity (ColorIdentity hue) = hue2text hue
+
+displayColorIndication :: Pretty ColorIndication
+displayColorIndication (ColorIndication color) = color2text color 
+
+----------------------------------------
+
 displayManaSymbol :: (Show i) => Pretty (ManaSymbol i)
 displayManaSymbol = \case
-  GenericSymbol      i         -> displayGenericManaCost i
-  HueSymbol          hue       -> displayHue             hue
-  HybridSymbol       hybrid    -> displayHybrid          hybrid
-  PhyrexianSymbol    phyrexian -> displayPhyrexian       phyrexian
+  GenericSymbol      i         -> displayGenericSymbol   i 
+  HueSymbol          hue       -> displayHueSymbol       hue
+  HybridSymbol       hybrid    -> displayHybridSymbol    hybrid
+  PhyrexianSymbol    phyrexian -> displayPhyrexianSymbol phyrexian
 
-displayGenericManaCost :: (Show i) => Pretty i
-displayGenericManaCost = show > toS > braces
+displayGenericSymbol :: (Show i) => Pretty i
+displayGenericSymbol = show > toS > braces
 
-displayHue :: Pretty Hue
-displayHue = hue2letter > char2text > braces
+displayHueSymbol :: Pretty Hue
+displayHueSymbol = hue2letter > char2text > braces
 
 -- \case
 --   TrueColor c -> displayColor c
@@ -48,32 +93,32 @@ displayHue = hue2letter > char2text > braces
 -- displayColor :: Pretty Color
 -- displayColor = color2letter > braces
 
-displayHybrid :: (Show i) => Pretty (Hybrid i)
-displayHybrid = \case
-  GuildHybrid  guild -> displayGuildHybrid guild
-  GrayHybrid i color -> displayGrayHybrid i color
+displayHybridSymbol :: (Show i) => Pretty (Hybrid i)
+displayHybridSymbol = \case
+  GuildHybrid  guild -> displayGuildHybridSymbol guild
+  GrayHybrid i color -> displayGrayHybridSymbol i color
 
-displayGuildHybrid :: Pretty Guild
-displayGuildHybrid
+displayGuildHybridSymbol :: Pretty Guild
+displayGuildHybridSymbol
   = fromGuild'
   > fmap (color2text) -- e.g. ["U","G"]
   > T.intercalate "/" -- e.g. "U/G"
   > braces            -- e.g. "{U/G}"
   --displayColorHybrid colors = (colors & fromGuild) & 
 
-displayGrayHybrid :: (Show i) => i -> Color -> Text
-displayGrayHybrid i c = displayRawHybrid i' c'
+displayGrayHybridSymbol :: (Show i) => i -> Color -> Text
+displayGrayHybridSymbol i c = displayRawHybridSymbol i' c'
   where
   i' = show' i
   c' = char2text (color2letter c)
 
-displayRawHybrid :: Text -> Text -> Text
-displayRawHybrid x y = "{" <> t <> "}"
+displayRawHybridSymbol :: Text -> Text -> Text
+displayRawHybridSymbol x y = "{" <> t <> "}"
   where
   t = x <> "/" <> y -- [x,y]
 
-displayPhyrexian :: Pretty Phyrexian
-displayPhyrexian = \case
+displayPhyrexianSymbol :: Pretty Phyrexian
+displayPhyrexianSymbol = \case
   Phyrexian c -> "{P" <> t <> "}"
                      where
                      t = char2text (color2letter c)
@@ -157,6 +202,21 @@ displayPredicate = \case
 
 ----------------------------------------
 
+{-|
+
+@
+= 'language2abbreviation'
+@
+
+>>> displayLanguage English
+"en"
+
+-}
+displayLanguage :: Pretty Language
+displayLanguage = language2abbreviation
+  
+----------------------------------------
+
 languageInfo :: Language -> LanguageInfo
 languageInfo = \case  
  English    -> LanguageInfo "en" "English"
@@ -171,22 +231,42 @@ languageInfo = \case
  Taiwanese  -> LanguageInfo "tw" "繁體中文"
  Korean     -> LanguageInfo "ko" "한국어"
 
--- languageAbbreviation :: Language -> Text
--- languageAbbreviation = languageInfo > _abbreviation
+language2abbreviation :: Language -> Text
+language2abbreviation = languageInfo > _abbreviation
 
--- languageEndonym :: Language -> Text
--- languageEndonym = languageInfo > _endonym
+language2endonym :: Language -> Text
+language2endonym = languageInfo > _endonym
 
 ----------------------------------------
 
--- editionBlock :: Edition -> Block
--- editionBlock = editionInfo > _block 
+{-|
 
--- editionAbbreviation :: Edition -> Text
--- editionAbbreviation = editionInfo > _abbreviation
+see 'edition2abbreviation' and 'language2abbreviation'. 
 
--- editionDescription :: Edition -> Text
--- editionDescription = editionInfo > _description
+>>> displayQualifiedEdition $ QualifiedEdition Alpha Nothing
+"al"
+
+>>> displayQualifiedEdition $ QualifiedEdition Alpha (Just English)
+"al/en"
+
+-}
+displayQualifiedEdition :: Pretty QualifiedEdition
+displayQualifiedEdition QualifiedEdition{..} = e <> l
+  where
+  e  = _qEdition  & edition2abbreviation
+  l  = l' & maybe "" (\t -> "/" <> t)
+  l' = _qLanguage <&> displayLanguage 
+
+----------------------------------------
+
+edition2block :: Edition -> Block
+edition2block = editionInfo > _block 
+
+edition2abbreviation :: Edition -> Text
+edition2abbreviation = editionInfo > _abbreviation
+
+edition2description :: Edition -> Text
+edition2description = editionInfo > _description
 
 editionInfo :: Edition -> EditionInfo
 editionInfo = \case
