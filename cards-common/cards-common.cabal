@@ -178,6 +178,7 @@ library
              , binary
              , file-embed
              , time
+             , thyme
 
 ----------------------------------------
 

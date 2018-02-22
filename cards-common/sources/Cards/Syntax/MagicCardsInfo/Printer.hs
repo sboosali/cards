@@ -1,3 +1,4 @@
+--{-# LANGUAGE OverloadedLabels, DuplicateRecordFields #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE OverloadedLists #-}
 
@@ -155,5 +156,168 @@ displayPredicate = \case
  Spell            -> "spell"
  Permanent        -> "permanent"
  Vanilla          -> "vanilla"
+
+----------------------------------------
+
+languageInfo :: Language -> LanguageInfo
+languageInfo = \case  
+ English    -> LanguageInfo "en" "English"
+ German     -> LanguageInfo "de" "Deutsch"
+ French     -> LanguageInfo "fr" "Français"
+ Italian    -> LanguageInfo "it" "Italiano"
+ Spanish    -> LanguageInfo "es" "Español"
+ Portuguese -> LanguageInfo "pt" "Português"
+ Japanese   -> LanguageInfo "jp" "日本語"
+ Chinese    -> LanguageInfo "cn" "简体中文"
+ Russian    -> LanguageInfo "ru" "Русский"
+ Taiwanese  -> LanguageInfo "tw" "繁體中文"
+ Korean     -> LanguageInfo "ko" "한국어"
+
+-- languageAbbreviation :: Language -> Text
+-- languageAbbreviation = languageInfo > _abbreviation
+
+-- languageEndonym :: Language -> Text
+-- languageEndonym = languageInfo > _endonym
+
+----------------------------------------
+
+-- editionBlock :: Edition -> Block
+-- editionBlock = editionInfo > _block 
+
+-- editionAbbreviation :: Edition -> Text
+-- editionAbbreviation = editionInfo > _abbreviation
+
+-- editionDescription :: Edition -> Text
+-- editionDescription = editionInfo > _description
+
+editionInfo :: Edition -> EditionInfo
+editionInfo = \case
+
+ RIX    -> EditionInfo Ixalan               "rix" "Rivals of Ixalan"
+ XLN    -> EditionInfo Ixalan               "xln" "Ixalan"
+
+ HOU    -> EditionInfo Amonkhet             "hou" "Hour of Devastation" 
+ AKH    -> EditionInfo Amonkhet             "akh" "Amonkhet" 
+
+ AER    -> EditionInfo Kaladesh             "aer" "Aether Revolt"
+ KLD    -> EditionInfo Kaladesh             "kld" "Kaladesh"
+
+ EMN    -> EditionInfo ShadowsOverInnistrad "emn" "Eldritch Moon"
+ SOI    -> EditionInfo ShadowsOverInnistrad "soi" "Shadows over Innistrad"
+
+ OGW    -> EditionInfo BattleForZendikar    "ogw" "Oath of the Gatewatch"
+ BFZ    -> EditionInfo BattleForZendikar    "bfz" "Battle for Zendikar"
+
+ DTK    -> EditionInfo KhansOfTarkir        "dtk" "Dragons of Tarkir"
+ FRF    -> EditionInfo KhansOfTarkir        "frf" "Fate Reforged"
+ KTK    -> EditionInfo KhansOfTarkir        "ktk" "Khans of Tarkir"
+
+ JOU    -> EditionInfo Theros               "jou" "Journey into Nyx"
+ BNG    -> EditionInfo Theros               "bng" "Born of the Gods"
+ THS    -> EditionInfo Theros               "ths" "Theros"
+
+ DGM    -> EditionInfo ReturnToRavnica      "dgm" "Dragon's Maze"
+ GTC    -> EditionInfo ReturnToRavnica      "gtc" "Gatecrash"
+ RTR    -> EditionInfo ReturnToRavnica      "rtr" "Return to Ravnica"
+
+ AVR    -> EditionInfo InnistradCycle       "avr" "Avacyn Restored"
+ DKA    -> EditionInfo InnistradCycle       "dka" "Dark Ascension"
+ ISD    -> EditionInfo InnistradCycle       "isd" "Innistrad"
+
+ NPH    -> EditionInfo ScarsOfMirrodin      "nph" "New Phyrexia"
+ MBS    -> EditionInfo ScarsOfMirrodin      "mbs" "Mirrodin Besieged"
+ SOM    -> EditionInfo ScarsOfMirrodin      "som" "Scars of Mirrodin"
+
+ ROE    -> EditionInfo ZendikarCycle        "roe" "Rise of the Eldrazi"
+ WWK    -> EditionInfo ZendikarCycle        "wwk" "Worldwake"
+ ZEN    -> EditionInfo ZendikarCycle        "zen" "Zendikar"
+
+ ARB    -> EditionInfo ShardsOfAlara        "arb" "Alara Reborn"
+ CFX    -> EditionInfo ShardsOfAlara        "cfx" "Conflux"
+ ALA    -> EditionInfo ShardsOfAlara        "ala" "Shards of Alara"
+
+ EVE    -> EditionInfo ShadowmoorCycle      "eve" "Eventide"
+ SHM    -> EditionInfo ShadowmoorCycle      "shm" "Shadowmoor"
+
+ MT     -> EditionInfo LorwynCycle          "mt" "Morningtide"
+ LW     -> EditionInfo LorwynCycle          "lw" "Lorwyn"
+
+ FUT    -> EditionInfo TimeSpiralCycle      "fut" "Future Sight"
+ PC     -> EditionInfo TimeSpiralCycle      "pc" "Planar Chaos"
+ TS     -> EditionInfo TimeSpiralCycle      "ts" "Time Spiral"
+ TSTS   -> EditionInfo TimeSpiralCycle      "tsts" "Time Spiral Timeshifted"
+
+ CS     -> EditionInfo IceAgeCycle          "cs" "Coldsnap"
+ AI     -> EditionInfo IceAgeCycle          "ai" "Alliances"
+ IA     -> EditionInfo IceAgeCycle          "ia" "Ice Age"
+
+ DI     -> EditionInfo RavnicaCycle         "di" "Dissension"
+ GP     -> EditionInfo RavnicaCycle         "gp" "Guildpact"
+ RAV    -> EditionInfo RavnicaCycle         "rav" "Ravnica: City of Guilds"
+
+ SOK    -> EditionInfo KamigawaCycle        "sok" "Saviors of Kamigawa"
+ BOK    -> EditionInfo KamigawaCycle        "bok" "Betrayers of Kamigawa"
+ CHK    -> EditionInfo KamigawaCycle        "chk" "Champions of Kamigawa"
+
+ DN5    -> EditionInfo MirrodinCycle        "5dn" "Fifth Dawn"
+ DS     -> EditionInfo MirrodinCycle        "ds" "Darksteel"
+ MI     -> EditionInfo MirrodinCycle        "mi" "Mirrodin"
+
+ SC     -> EditionInfo OnslaughtCycle       "sc" "Scourge"
+ LE     -> EditionInfo OnslaughtCycle       "le" "Legions"
+ ON     -> EditionInfo OnslaughtCycle       "on" "Onslaught"
+
+ JU     -> EditionInfo OdysseyCycle         "ju" "Judgment"
+ TR     -> EditionInfo OdysseyCycle         "tr" "Torment"
+ OD     -> EditionInfo OdysseyCycle         "od" "Odyssey"
+
+ AP     -> EditionInfo InvasionCycle        "ap" "Apocalypse"
+ PS     -> EditionInfo InvasionCycle        "ps" "Planeshift"
+ IN     -> EditionInfo InvasionCycle        "in" "Invasion"
+
+ PR     -> EditionInfo MasqueradeCycle      "pr" "Prophecy"
+ NE     -> EditionInfo MasqueradeCycle      "ne" "Nemesis"
+ MM     -> EditionInfo MasqueradeCycle      "mm" "Mercadian Masques"
+
+ UD     -> EditionInfo ArtifactsCycle       "ud" "Urza's Destiny"
+ UL     -> EditionInfo ArtifactsCycle       "ul" "Urza's Legacy"
+ US     -> EditionInfo ArtifactsCycle       "us" "Urza's Saga"
+
+ EX     -> EditionInfo RathCycle            "ex" "Exodus"
+ SH     -> EditionInfo RathCycle            "sh" "Stronghold"
+ TP     -> EditionInfo RathCycle            "tp" "Tempest"
+
+ WL     -> EditionInfo MirageCycle          "wl" "Weatherlight"
+ VI     -> EditionInfo MirageCycle          "vi" "Visions"
+ MR     -> EditionInfo MirageCycle          "mr" "Mirage"
+
+ HL     -> EditionInfo EarlySets            "hl" "Homelands"
+ FE     -> EditionInfo EarlySets            "fe" "Fallen Empires"
+ DK     -> EditionInfo EarlySets            "dk" "The Dark"
+ LG     -> EditionInfo EarlySets            "lg" "Legends"
+ AQ     -> EditionInfo EarlySets            "aq" "Antiquities"
+ AN     -> EditionInfo EarlySets            "an" "Arabian Nights"
+
+ ORI    -> EditionInfo CardinalCore         "ori" "Magic Origins"
+ M15    -> EditionInfo CardinalCore         "m15" "Magic 2015"
+ M14    -> EditionInfo CardinalCore         "m14" "Magic 2014 Core Set"
+ M13    -> EditionInfo CardinalCore         "m13" "Magic 2013"
+ M12    -> EditionInfo CardinalCore         "m12" "Magic 2012"
+ M11    -> EditionInfo CardinalCore         "m11" "Magic 2011"
+ M10    -> EditionInfo CardinalCore         "m10" "Magic 2010"
+
+ E10    -> EditionInfo OrdinalCore          "10e" "Tenth Edition"
+ E9     -> EditionInfo OrdinalCore          "9e" "Ninth Edition"
+ E8     -> EditionInfo OrdinalCore          "8e" "Eighth Edition"
+ E7     -> EditionInfo OrdinalCore          "7e" "Seventh Edition"
+ E6     -> EditionInfo OrdinalCore          "6e" "Classic Sixth Edition"
+ E5     -> EditionInfo OrdinalCore          "5e" "Fifth Edition"
+ E4     -> EditionInfo OrdinalCore          "4e" "Fourth Edition"
+
+ SUMMER -> EditionInfo Antediluvian         "summer" "Revised Edition Edgar"
+ RV     -> EditionInfo Antediluvian         "rv" "Revised Edition"
+ UN     -> EditionInfo Antediluvian         "un" "Unlimited Edition"
+ BE     -> EditionInfo Antediluvian         "be" "Limited Edition Beta"
+ AL     -> EditionInfo Antediluvian         "al" "Limited Alpha Edition"
 
 ----------------------------------------

@@ -6,6 +6,27 @@
 {-|
 
 
+========================================
+
+MagicCards.Info Enumerations\/Abbreviations: <https://magiccards.info/sitemap.html>
+
+@
+English English
+Deutsch Deutsch
+Français Français
+Italiano Italiano
+Español Español
+Português Português    
+日本語 日本語
+简体中文 简体中文
+Русский Русский
+繁體中文 繁體中文
+한국어 한국어
+@
+
+
+========================================
+
 MagicCards.Info Syntax: <https://magiccards.info/syntax.html>
 
 
@@ -139,7 +160,297 @@ o:"whenever ~" ((o:"deals damage to a" or o:"deals combat damage to a") (o:oppon
 
 
 ========================================
+Editions i.e. Sets\/Blocks
+TODO
 
+Expansions
+Ixalan 
+RIX -> "Rivals of Ixalan" "rix"
+XLN -> "Ixalan" "xln"
+Amonkhet
+Hour of Devastation hou
+Amonkhet akh
+Kaladesh
+Aether Revolt aer
+Kaladesh kld
+Shadows over Innistrad
+Eldritch Moon emn
+Shadows over Innistrad soi
+Battle for Zendikar
+Oath of the Gatewatch ogw
+Battle for Zendikar bfz
+Khans of Tarkir
+Dragons of Tarkir dtk
+Fate Reforged frf
+Khans of Tarkir ktk
+Theros
+Journey into Nyx jou
+Born of the Gods bng
+Theros ths
+Return to Ravnica
+Dragon's Maze dgm
+Gatecrash gtc
+Return to Ravnica rtr
+Innistrad Cycle
+Avacyn Restored avr
+Dark Ascension dka
+Innistrad isd
+Scars of Mirrodin
+New Phyrexia nph
+Mirrodin Besieged mbs
+Scars of Mirrodin som
+Zendikar Cycle
+Rise of the Eldrazi roe
+Worldwake wwk
+Zendikar zen
+Shards of Alara
+Alara Reborn arb
+Conflux cfx
+Shards of Alara ala
+Shadowmoor Cycle
+Eventide eve
+Shadowmoor shm
+Lorwyn Cycle
+Morningtide mt
+Lorwyn lw
+Time Spiral Cycle
+Future Sight fut
+Planar Chaos pc
+Time Spiral ts
+Time Spiral "Timeshifted" tsts
+Ice Age Cycle
+Coldsnap cs
+Alliances ai
+Ice Age ia
+Ravnica Cycle
+Dissension di
+Guildpact gp
+Ravnica: City of Guilds rav
+Kamigawa Cycle
+Saviors of Kamigawa sok
+Betrayers of Kamigawa bok
+Champions of Kamigawa chk
+Mirrodin Cycle
+Fifth Dawn 5dn
+Darksteel ds
+Mirrodin mi
+Onslaught Cycle
+Scourge sc
+Legions le
+Onslaught on
+Odyssey Cycle
+Judgment ju
+Torment tr
+Odyssey od
+Invasion Cycle
+Apocalypse ap
+Planeshift ps
+Invasion in
+Masquerade Cycle
+Prophecy pr
+Nemesis ne
+Mercadian Masques mm
+Artifacts Cycle
+Urza's Destiny ud
+Urza's Legacy ul
+Urza's Saga us
+Rath Cycle
+Exodus ex
+Stronghold sh
+Tempest tp
+Mirage Cycle
+Weatherlight wl
+Visions vi
+Mirage mr
+Early Sets
+Homelands hl
+Fallen Empires fe
+The Dark dk
+Legends lg
+Antiquities aq
+Arabian Nights an
+
+Core Sets
+Core Set Editions
+Magic Origins ori
+Magic 2015 m15
+Magic 2014 Core Set m14
+Magic 2013 m13
+Magic 2012 m12
+Magic 2011 m11
+Magic 2010 m10
+Tenth Edition 10e
+Ninth Edition 9e
+Eighth Edition 8e
+Seventh Edition 7e
+Classic Sixth Edition 6e
+Fifth Edition 5e
+Fourth Edition 4e
+Revised Edition (Summer Magic "Edgar") summer
+Revised Edition rv
+Unlimited Edition un
+Limited Edition Beta be
+Limited Edition Alpha al
+
+MTGO
+Magic Online
+Vintage Masters vma
+MTGO Masters Edition IV me4
+MTGO Masters Edition III me3
+MTGO Masters Edition II me2
+MTGO Masters Edition med
+
+Special Sets
+Masterpiece Series
+Amonkhet Invocations mpsakh
+Kaladesh Inventions mpskld
+Zendikar Expeditions exp
+“Conspiracy” Series
+Conspiracy: Take the Crown cn2
+Conspiracy cns
+Premium Deck Series
+Premium Deck Series: Graveborn pd3
+Premium Deck Series: Fire and Lightning pd2
+Premium Deck Series: Slivers pds
+
+Reprint Sets
+Iconic Masters ima
+Modern Masters 2017 Edition mm3
+Eternal Masters ema
+Modern Masters 2015 Edition mm2
+Tempest Remastered tpr
+Modern Event Deck md1
+Modern Masters mma
+Duels of the Planeswalkers dpa
+Chronicles ch
+
+“Command Zone” Series
+Explorers of Ixalan e02
+Commander 2017 c17
+Archenemy: Nicol Bolas e01
+Commander Anthology cma
+Commander 2016 c16
+Planechase Anthology pca
+Commander 2015 c15
+Commander 2014 Edition c14
+Commander 2013 Edition c13
+Commander's Arsenal cma
+Planechase 2012 Edition pc2
+Commander cmd
+
+Archenemy arc
+Planechase pch
+From The Vault
+From the Vault: Transform v17
+From the Vault: Lore v16
+From the Vault: Angels v15
+From the Vault: Annihilation v14
+From the Vault: Twenty v13
+From the Vault: Realms v12
+From the Vault: Legends fvl
+From the Vault: Relics fvr
+From the Vault: Exiled fve
+From the Vault: Dragons fvd
+
+Duel Decks
+Duel Decks: Merfolk vs. Goblins ddt
+Duel Decks: Mind vs. Might dds
+Duel Decks: Nissa vs. Ob Nixilis ddr
+Duel Decks: Blessed vs. Cursed ddq
+Duel Decks: Zendikar vs. Eldrazi ddp
+Duel Decks Anthology: Divine vs. Demonic ddadvd
+Duel Decks Anthology: Elves vs. Goblins ddaevg
+Duel Decks Anthology: Garruk vs. Liliana ddagvl
+Duel Decks Anthology: Jace vs. Chandra ddajvc
+Duel Decks: Kiora vs. Elspeth ddo
+Duel Decks: Speed vs. Cunning ddn
+Duel Decks: Jace vs. Vraska ddm
+Duel Decks: Heroes vs. Monsters ddl
+Duel Decks: Sorin vs. Tibalt ddk
+Duel Decks: Izzet vs. Golgari ddj
+Duel Decks: Venser vs. Koth ddi
+Duel Decks: Ajani vs. Nicol Bolas ddh
+Duel Decks: Knights vs. Dragons ddg
+Duel Decks: Elspeth vs. Tezzeret ddf
+Duel Decks: Phyrexia vs. The Coalition pvc
+Duel Decks: Garruk vs. Liliana gvl
+Duel Decks: Divine vs. Demonic dvd
+Duel Decks: Jace vs. Chandra jvc
+Duel Decks: Elves vs. Goblins evg
+
+Theme Decks
+Coldsnap Theme Decks cstd
+Independent Box Sets
+Ninth Edition Box Set 9eb
+Eighth Edition Box Set 8eb
+Deckmasters dm
+Beatdown Box Set bd
+Battle Royale Box Set br
+Anthologies at
+Multiverse Gift Box Cards mgbc
+Un-Serious Sets
+Unstable ust
+Unhinged uh
+Unglued ug
+
+Alternate Art
+Unhinged Alternate Foils uhaa
+
+Beginner Sets
+Welcome Deck 2017 w17
+Welcome Deck 2016 w16
+Starter 2000 st2k
+Starter 1999 st
+Portal Three Kingdoms p3k
+Portal Second Age po2
+Portal po
+Introductory Two-Player Set itp
+Not Legal for Tournament Play
+Collector's Edition ced
+International Collectors' Edition cedi
+
+Promo Cards
+Event Incentives
+Ugin's Fate ugin
+15th Anniversary 15ann
+Grand Prix gpx
+Pro Tour pro
+Magic Game Day Cards mgdc
+Worlds wrl
+World Magic Cup Qualifiers wmcq
+Dragon Con drc
+Tournament Rewards
+Prerelease Events ptc
+Release Events rep
+Magic: The Gathering Launch Parties mlp
+Summer of Magic sum
+WPN/Gateway grc
+Champs cp
+Two-Headed Giant Tournament thgt
+Arena League arena
+Friday Night Magic fnmp
+Magic Player Rewards mprp
+Super Series sus
+
+Gifts
+Happy Holidays hho
+Judge Gift Program jr
+Portal Demogame pot
+Redemption Rewards
+European Land Program euro
+Guru guru
+Asia Pacific Land Program apac
+WotC Online Store wotc
+Celebration Cards
+Celebration Cards uqc
+Media Inserts
+Clash Pack clash
+Media Inserts mbp
+Membership Incentives
+Legend Membership dcilm
+
+
+========================================
 
 
 -}
@@ -157,17 +468,17 @@ import Prelude.Spiros hiding (P)
 data Syntax_ = Syntax_
  { mciFreeform   :: [Text] -- Maybe Text
  , mciAttributes :: Attributes -- Map (Maybe Text) [Text]
- } deriving (Show,Read,Eq,Ord,Generic)
+ } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 newtype Attributes = Attributes
   { getAttributes :: [Attribute] -- [(Text, Text)]
-  } deriving (Show,Read,Eq,Ord,Generic) 
+  } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable) 
 
 data Attribute = Attribute
   { subject :: Text
   , verb    :: Text
   , object  :: Text
-  } deriving (Show,Read,Eq,Ord,Generic)
+  } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 -- data Attribute = Attribute
 --   { identifier :: Text
@@ -199,25 +510,25 @@ data Syntax = Syntax
  
 data GenericComparison a =
   GenericComparison GenericComparator a a
-  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic)
+  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 data BooleanComparison a =
   BooleanComparison BooleanComparator a a
-  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic)
+  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 data NumericComparison a =
   NumericComparison NumericComparator a a
-  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic)
+  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 data GenericComparator
   = Has
   | Is
-  deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
+  deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
 
 data BooleanComparator
   = Yes
   | Not
-  deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
+  deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
 
 data NumericComparator 
   = Equals
@@ -225,7 +536,7 @@ data NumericComparator
   | Greater
   | LesserEquals
   | GreaterEquals
-  deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
+  deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
 
 -- data Comparison a
 --   HAS :: a -> a -> Comparison a
@@ -242,34 +553,34 @@ data NumericComparator
 data Numeric i
   = Constant (NumericConstant i)
   | Variable NumericVariable  
-  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,Enumerable)
+  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
 
 data NumericConstant i
   = NumericLiteral i
   | WildcardConstant
-  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,Enumerable)
+  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
 
 data NumericVariable
   = PowerVariable
   | ToughnessVariable
   | CostVariable
-  deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
 
 ----------------------------------------
 
 data Chromatic = Chromatic [Chroma]
- deriving (Show,Read,Eq,Ord,Generic)
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 data Chroma
  = Hue Hue
  | Multicolored
  | LandColor
- deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
 
 data Hue
  = TrueColor Color
  | Colorless
- deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
 
 data Color
  = White
@@ -277,7 +588,7 @@ data Color
  | Black
  | Red
  | Green
- deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
 
 -- data Chroma
 --  = TrueColor Color
@@ -298,11 +609,11 @@ data Color
 
 data ColorIdentity
  = ColorIdentity Hue
- deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
 
 data ColorIndication
  = ColorIndication Color
- deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
 
 ----------------------------------------
 
@@ -311,29 +622,29 @@ data ColorIndication
 -}
 data ManaCost i
  = ManaCost (Maybe (ManaSymbols i))
- deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic)
+ deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 newtype ManaSymbols i = ManaSymbols 
  { getManaSymbols :: [ManaSymbol i]
- } deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic) --,Enumerable)
+ } deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable) --,Enumerable)
   
 -- data ManaCost f i
 --  = ManaSymbols (f (ManaSymbol i))
---  deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+--  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
 
 data ManaSymbol i
  = GenericSymbol   i
  | HueSymbol       Hue
  | HybridSymbol    (Hybrid i)
  | PhyrexianSymbol Phyrexian
- deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,Enumerable)
+ deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
 
 data Hybrid i
  = GuildHybrid Guild
  | GrayHybrid i Color
- deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,Enumerable)
+ deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
  --TODO GrayHybrid Natural Color
- --deriving (Show,Read,Eq,Ord,Generic)
+ --deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 --(UnorderedPair Color Color)
 
@@ -349,7 +660,7 @@ data Guild
  | Golgari
  | Boros
  | Simic
- deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
 
 {-
 {W}{U} Azorius Senate
@@ -367,12 +678,12 @@ data Guild
 
 -- -- | inductive unordered pair
 -- data Guild = UnorderedPair Color
---  deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+--  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
 --  -- inductive set?
   
 data Phyrexian
  = Phyrexian Color
- deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
 
 -- data ManaSymbol
 --  | ColorSymbol Color
@@ -385,33 +696,33 @@ data Is
  | IsFrame       Frame
  | IsBorder      Border
  | IsPredicate   KnownPredicate
- deriving (Show,Read,Eq,Ord,Generic,Enumerable)
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
  
 data Face
  = NormalFace
  | DoubleFace
  | SplitFace
  | FlipFace
- deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
  
 data Frame
  = OldFrame
  | TimeshiftedFrame
  | NewFrame
  | FutureFrame
- deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
 
 data Border
  = BlackBordered
  | WhiteBordered
  | SilverBordered
- deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
 
 data KnownPredicate
  = Spell
  | Permanent
  | Vanilla
- deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
 
  {-
 
@@ -427,9 +738,412 @@ data Rarity
  | Uncommon
  | Rare
  | Mythic
- deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Enumerable)
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
 
----------------------------------------- 
+----------------------------------------
+
+data FormatLegality
+ = FormatLegality Format Legality
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
+
+data Format
+ = Standard
+ | Block
+ | Extended
+ | Vintage
+ | Classic
+ | Legacy
+ | Modern
+ | Commander
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
+
+data Legality
+ = Legal
+ | Restricted
+ | Banned
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
+
+----------------------------------------
+
+data LanguageInfo = LanguageInfo
+ { _languageAbbreviation :: Text
+ , _languageEndonym      :: Text
+ } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+
+data Language
+ = English
+ | German
+ | French
+ | Italian
+ | Spanish
+ | Portuguese
+ | Japanese
+ | Chinese
+ | Russian
+ | Taiwanese
+ | Korean
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
+
+----------------------------------------
+
+data QualifiedEdition
+ = QualifiedEdition Edition (Maybe Language)
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
+
+data EditionInfo = EditionInfo
+ { _editionBlock        :: Block
+ , _editionAbbreviation :: Text
+ , _editionDescription  :: Text
+ --, _editionLanguages    :: [Language] --NOTE a `Set` 
+ } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)--TODO
+
+data Edition
+ = AL
+ | BE
+ | UN
+ | RV
+ | SUMMER
+
+ | E4
+ | E5
+ | E6
+ | E7
+ | E8
+ | E9
+ | E10
+
+ | M10
+ | M11
+ | M12
+ | M13
+ | M14
+ | M15
+ | ORI
+
+ | AN
+ | AQ
+ | LG
+ | DK
+ | FE
+ | HL
+
+ | MR
+ | VI
+ | WL
+
+ | TP
+ | SH
+ | EX
+
+ | US
+ | UL
+ | UD
+
+ | MM
+ | NE
+ | PR
+
+ | IN
+ | PS
+ | AP
+
+ | OD
+ | TR
+ | JU
+
+ | ON
+ | LE
+ | SC
+
+ | MI
+ | DS
+ | DN5
+
+ | CHK
+ | BOK
+ | SOK
+
+ | RAV
+ | GP
+ | DI
+
+ | IA
+ | AI
+ | CS
+
+ | TSTS
+ | TS
+ | PC
+ | FUT
+
+ | LW
+ | MT
+
+ | SHM
+ | EVE
+
+ | ALA
+ | CFX
+ | ARB
+
+ | ZEN
+ | WWK
+ | ROE
+
+ | SOM
+ | MBS
+ | NPH
+
+ | ISD
+ | DKA
+ | AVR
+
+ | RTR
+ | GTC
+ | DGM
+
+ | THS
+ | BNG
+ | JOU
+
+ | KTK
+ | FRF
+ | DTK
+
+ | BFZ
+ | OGW
+
+ | SOI
+ | EMN
+
+ | KLD
+ | AER
+
+ | AKH
+ | HOU
+
+ | XLN
+ | RIX
+
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
+
+data Block 
+ = Antediluvian
+ | OrdinalCore
+ | CardinalCore
+ | EarlySets
+ | MirageCycle
+ | RathCycle
+ | ArtifactsCycle
+ | MasqueradeCycle
+ | InvasionCycle
+ | OdysseyCycle
+ | OnslaughtCycle
+ | MirrodinCycle
+ | KamigawaCycle
+ | RavnicaCycle
+ | IceAgeCycle
+ | TimeSpiralCycle
+ | LorwynCycle
+ | ShadowmoorCycle
+ | ShardsOfAlara
+ | ZendikarCycle
+ | ScarsOfMirrodin
+ | InnistradCycle
+ | ReturnToRavnica
+ | Theros
+ | KhansOfTarkir
+ | BattleForZendikar
+ | ShadowsOverInnistrad
+ | Kaladesh
+ | Amonkhet
+ | Ixalan
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
+
+-- data Edition
+--  = ExpansionEdition  Expansion
+--  | CoreEdition       Core
+--  | CommanderEdition  Commander
+--  | ConspiracyEdition Conspiracy
+--  | ArchenemyEdition  Archenemy
+--  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
+
+-- data Expansion
+-- data Core
+-- data Commander
+-- data Conspiracy
+-- data Archenemy
+
+-- data Expansion
+
+--TODO my pseudo-Blocks
+--Naming: cardinal numbers: a number denoting quantity (one, two, three, etc.), as opposed to an ordinal number (first, second, third, etc.).
+  
+{-
+
+Expansions...
+
+Ixalan 
+RIX -> "Rivals of Ixalan" "rix"
+XLN -> "Ixalan" "xln"
+
+Amonkhet
+Hour of Devastation hou
+Amonkhet akh
+
+Kaladesh
+Aether Revolt aer
+Kaladesh kld
+
+Shadows over Innistrad
+Eldritch Moon emn
+Shadows over Innistrad soi
+
+Battle for Zendikar
+Oath of the Gatewatch ogw
+Battle for Zendikar bfz
+
+Khans of Tarkir
+Dragons of Tarkir dtk
+Fate Reforged frf
+Khans of Tarkir ktk
+
+Theros
+Journey into Nyx jou
+Born of the Gods bng
+Theros ths
+
+Return to Ravnica
+Dragon's Maze dgm
+Gatecrash gtc
+Return to Ravnica rtr
+Innistrad Cycle
+Avacyn Restored avr
+Dark Ascension dka
+Innistrad isd
+
+Scars of Mirrodin
+New Phyrexia nph
+Mirrodin Besieged mbs
+Scars of Mirrodin som
+
+Zendikar Cycle
+Rise of the Eldrazi roe
+Worldwake wwk
+Zendikar zen
+
+Shards of Alara
+Alara Reborn arb
+Conflux cfx
+Shards of Alara ala
+
+Shadowmoor Cycle
+Eventide eve
+Shadowmoor shm
+
+Lorwyn Cycle
+Morningtide mt
+Lorwyn lw
+
+Time Spiral Cycle
+Future Sight fut
+Planar Chaos pc
+Time Spiral ts
+Time Spiral "Timeshifted" tsts
+
+Ice Age Cycle
+Coldsnap cs
+Alliances ai
+Ice Age ia
+
+Ravnica Cycle
+Dissension di
+Guildpact gp
+Ravnica: City of Guilds rav
+
+Kamigawa Cycle
+Saviors of Kamigawa sok
+Betrayers of Kamigawa bok
+Champions of Kamigawa chk
+
+Mirrodin Cycle
+Fifth Dawn 5dn
+Darksteel ds
+Mirrodin mi
+
+Onslaught Cycle
+Scourge sc
+Legions le
+Onslaught on
+
+Odyssey Cycle
+Judgment ju
+Torment tr
+Odyssey od
+
+Invasion Cycle
+Apocalypse ap
+Planeshift ps
+Invasion in
+
+Masquerade Cycle
+Prophecy pr
+Nemesis ne
+Mercadian Masques mm
+
+Artifacts Cycle
+Urza's Destiny ud
+Urza's Legacy ul
+Urza's Saga us
+
+Rath Cycle
+Exodus ex
+Stronghold sh
+Tempest tp
+
+Mirage Cycle
+Weatherlight wl
+Visions vi
+Mirage mr
+
+Early Sets
+Homelands hl
+Fallen Empires fe
+The Dark dk
+Legends lg
+Antiquities aq
+Arabian Nights an
+
+
+Core Set Editions...
+
+Magic Origins ori
+
+Magic 2015 m15
+Magic 2014 Core Set m14
+Magic 2013 m13
+Magic 2012 m12
+Magic 2011 m11
+Magic 2010 m10
+
+Tenth Edition 10e
+Ninth Edition 9e
+Eighth Edition 8e
+Seventh Edition 7e
+Classic Sixth Edition 6e
+Fifth Edition 5e
+Fourth Edition 4e
+
+Revised Edition Edgar summer
+Revised Edition rv
+Unlimited Edition un
+Limited Edition Beta be
+Limited Edition Alpha al
+
+
+-}
+
+----------------------------------------
 
 --type UnorderedPair a b = (a,b) --TODO
 
