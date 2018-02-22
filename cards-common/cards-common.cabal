@@ -29,6 +29,8 @@ tested-with:
   GHC   == 8.0.2
   GHCJS == 8.0.2
 
+----------------------------------------
+  
 -- PVP
 -- https://wiki.haskell.org/Package_versioning_policy
 -- "A.B is known as the major version number, and C the minor version number."
@@ -54,16 +56,29 @@ source-repository head
   type:     git
   location: https://github.com/sboosali/cards
 
--- make the `template` test suite dump its template-haskell splices
-flag dump-splices
-  default: False
+----------------------------------------
+
+flag use-template-haskell
+  default: True
+  description: Use template haskell to generate lenses and to safely invert functions. 
   manual: True
+  
+-- -- make the `template` test suite dump its template-haskell splices
+-- flag dump-splices
+--   default: False
+--   manual: True
 
 ----------------------------------------
 
 library
  hs-source-dirs:      sources
- default-language:    Haskell2010
+
+ if flag(use-template-haskell)
+    cpp-options: -DUSE_TEMPLATE_HASKELL
+    other-extensions: TemplateHaskell
+    -- build-depends:
+    --   template-haskell >= 2.9 && < 2.13
+ 
  ghc-options:
   -Wall
   -Wcompat
@@ -84,6 +99,7 @@ library
   -fdefer-typed-holes
   -Wtyped-holes
 
+ default-language:   Haskell2010
  default-extensions: NoImplicitPrelude
                      PackageImports AutoDeriveTypeable DeriveDataTypeable DeriveGeneric
                      DeriveFunctor DeriveFoldable DeriveTraversable
@@ -94,8 +110,6 @@ library
                      MultiParamTypeClasses FlexibleContexts FlexibleInstances
                      TypeFamilies FunctionalDependencies
                      ScopedTypeVariables StandaloneDeriving
-
- other-extensions: TemplateHaskell
 
  exposed-modules:
                  Cards.Common
@@ -108,11 +122,12 @@ library
 
                  Cards.Syntax.MagicCardsInfo
                  Cards.Syntax.MagicCardsInfo.Types
+                 Cards.Syntax.MagicCardsInfo.Static     
                  Cards.Syntax.MagicCardsInfo.Printer
                  Cards.Syntax.MagicCardsInfo.Parser
                  Cards.Syntax.MagicCardsInfo.Validator 
                  Cards.Syntax.MagicCardsInfo.Compiler
-                 
+            
                  MTGJSON
                  MTGJSON.Types
                  MTGJSON.Core
