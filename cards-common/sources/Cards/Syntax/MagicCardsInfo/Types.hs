@@ -1,7 +1,5 @@
 
 {-# LANGUAGE OverloadedLabels, DuplicateRecordFields #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE OverloadedLists #-}
 
 {-# LANGUAGE GADTs, DeriveAnyClass #-}
 
@@ -153,10 +151,10 @@ import Prelude.Spiros hiding (P)
 
 ----------------------------------------
 
-{-| @magiccards.info@'s sytax
+{-| @magiccards.info@'s raw(/ lower-level) syntax.
 
 -}
-data Syntax = Syntax
+data Syntax_ = Syntax_
  { mciFreeform   :: [Text] -- Maybe Text
  , mciAttributes :: Attributes -- Map (Maybe Text) [Text]
  } deriving (Show,Read,Eq,Ord,Generic)
@@ -181,6 +179,19 @@ data Attribute = Attribute
 --  where
 --  mciFreeform    = [t]
 --  mciAttributes = []
+
+{-| @magiccards.info@'s validated(/ higher-level) syntax.
+
+-}
+data SyntaxError
+ = SyntaxError Text
+
+----------------------------------------
+
+{-| @magiccards.info@'s validated(/ higher-level) syntax.
+
+-}
+data Syntax = Syntax
 
 ----------------------------------------
 

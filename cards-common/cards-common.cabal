@@ -108,8 +108,9 @@ library
 
                  Cards.Syntax.MagicCardsInfo
                  Cards.Syntax.MagicCardsInfo.Types
-                 Cards.Syntax.MagicCardsInfo.Parser
                  Cards.Syntax.MagicCardsInfo.Printer
+                 Cards.Syntax.MagicCardsInfo.Parser
+                 Cards.Syntax.MagicCardsInfo.Validator 
                  Cards.Syntax.MagicCardsInfo.Compiler
                  
                  MTGJSON
