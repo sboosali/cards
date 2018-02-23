@@ -25,6 +25,53 @@ import Prelude.Spiros hiding (P)
 
 ----------------------------------------
 
+{-|
+
+group a pair of related parsers:
+
+* one ('_pQuoted') parses a value within quotations,
+* the other  ('_pUnquoted') parses that same value outside quotations and thus "more conservatively". 
+
+-}
+data QuotableParser s a = QuotableParser
+ { _pUnquoted :: P s a
+ , _pQuoted   :: P s a
+ } deriving (Functor)
+
+-- | pairwise
+instance Applicative (QuotableParser s) where
+  pure x = QuotableParser (pure x) (pure x)
+  (QuotableParser p q) <*> (QuotableParser p' q') =
+      QuotableParser (p <*> p') (q <*> q')
+
+-- | pairwise
+instance Alternative (QuotableParser s) where
+  empty = QuotableParser empty empty
+  (QuotableParser p q) <|> (QuotableParser p' q') =
+      QuotableParser (p <|> p') (q <|> q')
+
+-- | same as 'Alternative'
+instance Semigroup (QuotableParser s a) where
+  (<>) = (<|>)
+
+-- | same as 'Alternative'
+instance Monoid (QuotableParser s a) where  
+  mempty = empty
+
+singletonQuotableParser :: P s a -> QuotableParser s a
+singletonQuotableParser p = QuotableParser p p
+
+-- | 
+quotable' :: P s a -> P s a 
+quotable' = singletonQuotableParser > quotable
+
+-- | 
+quotable :: QuotableParser s a -> P s a
+quotable QuotableParser{..} = p // q
+  where
+  p = quoted _pUnquoted
+  q =        _pQuoted
+
 ----------------------------------------
 -- `text`
 
@@ -83,11 +130,18 @@ vocabulary = aliases
 -- aliases :: [(Text,a)] -> P s a
 -- aliases = fmap (alias&uncurry) > choice 
 
-quotable :: P s a -> P s a
-quotable pUnquoted = p
-  where
-  pQuoted = quoted pUnquoted
-  p       = pUnquoted // pQuoted
+-- -- | 
+-- quotable :: P s a -> P s a -> P s a
+-- quotable pUnquoted pQuoted = p // q
+--   where
+--   p = quoted pUnquoted
+--   q =        pQuoted
+
+-- quotable :: P s a -> P s a
+-- quotable pUnquoted = p
+--   where
+--   pQuoted = quoted pUnquoted
+--   p       = pUnquoted // pQuoted
 
   -- pQuoted = {- <- rule$ -} quoted pUnquoted
   -- p       = {- <- rule$ -} pUnquoted // pQuoted
