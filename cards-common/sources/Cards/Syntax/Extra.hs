@@ -76,6 +76,13 @@ quotable QuotableParser{..} = p // q
   p = quoted _pUnquoted
   q =        _pQuoted
 
+-- | 
+ruleQuotable :: QuotableParser s a -> G s a
+ruleQuotable QuotableParser{..} = do
+  p <- rule$ quoted _pUnquoted
+  q <- rule$        _pQuoted
+  return $ p // q
+
 ----------------------------------------
 -- `frisby`
 
@@ -109,10 +116,36 @@ aliases = fmap (alias&uncurry) > choice
 vocabulary :: [(Text,a)] -> P s a
 vocabulary = aliases
 
-integer :: (Num i) => P s i
-integer = p <&> (readMay > maybe 0 fromInteger) --TODO explicit failure?
+-- | returns a parser that can be prefixed with any number of whitespace characters
+preSpaceable :: P s a -> P s a
+preSpaceable p = pWhitespace *> p
+
+postSpaceable :: P s a -> P s a
+postSpaceable p = p <* pWhitespace 
+
+spaceable :: P s a -> P s a
+spaceable = preSpaceable > postSpaceable
+
+pWhitespace :: P s String
+pWhitespace = F.many pSpace
+
+pSpace :: P s Char
+pSpace = onlyIf anyChar isSpace
+
+integer :: forall i s. (Num i) => P s i
+integer = p <&> readNumber
   where
+  p :: P s String
   p = many1 F.digit
+  
+  readNumber :: String -> i
+  readNumber s = maybe (0::i) fromInteger i
+    where
+      i :: Maybe Integer
+      i = readMay s
+
+  -- readNumber = readMay > maybe 0 fromInteger
+  --TODO explicit failure?
 
 -- | makes a PEG parser from a @Printer@ for a finite type. 
 printer

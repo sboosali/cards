@@ -123,10 +123,11 @@ library
                  Cards.Syntax.MagicCardsInfo
                  Cards.Syntax.MagicCardsInfo.Types
                  Cards.Syntax.MagicCardsInfo.Static     
-                 Cards.Syntax.MagicCardsInfo.Printer
+                 Cards.Syntax.MagicCardsInfo.Known 
                  Cards.Syntax.MagicCardsInfo.Parser
                  Cards.Syntax.MagicCardsInfo.Validator 
                  Cards.Syntax.MagicCardsInfo.Compiler
+                 Cards.Syntax.MagicCardsInfo.Printer
             
                  MTGJSON
                  MTGJSON.Types

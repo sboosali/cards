@@ -6,7 +6,7 @@
 #endif
 
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE OverloadedLists #-}
+--{-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE RecursiveDo #-}
 
 {-| 
@@ -185,6 +185,7 @@ module Cards.Syntax.MagicCardsInfo.Parser where
 import Cards.Syntax.Extra
 import Cards.Syntax.MagicCardsInfo.Types
 import Cards.Syntax.MagicCardsInfo.Static
+import Cards.Syntax.MagicCardsInfo.Known 
 import Cards.Syntax.MagicCardsInfo.Printer
 
 --import Cards.Query.Types
@@ -212,14 +213,60 @@ import Prelude.Spiros hiding (P)
 import Prelude (error)
 
 ----------------------------------------
-  
-runMagicCardsInfo' :: String -> (Complete (Syntax_ i j))
+
+{-|
+
+>> mci "!Anger"
+Right (ExactQuery_ "Anger")
+
+>> mci "o:Flying"
+Right (StatementQuery_ (Statements {_statementFreeform = [], _statementAttributes = Attributes {getAttributes = [Attribute {subject = "o", verb = ":", object = TextAttribute "Flying"}]}}))
+
+>> mci "o:\"First strike\""
+
+>> mci "year<=95"
+Right (StatementQuery_ (Statements {_statementFreeform = [], _statementAttributes = Attributes {getAttributes = [Attribute {subject = "year", verb = "<=", object = DateAttribute (YearMonthDay {ymdYear = 1995, ymdMonth = 0, ymdDay = 0})}]}}))
+
+>> mci "e:al/en,be -e:al+be"
+
+>> mci "e:al/en,be"
+
+
+-}
+mci :: String -> Either SyntaxError KnownQuery_
+mci = runMagicCardsInfo' > fst > maybe l Right
+  where
+  l = Left (SyntaxError "")
+  -- maybe2either
+
+{-|
+
+
+-}
+parseMagicCardsInfo :: String -> Complete (KnownQuery_)
+parseMagicCardsInfo = runMagicCardsInfo'
+
+----------------------------------------
+
+runMagicCardsInfo'
+  :: (ParseableNumeric i, ParseableNumeric j)
+  => String
+  -> (Complete (Query_ i j))
 runMagicCardsInfo' = runPeg gMagicCardsInfo' 
 
-gMagicCardsInfo' :: PM s (P s (Complete (Syntax_ i j)))
+gMagicCardsInfo'
+  :: (ParseableNumeric i, ParseableNumeric j)
+  => PM s (P s (Complete (Query_ i j)))
 gMagicCardsInfo' = complete gMagicCardsInfo
 
-runMagicCardsInfo :: String -> (Syntax_ i j)
+{-|
+
+
+-}
+runMagicCardsInfo
+  :: (ParseableNumeric i, ParseableNumeric j)
+  => String
+  -> (Query_ i j)
 runMagicCardsInfo = runPeg gMagicCardsInfo 
 
 ---------------------------------------
@@ -256,13 +303,138 @@ Statement "year" "<=" (Date' 1995)
 i.e.: we don't interpret the meaning of anything, like the string "<=", but we do: (1) parse into simple types, like strings, dates, or some enums (like color); and (2), group substrings via the associativity / precedence of the operators, both alphabetic and symbolic, like the unary prefixes "-" and "not", or distinguishing @"/"@ from @","@ in @"al/en,be"@ (i.e., as an sexp, @(("al" "/" "en") "," "be")", including pseudo-operators ("whitepsace juxtaposition" and parentheses). 
 
 
+
 -}
-gMagicCardsInfo :: G s (Syntax_ i j)
+gMagicCardsInfo
+  :: ( ParseableNumeric i
+     , ParseableNumeric j
+     )
+  => G s (Query_ i j)
 gMagicCardsInfo = mdo
-    p <- rule $ _ -- pure emptySyntax_
-    
-    return p
- -- numbers / dates?
+  let gExactName = rule$ preSpaceable pExactName <&> ExactQuery_
+  
+  statements' <- gStatements 
+  exact       <- gExactName
+  
+  let statements = statements' <&> StatementQuery_
+  
+  p <- rule$ exact // statements
+  q <- rule$ postSpaceable p 
+  return q
+
+  -- pStatements <- gStatements <&> StatementQuery_ 
+  -- pExact      <- gExactName  <&> ExactQuery_ 
+
+----------------------------------------
+
+pExactName :: P s Text
+pExactName = p <&> toS
+  where
+  p = bof *> char '!' *> rest
+
+gStatements
+  :: forall i j s.
+     ( ParseableNumeric i
+     , ParseableNumeric j
+     )
+  => G s (Statements i j)
+gStatements = mdo
+
+  psTextAttributes      <- rule$ textAttribute        ["o","t","a"] 
+
+  {- ^ NOTE magiccards.info itself doesn't support equality,
+       e.g. `o!Flying`
+  -}
+
+  psNumericAttributes   <- rule$ pN
+
+  psManaAttributes      <- rule$ manaAttribute        ["mana"] 
+
+  psColorAttributes     <- rule$ chromaticAttribute   ["c","ci","in"]
+
+  psDateAttributes      <- rule$ dateAttribute        ["year"]
+
+  psOrderedAttributes   <- rule$ orderedEnumAttribute ["e","r"]
+
+  psUnorderedAttributes <- rule$ unorderedEnumAttribute
+      ["l"
+      ,"f"
+      ,"is", "not","has" 
+      ,"banned", "legal", "restricted"
+      ]
+
+  pAttribute <- rule$ choice
+      [ psTextAttributes     
+      , psNumericAttributes
+      , psManaAttributes
+      , psColorAttributes
+      , psDateAttributes
+      , psOrderedAttributes
+      , psUnorderedAttributes
+      ]
+
+  pAttributes <- rule$ many1 pAttribute <&> Attributes
+
+  pFreeform <- rule$ pure []
+
+  p <- rule$ Statements <$> pFreeform <*> pAttributes
+  return p
+
+  where
+  pN :: P s (Attribute i j)
+  pN = numericAttribute ["cmc","pow","tou"] 
+
+
+
+
+
+
+
+ --  psText      <- rule$ mciTextAttributes
+ --  psNumeric   <- rule$ mciNumericAttributes 
+ --  psMana      <- rule$ mciManaAttributes 
+ --  psColor     <- rule$ mciColorAttributes 
+ --  psDate      <- rule$ mciDateAttributes 
+ --  psUnordered <- rule$ mciUnorderedAttributes
+
+ --  p           <- rule$ _
+ --  return p
+  
+ -- -- numbers / dates?
+ -- -- p <- rule $ pure emptyQuery_
+
+----------------------------------------
+-- mci parsers
+
+-- mciTextAttributes :: P s (Attribute i j)
+-- mciTextAttributes = textAttribute ["o","t","a"] 
+-- -- TODO magiccards.info doesn't support equality, e.g. `o!Flying`
+
+-- mciNumericAttributes :: (Num i) => P s (Attribute i j)
+-- mciNumericAttributes = numericAttribute ["cmc","pow","tou"] 
+
+-- mciManaAttributes :: (Num j, Show j, Enumerable j) => P s (Attribute i j)
+-- mciManaAttributes = manaAttribute ["mana"] 
+
+-- mciColorAttributes :: P s (Attribute i j)
+-- mciColorAttributes = chromaticAttribute ["c","ci","in"]
+
+-- mciDateAttributes :: P s (Attribute i j)
+-- mciDateAttributes = dateAttribute ["year"]
+
+-- mciOrderedAttributes :: P s (Attribute i j)
+-- mciOrderedAttributes = orderedEnumAttribute
+--  ["e"
+--  ,"r"
+--  ]
+
+-- mciUnorderedAttributes :: P s (Attribute i j)
+-- mciUnorderedAttributes = unorderedEnumAttribute
+--  ["l"
+--   ,"f"
+--  ,"is", "not","has" 
+--  ,"banned", "legal", "restricted"
+--  ]
 
 ----------------------------------------
 
@@ -302,13 +474,14 @@ attribute
   -- -> P s (KnownAttribute i j)
   -- -> P s (KnownAttribute i j)
   -> P s (Attribute i j)
-attribute keywords seperators ps = a -- QuotableParser{..} = a
+attribute keywords seperators ps = q
   where
   -- "subject / verb / object"
   s = texts keywords
   v = texts seperators
   o = quotable ps  -- quotable _pUnquoted _pQuoted 
-  a = Attribute <$> s <*> v <*> o
+  p = Attribute <$> s <*> v <*> o
+  q = preSpaceable p
 
 {-|
 
@@ -319,7 +492,7 @@ attribute'
   :: [Text]
   -> [Text]
   -> P s (KnownAttribute i j)
-  -> P s (Attribute i j)
+  -> P s (Attribute      i j)
 attribute' ks os p = attribute ks os (singletonQuotableParser p)
 
 -- {-|
@@ -330,14 +503,14 @@ attribute' ks os p = attribute ks os (singletonQuotableParser p)
 -- enumAttribute ks os vs = attribute ks os
 --   (textAttributes vs)
 
+----------------------------------------
+
 {-|
 
 
 -}  
 textAttributes :: [Text] -> P s (KnownAttribute i j)
 textAttributes vs = TextAttribute <$> (texts vs)
-
-----------------------------------------
 
 {-|
 
@@ -401,7 +574,7 @@ numericAttribute ks = attribute ks numericOperators_ qNumericObject
 {-|
 
 -} 
-manaAttribute :: (Num j, Show j, Enumerable j) => [Text] -> P s (Attribute i j)
+manaAttribute :: (ParseableNumeric j) => [Text] -> P s (Attribute i j)
 manaAttribute ks = attribute ks numericOperators_ qManaObject
 
 -- attribute :: [Text] -> SyntaxTable a -> P s Text -> P s Attribute
@@ -420,37 +593,6 @@ manaAttribute ks = attribute ks numericOperators_ qManaObject
 --     Attribute <$> (k <* char ':') <*> v
 --   return p
 
-----------------------------------------
-
-pTextAttributes :: P s (Attribute i j)
-pTextAttributes = textAttribute ["o","t","a"] 
--- TODO magiccards.info doesn't support equality, e.g. `o!Flying`
-
-pNumericAttributes :: (Num i) => P s (Attribute i j)
-pNumericAttributes = numericAttribute ["cmc","pow","tou"] 
-
-pManaAttributes :: (Num j, Show j, Enumerable j) => P s (Attribute i j)
-pManaAttributes = manaAttribute ["mana"] 
-
-pColorAttributes :: P s (Attribute i j)
-pColorAttributes = chromaticAttribute ["c","ci","in"]
-
-pDateAttributes :: P s (Attribute i j)
-pDateAttributes = dateAttribute ["year"]
-
-pOrderedAttributes :: P s (Attribute i j)
-pOrderedAttributes = orderedEnumAttribute
- ["e"
- ,"r"
- ]
-
-pUnorderedAttributes :: P s (Attribute i j)
-pUnorderedAttributes = unorderedEnumAttribute
- ["l"
- ,"f"
- ,"is", "not","has" 
- ,"banned", "legal", "restricted"
- ]
 
 ----------------------------------------  
 
@@ -467,7 +609,7 @@ pTypes = textAttribute ["t"]
 
 pArtist :: P s Attribute
 pArtist = textAttribute ["a"] 
-  
+
 ----------------------------------------
 
 pCMC :: P s Attribute
@@ -535,7 +677,7 @@ qEnumObject = qEnum <&> TextAttribute
 qNumericObject :: (Num i) => QuotableParser s (KnownAttribute i j)
 qNumericObject = qNumeric <&> NumericAttribute
 
-qManaObject :: (Num j, Show j, Enumerable j) => QuotableParser s (KnownAttribute i j)
+qManaObject :: (ParseableNumeric j) => QuotableParser s (KnownAttribute i j)
 qManaObject = qMana <&> ManaAttribute
 
 qChromaticObject :: QuotableParser s (KnownAttribute i j)
@@ -562,7 +704,7 @@ qDate = singletonQuotableParser pDate
 qNumeric :: (Num i) => QuotableParser s (Numeric i)
 qNumeric = singletonQuotableParser pNumeric
 
-qMana :: (Num j, Show j, Enumerable j) => QuotableParser s (ManaCost j)  
+qMana :: (ParseableNumeric j) => QuotableParser s (ManaCost j)  
 qMana = singletonQuotableParser pMana
 --pMana :: (Show j) => P s (ManaCost j)
 
@@ -697,13 +839,6 @@ pNumericConstant = pWildcard // pLiteral
   where
   pWildcard = WildcardConstant <$  text "*"
   pLiteral  = NumericLiteral   <$> integer
-
-----------------------------------------
-
-pExactName :: P s Text
-pExactName = p <&> toS
-  where
-  p = bof *> char '!' *> rest
 
 ----------------------------------------
 

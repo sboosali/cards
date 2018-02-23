@@ -498,6 +498,7 @@ instance Semigroup (Statements i j) where
 
 instance Monoid (Statements i j) where
   mempty = Statements mempty mempty
+  mappend = (<>)
   
 -- emptySyntax_ ::  i j
 -- emptySyntax_ =  [] emptyAttributes
@@ -511,7 +512,8 @@ data Syntax_ i j
   = MCIFreeform   Text
   | MCIExact      Text
   | MCIAttributes (Attributes i j)
--}
+-}  mappend = (<>)
+
 
 --emptySyntax_ :: Syntax_ i j
 --emptySyntax_ = Syntax_ [] emptyAttributes
@@ -534,6 +536,7 @@ instance Semigroup (Attributes i j) where
 
 instance Monoid (Attributes i j) where
   mempty = Attributes mempty
+  mappend = (<>)
   
 emptyAttributes :: Attributes i j
 emptyAttributes = Attributes []
