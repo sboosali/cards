@@ -186,6 +186,7 @@ library
              , lens
 
 -- parsing
+             , Earley >= 0.12
              , frisby >=0.2
 --             , megaparsec
 

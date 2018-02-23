@@ -491,6 +491,8 @@ myOverlaysWith = pkgs: self: super: let
    #      "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
    #  };        
 
+    Earley = prefetched_ ./Earley.json;
+
     frisby = prefetched_ ./frisby.json; 
 
     megaparsec = github {
