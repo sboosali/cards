@@ -1,7 +1,8 @@
 
-{-# LANGUAGE OverloadedLabels, DuplicateRecordFields #-}
+--{-# LANGUAGE OverloadedLabels, DuplicateRecordFields #-}
 
-{-# LANGUAGE GADTs, DeriveAnyClass #-}
+{-# LANGUAGE ConstraintKinds, GADTs #-}
+{-# LANGUAGE DeriveAnyClass #-}
 
 {-|
 
@@ -460,6 +461,8 @@ import Enumerate
 
 import Data.Thyme.Calendar (YearMonthDay)  
 
+import Control.Lens hiding ((<&>))
+
 import Prelude.Spiros hiding (P)
 
 ----------------------------------------
@@ -469,18 +472,69 @@ import Prelude.Spiros hiding (P)
 parametrized over @i@ and @j@, numeric types for numeric mana costs and numeric characteristics, respectively. 
 
 -}
-data Syntax_ i j = Syntax_
- { mciFreeform   :: [Text] -- Maybe Text
- , mciAttributes :: Attributes i j -- Map (Maybe Text) [Text]
+data Query_ i j
+  = ExactQuery_     Text
+  | StatementQuery_ (Statements i j) 
+  deriving (Show,Eq,Ord,Generic,NFData) --,Read,Hashable)
+
+instance Bifunctor Query_ where
+  bimap fNumeric fMana = \case
+    ExactQuery_      t -> ExactQuery_ t
+    StatementQuery_ xs -> StatementQuery_ (xs & bimap fNumeric fMana)
+
+data Statements i j = Statements
+ { _statementFreeform   :: [Text]         -- Maybe Text
+ , _statementAttributes :: Attributes i j -- Map (Maybe Text) [Text]
  } deriving (Show,Eq,Ord,Generic,NFData) --,Read,Hashable)
 
-emptySyntax_ :: Syntax_ i j
-emptySyntax_ = Syntax_ [] emptyAttributes
+instance Bifunctor Statements where
+  bimap fNumeric fMana = \case
+    Statements x ys -> Statements x (ys & bimap fNumeric fMana)
+ 
+instance Semigroup (Statements i j) where
+  (Statements a b) <> (Statements c d) =
+    Statements (a <> c) (b <> d)
+           --TODO (<>) = au _Statements (<>)
+
+instance Monoid (Statements i j) where
+  mempty = Statements mempty mempty
+  
+-- emptySyntax_ ::  i j
+-- emptySyntax_ =  [] emptyAttributes
+
+{-
+data Syntax_ i j
+  = Syntax_ (Attributes i j)
+  deriving (Show,Eq,Ord,Generic,NFData) --,Read,Hashable)
+
+{-
+  = MCIFreeform   Text
+  | MCIExact      Text
+  | MCIAttributes (Attributes i j)
+-}
+
+--emptySyntax_ :: Syntax_ i j
+--emptySyntax_ = Syntax_ [] emptyAttributes
+-}
 
 newtype Attributes i j = Attributes
   { getAttributes :: [Attribute i j] -- [(Text, Text)]
-  } deriving (Show,Eq,Ord,Generic,NFData) --,Read,Hashable) 
+  } deriving (Show,Eq,Ord,Generic,NFData) --,Read,Hashable)
 
+instance Bifunctor Attributes where
+  bimap fNumeric fMana = \case
+    Attributes xs -> Attributes (xs & fmap (bimap fNumeric fMana))
+    
+_Attributes :: Iso' (Attributes i j) [Attribute i j]
+_Attributes = iso getAttributes Attributes
+
+instance Semigroup (Attributes i j) where
+  (Attributes x) <> (Attributes y) = Attributes (x <> y)
+  --TODO (<>) = au _Attributes (<>)
+
+instance Monoid (Attributes i j) where
+  mempty = Attributes mempty
+  
 emptyAttributes :: Attributes i j
 emptyAttributes = Attributes []
   
@@ -490,6 +544,10 @@ data Attribute i j = Attribute
   , object  :: KnownAttribute i j -- AttributeObject
   } deriving (Show,Eq,Ord,Generic,NFData) --,Read,Hashable)
 
+instance Bifunctor Attribute where
+  bimap fNumeric fMana = \case
+    Attribute s v o -> Attribute s v (o & bimap fNumeric fMana)
+    
 data KnownAttribute i j
   = TextAttribute      Text
   | DateAttribute      Date         
@@ -499,10 +557,28 @@ data KnownAttribute i j
   | NumericAttribute   (Numeric i)
   | ManaAttribute      (ManaCost j)
 --X  | CostAttribute      (ManaCost j)
-  deriving (Show,Eq,Ord,Generic,NFData) --,Read,Hashable)
+  deriving (Functor,Show,Eq,Ord,Generic,NFData) --,Read,Hashable)
  -- NOTE not (Date i), the `i` is for mana costs
 
--- data Attribute = Attribute
+instance Bifunctor KnownAttribute where
+  bimap fNumeric fMana = \case
+      NumericAttribute    i -> NumericAttribute (fNumeric <$> i)
+      ManaAttribute       j -> ManaAttribute    (fMana    <$> j)
+      TextAttribute       text      -> TextAttribute       text
+      DateAttribute       date      -> DateAttribute       date
+      ChromaticAttribute  chromatic -> ChromaticAttribute  chromatic
+      HueAttribute        hue       -> HueAttribute        hue
+      ColorAttribute      color     -> ColorAttribute      color
+
+      -- x -> x
+
+      -- TextAttribute       text      -> text
+      -- DateAttribute       date      -> date
+      -- ChromaticAttribute  chromatic -> chromatic
+      -- HueAttribute        hue       -> hue
+      -- ColorAttribute      color     -> color
+
+  -- data Attribute = Attribute
 --   { identifier :: Text
 --   , constraint :: Text
 --   } deriving (Show,Read,Eq,Ord,Generic)
@@ -512,6 +588,11 @@ data KnownAttribute i j
 --  where
 --  mciFreeform    = [t]
 --  mciAttributes = []
+
+----------------------------------------
+
+-- 
+type ParseableNumeric i = (Num i, Show i, Enumerable i)
 
 ----------------------------------------
 
@@ -526,7 +607,7 @@ data SyntaxError
 {-| @magiccards.info@'s validated(/ higher-level) syntax.
 
 -}
-data Syntax i j = Syntax
+data Query i j = Query
 
 ----------------------------------------
 
