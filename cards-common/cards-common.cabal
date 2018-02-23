@@ -117,6 +117,8 @@ library
                  Cards.Common.Core		
                  Cards.Common.Example   
 
+                 Cards.Syntax.Operators
+
                  Cards.Query
                  Cards.Query.Types
 
