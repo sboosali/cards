@@ -3,6 +3,7 @@
 {-# LANGUAGE RecursiveDo #-}
 
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE PatternSynonyms     #-}
 
 {-| utitilies.
 
@@ -36,10 +37,34 @@ group a pair of related parsers:
 * the other  ('_pUnquoted') parses that same value outside quotations and thus "more conservatively". 
 
 -}
+ 
 data QuotableParser s a = QuotableParser
  { _pUnquoted :: P s a
  , _pQuoted   :: P s a
  } deriving (Functor)
+
+type QuotableGrammar s a = (PM s) (QuotableParser s a)
+
+-- data Quotable f a = Quotable
+--  { _unquoted :: f a
+--  , _quoted   :: f a
+--  } deriving (Functor)
+
+-- type QuotableGrammar s a = Quotable (PM s) (P s a)
+
+-- --type QuotableGrammar s a = Quotable G s a
+
+-- type QuotableParser s = Quotable (P s)
+
+-- pattern QuotableParser :: P s a -> P s a -> QuotableParser s a
+-- pattern QuotableParser { _pUnquoted, _pQuoted } = Quotable
+--   { _unquoted = _pUnquoted
+--   , _quoted  = _pQuoted
+--   }
+-- {-# COMPLETE QuotableParser :: P s a -> P s a -> QuotableParser s a #-}
+
+
+-- --pattern QuotableParser pU pQ = Quotable pU pQ 
 
 -- | pairwise
 instance Applicative (QuotableParser s) where
@@ -71,17 +96,25 @@ quotable' = singletonQuotableParser > quotable
 
 -- | 
 quotable :: QuotableParser s a -> P s a
-quotable QuotableParser{..} = p // q
+quotable QuotableParser{..} = pU // pQ
   where
-  p = quoted _pUnquoted
-  q =        _pQuoted
+  pU =        _pUnquoted
+  pQ = quoted _pQuoted
+
+-- | 
+gQuotable :: G s a -> G s a -> G s a
+gQuotable gU gQ = do
+  pU  <- gU
+  pQ  <- gQ
+  pQ' <- rule $ quoted pQ
+  return $ pU // pQ'
 
 -- | 
 ruleQuotable :: QuotableParser s a -> G s a
 ruleQuotable QuotableParser{..} = do
-  p <- rule$ quoted _pUnquoted
-  q <- rule$        _pQuoted
-  return $ p // q
+  pU <- rule$        _pUnquoted
+  pQ <- rule$ quoted _pQuoted
+  return $ pU // pQ
 
 ----------------------------------------
 -- `frisby`

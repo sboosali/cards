@@ -559,6 +559,7 @@ data KnownAttribute i j
   | ColorAttribute     Color
   | NumericAttribute   (Numeric i)
   | ManaAttribute      (ManaCost j)
+  | ListAttribute Text (KnownAttribute i j) -- ^ separator and (separated) sequence
 --X  | CostAttribute      (ManaCost j)
   deriving (Functor,Show,Eq,Ord,Generic,NFData) --,Read,Hashable)
  -- NOTE not (Date i), the `i` is for mana costs
@@ -572,6 +573,9 @@ instance Bifunctor KnownAttribute where
       ChromaticAttribute  chromatic -> ChromaticAttribute  chromatic
       HueAttribute        hue       -> HueAttribute        hue
       ColorAttribute      color     -> ColorAttribute      color
+      ListAttribute     t as        -> ListAttribute     t (as & go)
+    where
+      go = bimap fNumeric fMana 
 
       -- x -> x
 

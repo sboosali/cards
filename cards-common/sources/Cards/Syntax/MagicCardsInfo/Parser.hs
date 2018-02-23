@@ -227,9 +227,9 @@ Right (StatementQuery_ (Statements {_statementFreeform = [], _statementAttribute
 >> mci "year<=95"
 Right (StatementQuery_ (Statements {_statementFreeform = [], _statementAttributes = Attributes {getAttributes = [Attribute {subject = "year", verb = "<=", object = DateAttribute (YearMonthDay {ymdYear = 1995, ymdMonth = 0, ymdDay = 0})}]}}))
 
->> mci "e:al/en,be -e:al+be"
-
 >> mci "e:al/en,be"
+
+>> mci "e:al/en,be -e:al+be"
 
 
 -}
@@ -330,7 +330,7 @@ gMagicCardsInfo = mdo
 pExactName :: P s Text
 pExactName = p <&> toS
   where
-  p = bof *> char '!' *> rest
+  p = char '!' *> rest
 
 gStatements
   :: forall i j s.
@@ -340,7 +340,9 @@ gStatements
   => G s (Statements i j)
 gStatements = mdo
 
-  psTextAttributes      <- rule$ textAttribute        ["o","t","a"] 
+  
+
+  psTextAttributes      <- textRule        ["o","t","a"] 
 
   {- ^ NOTE magiccards.info itself doesn't support equality,
        e.g. `o!Flying`
@@ -505,40 +507,13 @@ attribute' ks os p = attribute ks os (singletonQuotableParser p)
 
 ----------------------------------------
 
-{-|
+-- {-|
 
 
--}  
-textAttributes :: [Text] -> P s (KnownAttribute i j)
-textAttributes vs = TextAttribute <$> (texts vs)
-
-{-|
-
-
--}  
-orderedEnumAttribute :: [Text] -> P s (Attribute i j)
-orderedEnumAttribute ks =
-  attribute ks genericOperators_ qEnumObject
-
-{-|
-
-
--}  
-unorderedEnumAttribute :: [Text] -> P s (Attribute i j)
-unorderedEnumAttribute ks =
-  attribute ks equalityOperators_ qEnumObject
-
-{-|
-
--}  
-chromaticAttribute :: [Text] -> P s (Attribute i j)
-chromaticAttribute ks = attribute ks numericOperators_ qChromaticObject
-
-{-|
-
--}
-dateAttribute :: [Text] -> P s (Attribute i j)  
-dateAttribute ks = attribute ks numericOperators_ qDateObject
+-- -}  
+-- textAttributes :: [Text] -> P s (KnownAttribute i j)
+-- textAttributes vs =
+--   TextAttribute <$> (texts vs)
 
 {-|
 
@@ -560,22 +535,96 @@ aka
 attribute ["t", ...] [":", "!"] 'pText'
 @
 
+-}
+textRule :: [Text] -> G s (Attribute i j)
+textRule ks = do
+  pQuotableText <- gQuotableText
+  let p = TextAttribute <$> pQuotableText
+  q <- rule$ attribute ks genericOperators_ p
+  return q
+
+gQuotableText :: G s Text
+gQuotableText = do
+  pQuoteable <- gQuotable pNakedText pQuotedText
+  return pQuoteable
+
+----------------------------------------
+
+{-|
+
+
 -}  
-textAttribute :: [Text] -> P s (Attribute i j)
-textAttribute keywords = attribute keywords genericOperators_ qTextObject
+orderedEnumAttribute :: [Text] -> P s (Attribute i j)
+orderedEnumAttribute ks = TextAttribute <$> 
+  attribute ks numericOperators_ qEnum
+
+{-|
+
+-}  
+unorderedEnumAttribute :: [Text] -> P s (Attribute i j)
+unorderedEnumAttribute ks = TextAttribute <$> 
+  attribute ks genericOperators_ qEnum
+
+{-|
+
+-}  
+equatableEnumAttribute :: [Text] -> P s (Attribute i j)
+equatableEnumAttribute ks = TextAttribute <$> 
+  attribute ks [":"] qEnum
+
+{-|
+
+-}  
+chromaticAttribute :: [Text] -> P s (Attribute i j)
+chromaticAttribute ks = ChromaticAttribute <$> 
+  attribute ks numericOperators_ qChromatic
+
+{-|
+
+-}
+dateAttribute :: [Text] -> P s (Attribute i j)  
+dateAttribute ks = DateAttribute <$> 
+  attribute ks numericOperators_ qDate
 
 {-|
 
 
 -}  
 numericAttribute :: (Num i) => [Text] -> P s (Attribute i j)
-numericAttribute ks = attribute ks numericOperators_ qNumericObject
+numericAttribute ks = NumericAttribute <$> 
+  attribute ks numericOperators_ qNumeric
 
 {-|
 
 -} 
 manaAttribute :: (ParseableNumeric j) => [Text] -> P s (Attribute i j)
-manaAttribute ks = attribute ks numericOperators_ qManaObject
+manaAttribute ks = ManaAttribute <$> 
+  attribute ks numericOperators_ qMana
+
+
+----------------------------------------
+  
+equalityOperators_ :: [Text]
+equalityOperators_ =
+  [ ":"
+  ]
+
+genericOperators_ :: [Text]
+genericOperators_ =
+  [ ":"
+  , "!"
+  ]
+
+numericOperators_ :: [Text]
+numericOperators_ =
+  [ ":"
+  , "!"
+  , "="
+  , "<"
+  , ">"
+  , "<="
+  , ">="
+  ]
 
 -- attribute :: [Text] -> SyntaxTable a -> P s Text -> P s Attribute
 -- attribute keywords seperators pConstraint = p
@@ -668,29 +717,29 @@ pHas = enumAttribute ["has"] [":"] possessionKeywords
 
 ----------------------------------------
 
-qTextObject :: QuotableParser s (KnownAttribute i j)
-qTextObject = qText <&> TextAttribute
+-- qTextObject :: QuotableParser s (KnownAttribute i j)
+-- qTextObject = qText <&> TextAttribute
 
-qEnumObject :: QuotableParser s (KnownAttribute i j)
-qEnumObject = qEnum <&> TextAttribute
+-- qEnumObject :: QuotableParser s (KnownAttribute i j)
+-- qEnumObject = qEnum <&> TextAttribute
 
-qNumericObject :: (Num i) => QuotableParser s (KnownAttribute i j)
-qNumericObject = qNumeric <&> NumericAttribute
+-- qNumericObject :: (Num i) => QuotableParser s (KnownAttribute i j)
+-- qNumericObject = qNumeric <&> NumericAttribute
 
-qManaObject :: (ParseableNumeric j) => QuotableParser s (KnownAttribute i j)
-qManaObject = qMana <&> ManaAttribute
+-- qManaObject :: (ParseableNumeric j) => QuotableParser s (KnownAttribute i j)
+-- qManaObject = qMana <&> ManaAttribute
 
-qChromaticObject :: QuotableParser s (KnownAttribute i j)
-qChromaticObject = qChromatic <&> ChromaticAttribute
+-- qChromaticObject :: QuotableParser s (KnownAttribute i j)
+-- qChromaticObject = qChromatic <&> ChromaticAttribute
 
-qDateObject :: QuotableParser s (KnownAttribute i j)
---pDateObject :: (Show i) => QuotableParser s (KnownAttribute i j)
-qDateObject = qDate <&> DateAttribute
+-- qDateObject :: QuotableParser s (KnownAttribute i j)
+-- --pDateObject :: (Show i) => QuotableParser s (KnownAttribute i j)
+-- qDateObject = qDate <&> DateAttribute
 
 ----------------------------------------
 
-qText :: QuotableParser s Text
-qText = QuotableParser pNakedText pQuotedText
+-- qText :: QuotableParser s Text
+-- qText = QuotableParser pNakedText pQuotedText
 
 qEnum :: QuotableParser s Text
 qEnum = singletonQuotableParser pToken
@@ -719,25 +768,50 @@ qMana = singletonQuotableParser pMana
 
 ----------------------------------------
 
-pQuotedText :: P s Text
-pQuotedText = many1 pQuotedChar <&> toS
+textUntil :: [Char] -> G s Text
+textUntil cs = do
+  pBad  <- rule$ oneOf cs
+  pGood <- anyChar & manyUntil pBad 
+  let p = pGood <&> toS
+  return p
+ -- where
 
-pQuotedChar :: P s Char
-pQuotedChar = noneOf invalidQuotedChars
+----------------------------------------  
+
+gQuotedText :: G s Text
+gQuotedText = textUntil invalidQuotedChars
 
 invalidQuotedChars :: [Char]
 invalidQuotedChars =
   "\""
+  -- TODO for nested quotations, e.g. in Llanowar Mentor, use two single quotes (i.e. '')
 
-pNakedText :: P s Text
-pNakedText = many1 pNakedChar <&> toS
-
-pNakedChar :: P s Char
-pNakedChar = noneOf invalidNakedChars
+gNakedText :: G s Text
+gNakedText = textUntil invalidNakedChars
 
 invalidNakedChars :: [Char]
 invalidNakedChars =
   " :!\"()"
+
+-- pQuotedText :: P s Text
+-- pQuotedText = many1 pQuotedChar <&> toS
+
+-- pQuotedChar :: P s Char
+-- pQuotedChar = noneOf invalidQuotedChars
+
+-- invalidQuotedChars :: [Char]
+-- invalidQuotedChars =
+--   "\""
+
+-- pNakedText :: P s Text
+-- pNakedText = many1 pNakedChar <&> toS
+
+-- pNakedChar :: P s Char
+-- pNakedChar = noneOf invalidNakedChars
+
+-- invalidNakedChars :: [Char]
+-- invalidNakedChars =
+--   " :!\"()"
 
 ----------------------------------------
 
@@ -779,7 +853,7 @@ pColorIndication = printer displayColorIndication
 ----------------------------------------
 
 pMana :: (Enumerable j, Show j) => P s (ManaCost j)   -- Num j
-pMana = pManaSymbols <&> (Just > ManaCost)
+pMana = pManaSymbols <&> (Just > ManaCost) --TODO
 
 pManaSymbols :: (Enumerable i, Show i) => P s (ManaSymbols i)
 pManaSymbols = many1 p <&> ManaSymbols
@@ -955,31 +1029,31 @@ binaryPrefixOperators =
 
 ---------------------------------------
 
-equalityOperators_ :: [Text]
-equalityOperators_ = [":"]
+-- equalityOperators_ :: [Text]
+-- equalityOperators_ = [":"]
 
-genericOperators :: SyntaxTable (GenericComparator)
-genericOperators =
-  [ ":"          -: Has
-  , "!"          -: Is
-  ]
+-- genericOperators :: SyntaxTable (GenericComparator)
+-- genericOperators =
+--   [ ":"          -: Has
+--   , "!"          -: Is
+--   ]
 
-genericOperators_ :: [Text]
-genericOperators_ = genericOperators & fmap fst
+-- genericOperators_ :: [Text]
+-- genericOperators_ = genericOperators & fmap fst
 
-numericOperators :: SyntaxTable (NumericComparator)
-numericOperators =
-  [ ":"          -: Equals -- HAS
-  , "!"          -: Equals -- IS
-  , "="          -: Equals
-  , "<"          -: Lesser
-  , ">"          -: Greater
-  , "<="         -: LesserEquals
-  , ">="         -: GreaterEquals
-  ]
+-- numericOperators :: SyntaxTable (NumericComparator)
+-- numericOperators =
+--   [ ":"          -: Equals -- HAS
+--   , "!"          -: Equals -- IS
+--   , "="          -: Equals
+--   , "<"          -: Lesser
+--   , ">"          -: Greater
+--   , "<="         -: LesserEquals
+--   , ">="         -: GreaterEquals
+--   ]
 
-numericOperators_ :: [Text]
-numericOperators_ = numericOperators & fmap fst
+-- numericOperators_ :: [Text]
+-- numericOperators_ = numericOperators & fmap fst
 
 -- booleanPrefixes :: SyntaxTable (GenericComparator)
 -- booleanPrefixes =
