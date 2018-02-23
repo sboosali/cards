@@ -20,9 +20,17 @@ inherit (pkgs)
 in
 ########################################
 ### "Reflex-Platform"...
-let 
+let
+
+myOverlays = [myOverlay];
+
+myOverlay = self: super: {
+  # cabal-install = nixpkgs.cabal-install;
+  # cabal-install-2.0.0.1 (nixpkgs.cabal-install)
+};
 
 reflex-platform = import ./reflex-platform {
+  # customOverlays = myOverlays; 
   # inherit (nixpkgs) cabal-install; # Cabal v2.0 ?
 };
   # `reflex-platform` uses a pinned/older `nixpkgs` version.
