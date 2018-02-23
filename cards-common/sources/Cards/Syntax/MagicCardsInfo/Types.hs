@@ -608,6 +608,7 @@ type ParseableNumeric i = (Num i, Show i, Enumerable i)
 -}
 data SyntaxError
  = SyntaxError Text
+ deriving (Show,Eq,Ord,Generic,NFData)
 
 ----------------------------------------
 

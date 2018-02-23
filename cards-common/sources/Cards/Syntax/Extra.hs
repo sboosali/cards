@@ -101,13 +101,28 @@ quotable QuotableParser{..} = pU // pQ
   pU =        _pUnquoted
   pQ = quoted _pQuoted
 
--- | 
+-- | the inputs are parsers for, respectively, the unquoted form and and the quoted (i.e. without quotes) form.
+pQuotable :: P s a -> P s a -> P s a
+pQuotable _pUnquoted _pQuoted = pU // pQ
+  where
+  pU =        _pUnquoted
+  pQ = quoted _pQuoted
+
+-- | 'pQuotable', where the quoted and unquoted parsers are the same
+pQuotableDitto :: P s a -> P s a
+pQuotableDitto p = pQuotable p p
+
+-- | the inputs are parsers for, respectively, the unquoted form and and the quoted (i.e. without quotes) form.
 gQuotable :: G s a -> G s a -> G s a
 gQuotable gU gQ = do
   pU  <- gU
   pQ  <- gQ
   pQ' <- rule $ quoted pQ
   return $ pU // pQ'
+
+-- | 'gQuotable', where the quoted and unquoted parsers are the same
+gQuotableDitto :: G s a -> G s a
+gQuotableDitto g = gQuotable g g
 
 -- | 
 ruleQuotable :: QuotableParser s a -> G s a
@@ -131,7 +146,7 @@ rule = newRule
 complete :: PM s (P s a) -> PM s (P s (Complete a))
 complete grammar = mdo
   p <- grammar
-  let q = (,) <$> (fmap Just (p <<- eof) // unit Nothing) <*> rest
+  let q = (,) <$> (fmap Just (p <* eof) // unit Nothing) <*> rest
   return q
 
 text :: Text -> P s Text
@@ -163,7 +178,10 @@ pWhitespace :: P s String
 pWhitespace = F.many pSpace
 
 pSpace :: P s Char
-pSpace = onlyIf anyChar isSpace
+pSpace = charIf isSpace
+
+charIf :: (Char -> Bool) -> P s Char
+charIf = onlyIf anyChar
 
 integer :: forall i s. (Num i) => P s i
 integer = p <&> readNumber

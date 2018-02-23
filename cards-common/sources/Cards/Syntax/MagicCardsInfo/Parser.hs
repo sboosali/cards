@@ -212,9 +212,16 @@ import Enumerate
 import Prelude.Spiros hiding (P)
 import Prelude (error)
 
+{-
+
+["!Anger", "o:Flying", "o:\"First strike\"", "year<=95", "e:al/en,be", "e:al/en,be -e:al+be"] & fmap mci & traverse_ print
+
+-}
+
 ----------------------------------------
 
 {-|
+
 
 >> mci "!Anger"
 Right (ExactQuery_ "Anger")
@@ -231,12 +238,38 @@ Right (StatementQuery_ (Statements {_statementFreeform = [], _statementAttribute
 
 >> mci "e:al/en,be -e:al+be"
 
+>> > mci " year>93  year<95 "
+Right (StatementQuery_ (Statements {_statementFreeform = [], _statementAttributes = Attributes {getAttributes = [Attribute {subject = "year", verb = ">", object = DateAttribute (YearMonthDay {ymdYear = 1993, ymdMonth = 0, ymdDay = 0})},Attribute {subject = "year", verb = "<", object = DateAttribute (YearMonthDay {ymdYear = 1995, ymdMonth = 0, ymdDay = 0})}]}}))
+
+
+
+> mci "o:\"First strike\" o:Flying"
+Right ...
+> mci "o:\"First strike"
+Left ...
+> mci "o:First strike"
+Left ...
+
+
+
+TODO property test commutativity for well-formed queries (i.e. without lenient acceptance of dangling quotations, etc)
+
+mci "o:\"First strike\" o:Flying"
+ght (StatementQuery_ (Statements {_statementFreeform = [], _statementAttributes = Attributes {getAttributes = [Attribute {subject = "o", verb = ":", object = TextAttribute "First strike"},Attribute {subject = "o", verb = ":", object = TextAttribute "Flying"}]}}))
+
+mci " o:Flying o:\"First strike\" "
+Right (StatementQuery_ (Statements {_statementFreeform = [], _statementAttributes = Attributes {getAttributes = [Attribute {subject = "o", verb = ":", object = TextAttribute "Flying"},Attribute {subject = "o", verb = ":", object = TextAttribute "First strike"}]}}))
+
+
+
+
 
 -}
 mci :: String -> Either SyntaxError KnownQuery_
-mci = runMagicCardsInfo' > fst > maybe l Right
+mci sInput = x
   where
-  l = Left (SyntaxError "")
+  (result, sRest) = sInput & runMagicCardsInfo'
+  x = result & maybe (Left (SyntaxError (toS sRest))) Right  
   -- maybe2either
 
 {-|
@@ -311,13 +344,13 @@ gMagicCardsInfo
      )
   => G s (Query_ i j)
 gMagicCardsInfo = mdo
-  let gExactName = rule$ preSpaceable pExactName <&> ExactQuery_
-  
+ 
   statements' <- gStatements 
-  exact       <- gExactName
+  exact'      <- gExactName
   
   let statements = statements' <&> StatementQuery_
-  
+  let exact      = exact'      <&> ExactQuery_
+
   p <- rule$ exact // statements
   q <- rule$ postSpaceable p 
   return q
@@ -327,11 +360,17 @@ gMagicCardsInfo = mdo
 
 ----------------------------------------
 
+gExactName :: G s Text
+gExactName = rule$
+  preSpaceable pExactName
+
 pExactName :: P s Text
 pExactName = p <&> toS
   where
   p = char '!' *> rest
 
+----------------------------------------
+  
 gStatements
   :: forall i j s.
      ( ParseableNumeric i
@@ -340,25 +379,40 @@ gStatements
   => G s (Statements i j)
 gStatements = mdo
 
-  
+  -- boundary between attributes (i.e. simultaneous tokenization)
+  boundary <- rule$ pAttributeBoundary 
 
-  psTextAttributes      <- textRule        ["o","t","a"] 
+  psTextAttributes      <- textAttribute
+    boundary
+    ["o","t","a"] 
 
-  {- ^ NOTE magiccards.info itself doesn't support equality,
-       e.g. `o!Flying`
+  {- ^ NOTE magiccards.info itself doesn't support strict equality for oracle text.
+       e.g. `o!Flying`, French vanillas creatures that have no other text besides flying.
   -}
 
-  psNumericAttributes   <- rule$ pN
+  psNumericAttributes   <- do
+    numericAttribute
+      ["cmc","pow","tou"] 
 
-  psManaAttributes      <- rule$ manaAttribute        ["mana"] 
+  psManaAttributes      <- do
+    manaAttribute
+      ["mana"] 
 
-  psColorAttributes     <- rule$ chromaticAttribute   ["c","ci","in"]
+  psColorAttributes     <- do
+    chromaticAttribute
+      ["c","ci","in"]
 
-  psDateAttributes      <- rule$ dateAttribute        ["year"]
+  psDateAttributes      <- do
+    dateAttribute
+      boundary
+      ["year"]
 
-  psOrderedAttributes   <- rule$ orderedEnumAttribute ["e","r"]
+  psOrderedAttributes   <- rule$
+    orderedEnumAttribute
+      ["e","r"]
 
-  psUnorderedAttributes <- rule$ unorderedEnumAttribute
+  psUnorderedAttributes <- rule$
+    unorderedEnumAttribute
       ["l"
       ,"f"
       ,"is", "not","has" 
@@ -382,9 +436,9 @@ gStatements = mdo
   p <- rule$ Statements <$> pFreeform <*> pAttributes
   return p
 
-  where
-  pN :: P s (Attribute i j)
-  pN = numericAttribute ["cmc","pow","tou"] 
+  -- where
+  -- pN :: P s (Attribute i j)
+  -- pN = numericAttribute ["cmc","pow","tou"] 
 
 
 
@@ -448,6 +502,26 @@ gStatements = mdo
 
 ----------------------------------------
 
+attributeGrammar
+  :: G s (KnownAttribute i j)
+  -> G s (KnownAttribute i j)
+  -> [Text]
+  -> [Text]
+  -> G s (Attribute i j)
+attributeGrammar gU gQ verbs subjects = do
+  pU <- gU
+  pQ <- gQ
+  q  <- rule$ attribute pU pQ verbs subjects
+  return q
+
+attributeDittoQuotableGrammar
+  :: G s (KnownAttribute i j)
+  -> [Text]
+  -> [Text]
+  -> G s (Attribute i j)
+attributeDittoQuotableGrammar g =
+  attributeGrammar g g
+
 {-|
 
 Parses a keyword (or a set of aliases for that keyword),
@@ -467,35 +541,87 @@ attribute ["cmc", ...] [":", ...] 'pNumeric'
 -- where number :: P s Numeric
 @
 
-
 -}
 attribute
-  :: [Text]
+  :: P s (KnownAttribute i j)
+  -> P s (KnownAttribute i j)
   -> [Text]
-  -> QuotableParser s (KnownAttribute i j) 
-  -- -> P s (KnownAttribute i j)
-  -- -> P s (KnownAttribute i j)
+  -> [Text]
   -> P s (Attribute i j)
-attribute keywords seperators ps = q
+attribute pU pQ verbs subjects =
+  attributeAlreadyQuotable q verbs subjects 
+  where
+  q = pQuotable pU pQ
+
+attributeDittoQuotable
+  :: P s (KnownAttribute i j)
+  -> [Text]
+  -> [Text]
+  -> P s (Attribute i j)
+attributeDittoQuotable p verbs subjects = 
+  attributeAlreadyQuotable q verbs subjects 
+  where
+  q = pQuotable p p
+
+attributeAlreadyQuotable
+  :: P s (KnownAttribute i j)
+  -> [Text]
+  -> [Text]
+  -> P s (Attribute i j)
+attributeAlreadyQuotable p verbs subjects = pAttribute
   where
   -- "subject / verb / object"
-  s = texts keywords
-  v = texts seperators
-  o = quotable ps  -- quotable _pUnquoted _pQuoted 
-  p = Attribute <$> s <*> v <*> o
-  q = preSpaceable p
+  s = texts subjects
+  v = texts verbs
+  o = p
+  pAttribute =
+    preSpaceable $ Attribute <$> s <*> v <*> o
 
-{-|
+  -- gAttribute
+--   :: [Text]
+--   -> [Text]
+--   -> P s (KnownAttribute i j) 
+--   -> P s (KnownAttribute i j) 
+--   -> G s (Attribute i j)
+-- gAttribute keywords seperators pU pQ = do
+--   -- "subject / verb / object"
+--   s <- rule$ texts keywords
+--   v <- rule$ texts seperators
+--   o <- rule$ pQuotable pU pQ  -- quotable _pUnquoted _pQuoted 
 
-wraps 'attribute' (as 'quotable'' wraps 'quotable'). 
+--   let p = Attribute <$> s <*> v <*> o
+--   pAttribute <- rule$ preSpaceable p
+--   return pAttribute
 
--}
-attribute'
-  :: [Text]
-  -> [Text]
-  -> P s (KnownAttribute i j)
-  -> P s (Attribute      i j)
-attribute' ks os p = attribute ks os (singletonQuotableParser p)
+-- -- | like 'gAttribute', but the given parser already supports being quoted
+-- gQuotableAttribute
+--   :: [Text]
+--   -> [Text]
+--   -> P s (KnownAttribute i j) 
+--   -- -> P s (KnownAttribute i j)
+--   -- -> P s (KnownAttribute i j)
+--   -> G s (Attribute i j)
+-- gQuotableAttribute keywords seperators ps = do
+--   -- "subject / verb / object"
+--   s <- rule$ texts keywords
+--   v <- rule$ texts seperators
+--   o <- rule$ ps -- pQuotableDitto ps  -- quotable _pUnquoted _pQuoted 
+
+--   let p = Attribute <$> s <*> v <*> o
+--   pAttribute <- rule$ preSpaceable p
+--   return pAttribute
+
+-- {-|
+
+-- wraps 'attribute' (as 'quotable'' wraps 'quotable'). 
+
+-- -}
+-- attribute'
+--   :: [Text]
+--   -> [Text]
+--   -> P s (KnownAttribute i j)
+--   -> P s (Attribute      i j)
+-- attribute' ks os p = attribute ks os (singletonQuotableParser p)
 
 -- {-|
 
@@ -536,70 +662,101 @@ attribute ["t", ...] [":", "!"] 'pText'
 @
 
 -}
-textRule :: [Text] -> G s (Attribute i j)
-textRule ks = do
-  pQuotableText <- gQuotableText
-  let p = TextAttribute <$> pQuotableText
-  q <- rule$ attribute ks genericOperators_ p
-  return q
+-- textRule :: [Text] -> G s (Attribute i j)
+-- textRule ks = do
+--   pQuotableText <- gQuotableText
+--   let p = TextAttribute <$> pQuotableText
+--   q <- rule$ attribute ks genericOperators_ p
+--   return q
 
-gQuotableText :: G s Text
-gQuotableText = do
-  pQuoteable <- gQuotable pNakedText pQuotedText
-  return pQuoteable
+-- gQuotableText :: G s Text
+-- gQuotableText = do
+--   pQuoteable <- gQuotable pNakedText pQuotedText
+--   return pQuoteable
+
+textAttribute :: P s a -> [Text] -> G s (Attribute i j)
+textAttribute _pBoundary ks = do
+  pText <- gText
+  pTextAttribute <- rule$
+    attributeAlreadyQuotable (pText <&> TextAttribute) genericOperators_ ks
+  return pTextAttribute   
+
+  -- pQuotableText <- gText
+  -- pTextAttribute <- rule$ attributeAlreadyQuotable ks genericOperators_
+  --             (pQuotableText <&> TextAttribute)
+  -- return pTextAttribute
 
 ----------------------------------------
+
+enumAttribute :: [Text] -> [Text] -> P s (Attribute i j)
+enumAttribute os = q
+  where
+  p = TextAttribute <$> pEnum
+  q = attributeDittoQuotable p os
+
+-- enumAttribute :: [Text] -> [Text] -> G s (Attribute i j)
+-- enumAttribute os ks = do
+--   p <- rule$ TextAttribute <$> pEnum
+--   q <- rule$ attribute ks os p
+--   return q
 
 {-|
 
 
 -}  
 orderedEnumAttribute :: [Text] -> P s (Attribute i j)
-orderedEnumAttribute ks = TextAttribute <$> 
-  attribute ks numericOperators_ qEnum
-
+orderedEnumAttribute = enumAttribute numericOperators_
+  
 {-|
 
 -}  
 unorderedEnumAttribute :: [Text] -> P s (Attribute i j)
-unorderedEnumAttribute ks = TextAttribute <$> 
-  attribute ks genericOperators_ qEnum
+unorderedEnumAttribute = enumAttribute genericOperators_
 
 {-|
 
 -}  
 equatableEnumAttribute :: [Text] -> P s (Attribute i j)
-equatableEnumAttribute ks = TextAttribute <$> 
-  attribute ks [":"] qEnum
+equatableEnumAttribute = enumAttribute [":"] 
+
+----------------------------------------
 
 {-|
 
 -}  
-chromaticAttribute :: [Text] -> P s (Attribute i j)
-chromaticAttribute ks = ChromaticAttribute <$> 
-  attribute ks numericOperators_ qChromatic
+chromaticAttribute :: [Text] -> G s (Attribute i j)
+chromaticAttribute =
+  attributeDittoQuotableGrammar g numericOperators_
+  where
+  g = fmap ChromaticAttribute <$> gChromatic
 
 {-|
 
 -}
-dateAttribute :: [Text] -> P s (Attribute i j)  
-dateAttribute ks = DateAttribute <$> 
-  attribute ks numericOperators_ qDate
+dateAttribute :: P s () -> [Text] -> G s (Attribute i j)  
+dateAttribute pBoundary = 
+  attributeDittoQuotableGrammar g numericOperators_
+  where
+  g = fmap DateAttribute <$> gDate pBoundary
 
 {-|
 
 
 -}  
-numericAttribute :: (Num i) => [Text] -> P s (Attribute i j)
-numericAttribute ks = NumericAttribute <$> 
-  attribute ks numericOperators_ qNumeric
+numericAttribute :: (Num i) => [Text] -> G s (Attribute i j)
+numericAttribute = 
+  attributeDittoQuotableGrammar g numericOperators_
+  where
+  g = fmap NumericAttribute <$> gNumeric
 
 {-|
 
 -} 
-manaAttribute :: (ParseableNumeric j) => [Text] -> P s (Attribute i j)
-manaAttribute ks = ManaAttribute <$> 
-  attribute ks numericOperators_ qMana
+manaAttribute :: (ParseableNumeric j) => [Text] -> G s (Attribute i j)
+manaAttribute = 
+  attributeDittoQuotableGrammar g numericOperators_
+  where
+  g = fmap ManaAttribute <$> gMana
 
 
 ----------------------------------------
@@ -617,13 +774,14 @@ genericOperators_ =
 
 numericOperators_ :: [Text]
 numericOperators_ =
-  [ ":"
+  [ "=="
+  , "<="
+  , ">="
+  , ":"
   , "!"
   , "="
   , "<"
   , ">"
-  , "<="
-  , ">="
   ]
 
 -- attribute :: [Text] -> SyntaxTable a -> P s Text -> P s Attribute
@@ -737,25 +895,55 @@ pHas = enumAttribute ["has"] [":"] possessionKeywords
 -- qDateObject = qDate <&> DateAttribute
 
 ----------------------------------------
+gText :: G s Text
+gText = do
+  
+  pNakedText <-
+    textUntil "\n\t :!\"()=~<>"
+    --NOTE accepts terminal dangling quotations
+    -- TODO for nested quotations,
+    -- e.g. in Llanowar Mentor, use two single quotes (i.e. '')
+    
+  pQuotedText <-
+    textUntil "\""
+    --TODO pull from operators
 
--- qText :: QuotableParser s Text
--- qText = QuotableParser pNakedText pQuotedText
+  let pU = pNakedText  & bounded
+  let pQ = pQuotedText & quoted
+  
+  let p = pU // pQ
+  return p
 
-qEnum :: QuotableParser s Text
-qEnum = singletonQuotableParser pToken
 
-qChromatic :: QuotableParser s Chromatic
-qChromatic = singletonQuotableParser pChromatic
+  -- gText :: G s Text
+-- gText = do
+--   let p = pU // pQ
+--   return p
+--   where
+--   pU = pNakedText  & bounded
+--   pQ = pQuotedText & quoted
+--   pNakedText = 
+--     textUntil "\""
+--     --NOTE accepts terminal dangling quotations
+--     -- TODO for nested quotations,
+--     -- e.g. in Llanowar Mentor, use two single quotes (i.e. '')
+--   pQuotedText =
+--     textUntil "\n\t :!\"()=~<>"
+--     --TODO pull from operators
+  
+bounded :: P s a -> P s a
+bounded p = p <* pAttributeBoundary
 
-qDate :: QuotableParser s Date
-qDate = singletonQuotableParser pDate
+--gText = gQuotable gNakedText gQuotedText
 
-qNumeric :: (Num i) => QuotableParser s (Numeric i)
-qNumeric = singletonQuotableParser pNumeric
+-- gEnum :: G s Text
+-- gEnum = gQuotableDitto (rule pToken)
 
-qMana :: (ParseableNumeric j) => QuotableParser s (ManaCost j)  
-qMana = singletonQuotableParser pMana
---pMana :: (Show j) => P s (ManaCost j)
+-- gDate :: G s Date
+-- gDate = gQuotableDitto $ rule pDate
+
+gNumeric :: (Num i) => G s (Numeric i)
+gNumeric = gQuotableDitto $ rule pNumeric
 
 -- pGenericOperators :: P s GenericComparator
 -- pGenericOperators = aliases genericOperators
@@ -766,12 +954,26 @@ qMana = singletonQuotableParser pMana
 -- pNumericComparison :: P s Attribute
 -- pNumericComparison = _ -- pAttribute' pNumeric
 
+----------------------------------------  
+
+pEnum :: P s Text
+pEnum = pToken
+
 ----------------------------------------
+
+pAttributeBoundary :: P s ()
+pAttributeBoundary =
+  bof // (matches $ oneOf csAttributeBoundary) // eof 
+  -- discard $ peek $
+  
+csAttributeBoundary :: [Char]
+csAttributeBoundary =
+  "\n\t ()"
 
 textUntil :: [Char] -> G s Text
 textUntil cs = do
-  pBad  <- rule$ oneOf cs
-  pGood <- anyChar & manyUntil pBad 
+  pBad  <- rule$ oneOf cs & discard
+  pGood <- anyChar & manyUntil (pBad // eof)
   let p = pGood <&> toS
   return p
  -- where
@@ -780,6 +982,7 @@ textUntil cs = do
 
 gQuotedText :: G s Text
 gQuotedText = textUntil invalidQuotedChars
+  --NOTE accepts terminal dangling quotations
 
 invalidQuotedChars :: [Char]
 invalidQuotedChars =
@@ -791,7 +994,8 @@ gNakedText = textUntil invalidNakedChars
 
 invalidNakedChars :: [Char]
 invalidNakedChars =
-  " :!\"()"
+  "\n\t :!\"()=~<>"
+  --TODO pull from operators
 
 -- pQuotedText :: P s Text
 -- pQuotedText = many1 pQuotedChar <&> toS
@@ -819,7 +1023,7 @@ pToken :: P s Text
 pToken = many1 pBlackChar <&> toS
 
 pBlackChar :: P s Char
-pBlackChar = onlyIf anyChar (not . isSpace)
+pBlackChar = charIf (not . isSpace)
 
 -- pWhiteChar :: P s Char
 -- pWhiteChar = noneOf whitespaceChars
@@ -830,10 +1034,16 @@ pBlackChar = onlyIf anyChar (not . isSpace)
 
 ----------------------------------------
 
-pChromatic :: P s Chromatic
-pChromatic = p <&> Chromatic
-  where
-  p = many1 pChroma
+gChromatic :: G s Chromatic
+gChromatic = do
+  chroma   <- rule $ pChroma
+  chromata <- rule $ many1 chroma
+  let p = chromata <&> Chromatic
+  return p
+  
+  -- p <- rule $ many1 pChroma
+  -- let q = p <&> Chromatic
+  -- return q
 
 pChroma :: P s Chroma
 pChroma = printer displayChroma 
@@ -852,25 +1062,40 @@ pColorIndication = printer displayColorIndication
   
 ----------------------------------------
 
-pMana :: (Enumerable j, Show j) => P s (ManaCost j)   -- Num j
-pMana = pManaSymbols <&> (Just > ManaCost) --TODO
+gMana :: (Enumerable j, Show j) => G s (ManaCost j)   -- Num j
+gMana = do
+  pManaSymbols <- gManaSymbols
+  let p = pManaSymbols <&> (Just > ManaCost)
+  --TODO represent searching for something without a Mana cost. like 'early' whitespace, "m: r:rare"?
+  return p
 
-pManaSymbols :: (Enumerable i, Show i) => P s (ManaSymbols i)
-pManaSymbols = many1 p <&> ManaSymbols
- where
- p = printer displayManaSymbol 
+gManaSymbols :: (Enumerable i, Show i) => G s (ManaSymbols i)
+gManaSymbols = do
+  p  <- rule$ pManaSymbol
+  psManaSymbol <- rule$ many1 p
+  let pManaSymbols = psManaSymbol <&> ManaSymbols
+  return pManaSymbols
+  where
+  pManaSymbol = printer displayManaSymbol 
 
 ----------------------------------------
 
-pDate :: P s Date
-pDate = pShortDate // pLongDate
-  where
-  pLongDate    = pYear
+-- | end of attribute
+gDate :: P s () -> G s Date
+gDate pEnd = do
   
-  pShortDate   = pDoubleDigit <&> disambiguateCentury
-  pDoubleDigit = toDoubleDigit <$> pDigit <*> pDigit
+  pYear <- gDigits
+  let pLongDate = fromYear <$> pYear
 
-  pYear        = fromYear <$> pDigits
+  let pShortDate = pYY <* pEnd
+
+  let pDate = pShortDate // pLongDate
+  return pDate
+
+  where
+
+  pYY = pDoubleDigit <&> disambiguateCentury
+  pDoubleDigit = toDoubleDigit <$> pDigit <*> pDigit
 
   toDoubleDigit :: Int -> Int -> Int 
   toDoubleDigit x y = 10*x + 1*y
@@ -888,8 +1113,12 @@ pDate = pShortDate // pLongDate
     --- | y >= 93   = 1900 + y
     --- | otherwise = 2000 + y
 
-pDigits :: (Num a) => P s a
-pDigits = many1 F.number <&> toDigits
+gDigits :: (Num a) => G s a
+gDigits = do
+  pC <- rule$ F.digit --TODO F.number
+  pS <- rule$ many1 pC
+  let pN = pS <&> toDigits
+  return pN
   where
   toDigits = readMay > maybe 0 fromInteger
   --  (error "[pDigits] inconceivable")
