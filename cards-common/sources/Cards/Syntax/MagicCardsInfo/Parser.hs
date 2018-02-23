@@ -184,6 +184,7 @@ module Cards.Syntax.MagicCardsInfo.Parser where
 
 import Cards.Syntax.Extra
 import Cards.Syntax.MagicCardsInfo.Types
+import Cards.Syntax.MagicCardsInfo.Static
 import Cards.Syntax.MagicCardsInfo.Printer
 
 --import Cards.Query.Types
@@ -192,9 +193,12 @@ import Cards.Syntax.MagicCardsInfo.Printer
 -- import qualified Text.Megaparsec as P
 
 --import qualified Text.Parsers.Frisby as Frisby
+import qualified Text.Parsers.Frisby.Char as F
 import           Text.Parsers.Frisby hiding (text, (<>))
 
-import Data.Thyme (Day)
+--import Data.Thyme (Day)
+
+import Data.Thyme.Calendar (YearMonthDay(..))
 
 import Enumerate
 -- import Enumerate.Function
@@ -202,19 +206,20 @@ import Enumerate
 -- import qualified Data.Text.Lazy as T
 
 -- import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
+--import qualified Data.Map as Map
 
 import Prelude.Spiros hiding (P)
+import Prelude (error)
 
 ----------------------------------------
   
-runMagicCardsInfo' :: String -> (Complete Syntax_)
+runMagicCardsInfo' :: String -> (Complete (Syntax_ i j))
 runMagicCardsInfo' = runPeg gMagicCardsInfo' 
 
-gMagicCardsInfo' :: PM s (P s (Complete Syntax_))
+gMagicCardsInfo' :: PM s (P s (Complete (Syntax_ i j)))
 gMagicCardsInfo' = complete gMagicCardsInfo
 
-runMagicCardsInfo :: String -> Syntax_
+runMagicCardsInfo :: String -> (Syntax_ i j)
 runMagicCardsInfo = runPeg gMagicCardsInfo 
 
 ---------------------------------------
@@ -252,15 +257,20 @@ i.e.: we don't interpret the meaning of anything, like the string "<=", but we d
 
 
 -}
-gMagicCardsInfo :: PM s (P s Syntax_)
+gMagicCardsInfo :: G s (Syntax_ i j)
 gMagicCardsInfo = mdo
-    p <- rule $ _
+    p <- rule $ _ -- pure emptySyntax_
     
     return p
  -- numbers / dates?
 
 ----------------------------------------
 
+-- {-|
+
+-- -}  
+-- textAttributes :: [[Text]] -> P s Attribute
+-- textAttributes keywords = attribute keywords genericOperators_ pText
 
 ----------------------------------------
 
@@ -285,35 +295,77 @@ attribute ["cmc", ...] [":", ...] 'pNumeric'
 
 
 -}
-attribute :: [Text] -> [Text] -> P s Text -> P s Attribute
-attribute keywords seperators pConstraint = a
+attribute
+  :: [Text]
+  -> [Text]
+  -> QuotableParser s (KnownAttribute i j) 
+  -- -> P s (KnownAttribute i j)
+  -- -> P s (KnownAttribute i j)
+  -> P s (Attribute i j)
+attribute keywords seperators ps = a -- QuotableParser{..} = a
   where
   -- "subject / verb / object"
   s = texts keywords
   v = texts seperators
-  o = quotable pConstraint
+  o = quotable ps  -- quotable _pUnquoted _pQuoted 
   a = Attribute <$> s <*> v <*> o
 
 {-|
 
+wraps 'attribute' (as 'quotable'' wraps 'quotable'). 
 
--}  
-enumAttribute :: [Text] -> [Text] -> [Text] -> P s Attribute
-enumAttribute x y constraints = attribute x y (texts constraints)
+-}
+attribute'
+  :: [Text]
+  -> [Text]
+  -> P s (KnownAttribute i j)
+  -> P s (Attribute i j)
+attribute' ks os p = attribute ks os (singletonQuotableParser p)
+
+-- {-|
+
+
+-- -}  
+-- enumAttribute :: [Text] -> [Text] -> [Text] -> P s (Attribute i j)
+-- enumAttribute ks os vs = attribute ks os
+--   (textAttributes vs)
 
 {-|
 
 
 -}  
-numericAttribute :: [Text] -> P s Attribute
-numericAttribute x = attribute x numericOperators_ pNumeric
+textAttributes :: [Text] -> P s (KnownAttribute i j)
+textAttributes vs = TextAttribute <$> (texts vs)
+
+----------------------------------------
 
 {-|
 
 
 -}  
-chromaticAttribute :: [Text] -> P s Attribute
-chromaticAttribute x = attribute x numericOperators_ pChromatic
+orderedEnumAttribute :: [Text] -> P s (Attribute i j)
+orderedEnumAttribute ks =
+  attribute ks genericOperators_ qEnumObject
+
+{-|
+
+
+-}  
+unorderedEnumAttribute :: [Text] -> P s (Attribute i j)
+unorderedEnumAttribute ks =
+  attribute ks equalityOperators_ qEnumObject
+
+{-|
+
+-}  
+chromaticAttribute :: [Text] -> P s (Attribute i j)
+chromaticAttribute ks = attribute ks numericOperators_ qChromaticObject
+
+{-|
+
+-}
+dateAttribute :: [Text] -> P s (Attribute i j)  
+dateAttribute ks = attribute ks numericOperators_ qDateObject
 
 {-|
 
@@ -336,8 +388,21 @@ attribute ["t", ...] [":", "!"] 'pText'
 @
 
 -}  
-textAttribute :: [Text] -> P s Attribute
-textAttribute keywords = attribute keywords genericOperators_ pText
+textAttribute :: [Text] -> P s (Attribute i j)
+textAttribute keywords = attribute keywords genericOperators_ qTextObject
+
+{-|
+
+
+-}  
+numericAttribute :: (Num i) => [Text] -> P s (Attribute i j)
+numericAttribute ks = attribute ks numericOperators_ qNumericObject
+
+{-|
+
+-} 
+manaAttribute :: (Num j, Show j, Enumerable j) => [Text] -> P s (Attribute i j)
+manaAttribute ks = attribute ks numericOperators_ qManaObject
 
 -- attribute :: [Text] -> SyntaxTable a -> P s Text -> P s Attribute
 -- attribute keywords seperators pConstraint = p
@@ -356,6 +421,40 @@ textAttribute keywords = attribute keywords genericOperators_ pText
 --   return p
 
 ----------------------------------------
+
+pTextAttributes :: P s (Attribute i j)
+pTextAttributes = textAttribute ["o","t","a"] 
+-- TODO magiccards.info doesn't support equality, e.g. `o!Flying`
+
+pNumericAttributes :: (Num i) => P s (Attribute i j)
+pNumericAttributes = numericAttribute ["cmc","pow","tou"] 
+
+pManaAttributes :: (Num j, Show j, Enumerable j) => P s (Attribute i j)
+pManaAttributes = manaAttribute ["mana"] 
+
+pColorAttributes :: P s (Attribute i j)
+pColorAttributes = chromaticAttribute ["c","ci","in"]
+
+pDateAttributes :: P s (Attribute i j)
+pDateAttributes = dateAttribute ["year"]
+
+pOrderedAttributes :: P s (Attribute i j)
+pOrderedAttributes = orderedEnumAttribute
+ ["e"
+ ,"r"
+ ]
+
+pUnorderedAttributes :: P s (Attribute i j)
+pUnorderedAttributes = unorderedEnumAttribute
+ ["l"
+ ,"f"
+ ,"is", "not","has" 
+ ,"banned", "legal", "restricted"
+ ]
+
+----------------------------------------  
+
+{-
 
 pOracle :: P s Attribute
 pOracle = textAttribute ["o"] 
@@ -423,19 +522,49 @@ pIs = enumAttribute ["is", "not"] [":"] identityKeywords
 pHas :: P s Attribute
 pHas = enumAttribute ["has"] [":"] possessionKeywords
 
+-}
+
 ----------------------------------------
 
-pText :: P s Text
-pText = _
+qTextObject :: QuotableParser s (KnownAttribute i j)
+qTextObject = qText <&> TextAttribute
 
-pNumeric :: P s (Numeric i)
-pNumeric = _
+qEnumObject :: QuotableParser s (KnownAttribute i j)
+qEnumObject = qEnum <&> TextAttribute
 
-pChromatic :: P s Chromatic
-pChromatic = _
+qNumericObject :: (Num i) => QuotableParser s (KnownAttribute i j)
+qNumericObject = qNumeric <&> NumericAttribute
 
-pDate :: P s Day
-pDate = _  
+qManaObject :: (Num j, Show j, Enumerable j) => QuotableParser s (KnownAttribute i j)
+qManaObject = qMana <&> ManaAttribute
+
+qChromaticObject :: QuotableParser s (KnownAttribute i j)
+qChromaticObject = qChromatic <&> ChromaticAttribute
+
+qDateObject :: QuotableParser s (KnownAttribute i j)
+--pDateObject :: (Show i) => QuotableParser s (KnownAttribute i j)
+qDateObject = qDate <&> DateAttribute
+
+----------------------------------------
+
+qText :: QuotableParser s Text
+qText = QuotableParser pNakedText pQuotedText
+
+qEnum :: QuotableParser s Text
+qEnum = singletonQuotableParser pToken
+
+qChromatic :: QuotableParser s Chromatic
+qChromatic = singletonQuotableParser pChromatic
+
+qDate :: QuotableParser s Date
+qDate = singletonQuotableParser pDate
+
+qNumeric :: (Num i) => QuotableParser s (Numeric i)
+qNumeric = singletonQuotableParser pNumeric
+
+qMana :: (Num j, Show j, Enumerable j) => QuotableParser s (ManaCost j)  
+qMana = singletonQuotableParser pMana
+--pMana :: (Show j) => P s (ManaCost j)
 
 -- pGenericOperators :: P s GenericComparator
 -- pGenericOperators = aliases genericOperators
@@ -448,11 +577,21 @@ pDate = _
 
 ----------------------------------------
 
-pValidText :: P s Text
-pValidText = many1 pValidChar 
+pQuotedText :: P s Text
+pQuotedText = many1 pQuotedChar <&> toS
 
-pValidChar :: P s Char
-pValidChar = noneOf
+pQuotedChar :: P s Char
+pQuotedChar = noneOf invalidQuotedChars
+
+invalidQuotedChars :: [Char]
+invalidQuotedChars =
+  "\""
+
+pNakedText :: P s Text
+pNakedText = many1 pNakedChar <&> toS
+
+pNakedChar :: P s Char
+pNakedChar = noneOf invalidNakedChars
 
 invalidNakedChars :: [Char]
 invalidNakedChars =
@@ -460,110 +599,229 @@ invalidNakedChars =
 
 ----------------------------------------
 
-allPrefixKeywords :: SyntaxTable ()
-allPrefixKeywords = 
-  [ "o"          -: ()
-  , "t"          -: ()
-  , "cmc"        -: ()
-  , "mana"       -: ()
-  , "c"          -: ()
-  , "ci"         -: ()
-  , "in"         -: ()
-  , "r"          -: ()
-  , "pow"        -: ()
-  , "tou"        -: ()
-  , "e"          -: ()
-  , "f"          -: ()
-  , "year"       -: ()
-  , "banned"     -: ()
-  , "legal"      -: ()
-  , "restricted" -: ()
-  , "a"          -: ()
-  , "l"          -: ()
-  , "is"         -: ()
-  , "not"        -: ()
-  , "has"        -: ()
+pToken :: P s Text
+pToken = many1 pBlackChar <&> toS
+
+pBlackChar :: P s Char
+pBlackChar = onlyIf anyChar (not . isSpace)
+
+-- pWhiteChar :: P s Char
+-- pWhiteChar = noneOf whitespaceChars
+
+-- whitespaceChars :: [Char]
+-- whitespaceChars =
+--   " \n\t"
+
+----------------------------------------
+
+pChromatic :: P s Chromatic
+pChromatic = p <&> Chromatic
+  where
+  p = many1 pChroma
+
+pChroma :: P s Chroma
+pChroma = printer displayChroma 
+  
+pHue :: P s Hue  
+pHue = printer displayHue
+
+pColor :: P s Color  
+pColor = printer displayColor
+
+pColorIdentity :: P s ColorIdentity
+pColorIdentity = printer displayColorIdentity 
+  
+pColorIndication :: P s ColorIndication
+pColorIndication = printer displayColorIndication
+  
+----------------------------------------
+
+pMana :: (Enumerable j, Show j) => P s (ManaCost j)   -- Num j
+pMana = pManaSymbols <&> (Just > ManaCost)
+
+pManaSymbols :: (Enumerable i, Show i) => P s (ManaSymbols i)
+pManaSymbols = many1 p <&> ManaSymbols
+ where
+ p = printer displayManaSymbol 
+
+----------------------------------------
+
+pDate :: P s Date
+pDate = pShortDate // pLongDate
+  where
+  pLongDate    = pYear
+  
+  pShortDate   = pDoubleDigit <&> disambiguateCentury
+  pDoubleDigit = toDoubleDigit <$> pDigit <*> pDigit
+
+  pYear        = fromYear <$> pDigits
+
+  toDoubleDigit :: Int -> Int -> Int 
+  toDoubleDigit x y = 10*x + 1*y
+  
+  disambiguateCentury :: Int -> Date
+  disambiguateCentury y = 
+    if y >= 93
+       -- MTG was published in 1993
+    then fromYear $ 1900 + y
+    else fromYear $ 2000 + y
+
+  fromYear :: Int -> YearMonthDay -- Date
+  fromYear y = YearMonthDay y 0 0
+
+    --- | y >= 93   = 1900 + y
+    --- | otherwise = 2000 + y
+
+pDigits :: (Num a) => P s a
+pDigits = many1 F.number <&> toDigits
+  where
+  toDigits = readMay > maybe 0 fromInteger
+  --  (error "[pDigits] inconceivable")
+
+pDigit :: (Num a) => P s a
+pDigit = F.number <&> toDigit
+  where
+  toDigit = (:[]) > readMay > maybe (error "[pDigit] inconceivable") fromInteger
+
+----------------------------------------
+
+pNumeric :: (Num i) => P s (Numeric i)
+pNumeric = pVariable // pConstant
+  where
+  pVariable = Variable <$> printer displayNumericVariable 
+  pConstant = Constant <$> pNumericConstant
+  -- pConstant =  printer displayNumericConstant
+
+pNumericConstant :: (Num i) => P s (NumericConstant i)
+pNumericConstant = pWildcard // pLiteral
+  where
+  pWildcard = WildcardConstant <$  text "*"
+  pLiteral  = NumericLiteral   <$> integer
+
+----------------------------------------
+
+pExactName :: P s Text
+pExactName = p <&> toS
+  where
+  p = bof *> char '!' *> rest
+
+----------------------------------------
+
+unaryPrefixOperators :: [Text]
+unaryPrefixOperators =
+  [ "!"          
+  , "-"          
+  , "not"        
   ]
 
-allUnaryPrefixOperators :: SyntaxTable ()
-allUnaryPrefixOperators =
-  [ "!"          -: ()
-  , "-"          -: ()
-  , "not"        -: ()
-  ]
-
-allInfixOperators :: SyntaxTable ()
-allInfixOperators =
-  [ ":"          -: ()
-  , "!"          -: ()
-  , "="          -: ()
-  , "<"          -: ()
-  , ">"          -: ()
-  , "<="         -: ()
-  , ">="         -: ()
-  , "or"         -: ()
-  , "and"        -: ()
-  ]
-
--- | for @"is"@ and @"not"@.
-identityKeywords :: [Text]
-identityKeywords =
- [ "vanilla" 
- , "permanent"
- , "spell"
-
- , "split"
- , "flip"
-
- , "new"
- , "old"
- 
- , "future"
- , "timeshifted"
-
- , "funny"
- , "promo"
- 
- , "black-bordered"
- , "white-bordered"
- , "silver-bordered"
- ]
-
--- | for @"has"@.
-possessionKeywords :: [Text]
-possessionKeywords =
-  [ "foil"
+binaryPrefixOperators :: [Text]
+binaryPrefixOperators =
+  [ "or"         
+  , "and"        
   ]
 
 ----------------------------------------
 
-numericKeywords :: [Text]
---tsNumeric
-numericKeywords = 
-  [ "cmc"
-  , "pow"
-  , "tou"
-  ]
+-- allPrefixKeywords :: SyntaxTable ()
+-- allPrefixKeywords = 
+--   [ "o"          -: ()
+--   , "t"          -: ()
+--   , "cmc"        -: ()
+--   , "mana"       -: ()
+--   , "c"          -: ()
+--   , "ci"         -: ()
+--   , "in"         -: ()
+--   , "r"          -: ()
+--   , "pow"        -: ()
+--   , "tou"        -: ()
+--   , "e"          -: ()
+--   , "f"          -: ()
+--   , "year"       -: ()
+--   , "banned"     -: ()
+--   , "legal"      -: ()
+--   , "restricted" -: ()
+--   , "a"          -: ()
+--   , "l"          -: ()
+--   , "is"         -: ()
+--   , "not"        -: ()
+--   , "has"        -: ()
+--   ]
 
-colorKeywords :: [Text]
-colorKeywords = 
-  [ "c"
-  , "ci"
-  , "in"
-  ]
+-- allInfixOperators :: SyntaxTable ()
+-- allInfixOperators =
+--   [ ":"          -: ()
+--   , "!"          -: ()
+--   , "="          -: ()
+--   , "<"          -: ()
+--   , ">"          -: ()
+--   , "<="         -: ()
+--   , ">="         -: ()
+--   , "or"         -: ()
+--   , "and"        -: ()
+--   ]
 
-colorValues :: [Text]
-colorValues =
-  [
-  ]
+-- -- | for @"is"@ and @"not"@.
+-- identityKeywords :: [Text]
+-- identityKeywords =
+--  [ "vanilla" 
+--  , "permanent"
+--  , "spell"
 
-pNumericKeywords :: P s Text
-pNumericKeywords = texts numericKeywords
+--  , "split"
+--  , "flip"
 
-pColorKeywords :: P s Text
-pColorKeywords = texts colorKeywords
+--  , "new"
+--  , "old"
+ 
+--  , "future"
+--  , "timeshifted"
+
+--  , "funny"
+--  , "promo"
+ 
+--  , "black-bordered"
+--  , "white-bordered"
+--  , "silver-bordered"
+--  ]
+
+-- -- | for @"has"@.
+-- possessionKeywords :: [Text]
+-- possessionKeywords =
+--   [ "foil"
+--   ]
+
+-- ----------------------------------------
+
+-- numericKeywords :: [Text]
+-- --tsNumeric
+-- numericKeywords = 
+--   [ "cmc"
+--   , "pow"
+--   , "tou"
+--   ]
+
+-- colorKeywords :: [Text]
+-- colorKeywords = 
+--   [ "c"
+--   , "ci"
+--   , "in"
+--   ]
+
+-- colorValues :: [Text]
+-- colorValues =
+--   [
+--   ]
+
+-- pNumericKeywords :: P s Text
+-- pNumericKeywords = texts numericKeywords
+
+-- pColorKeywords :: P s Text
+-- pColorKeywords = texts colorKeywords
 
 ---------------------------------------
+
+equalityOperators_ :: [Text]
+equalityOperators_ = [":"]
 
 genericOperators :: SyntaxTable (GenericComparator)
 genericOperators =
@@ -585,6 +843,9 @@ numericOperators =
   , ">="         -: GreaterEquals
   ]
 
+numericOperators_ :: [Text]
+numericOperators_ = numericOperators & fmap fst
+
 -- booleanPrefixes :: SyntaxTable (GenericComparator)
 -- booleanPrefixes =
 --   [ "is"          -: Is
@@ -604,10 +865,13 @@ numericOperators =
 
 ---------------------------------------  
 
-parseManaCost
-  :: (Enumerable i, Ord i, Show i)
-  => Text -> Maybe (ManaCost i)
-parseManaCost = _--parseManaSymbol
+-- parseNumericVariable :: Text -> Maybe NumericVariable
+-- parseNumericVariable = display2parse displayNumericVariable
+
+-- parseManaCost
+--   :: (Enumerable i, Ord i, Show i)
+--   => Text -> Maybe (ManaCost i)
+-- parseManaCost = _--parseManaSymbol
 
 parseManaSymbol
   :: (Enumerable i, Ord i, Show i)
@@ -677,6 +941,10 @@ additive = mdo
                   many1 (oneOf ['0' .. '9']) ## read
     return additive
 
+
+
+onlyIf :: P s a -> (a -> Bool) -> P s a
+Succeed only if thing parsed passes a predicate.
 
 
 (//) :: P s a -> P s a -> P s a infixl 1 

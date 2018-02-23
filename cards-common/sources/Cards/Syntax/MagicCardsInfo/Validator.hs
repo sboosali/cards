@@ -14,7 +14,7 @@ import Prelude.Spiros
 
 ----------------------------------------
 
-validate :: Syntax_ -> Either SyntaxError Syntax
+validate :: Syntax_ i j -> Either SyntaxError (Syntax i j)
 validate _ = Left (SyntaxError "")
 
 ----------------------------------------

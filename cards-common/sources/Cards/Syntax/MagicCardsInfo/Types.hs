@@ -458,27 +458,49 @@ module Cards.Syntax.MagicCardsInfo.Types where
 
 import Enumerate
 
+import Data.Thyme.Calendar (YearMonthDay)  
+
 import Prelude.Spiros hiding (P)
 
 ----------------------------------------
 
 {-| @magiccards.info@'s raw(/ lower-level) syntax.
 
+parametrized over @i@ and @j@, numeric types for numeric mana costs and numeric characteristics, respectively. 
+
 -}
-data Syntax_ = Syntax_
+data Syntax_ i j = Syntax_
  { mciFreeform   :: [Text] -- Maybe Text
- , mciAttributes :: Attributes -- Map (Maybe Text) [Text]
- } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+ , mciAttributes :: Attributes i j -- Map (Maybe Text) [Text]
+ } deriving (Show,Eq,Ord,Generic,NFData) --,Read,Hashable)
 
-newtype Attributes = Attributes
-  { getAttributes :: [Attribute] -- [(Text, Text)]
-  } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable) 
+emptySyntax_ :: Syntax_ i j
+emptySyntax_ = Syntax_ [] emptyAttributes
 
-data Attribute = Attribute
+newtype Attributes i j = Attributes
+  { getAttributes :: [Attribute i j] -- [(Text, Text)]
+  } deriving (Show,Eq,Ord,Generic,NFData) --,Read,Hashable) 
+
+emptyAttributes :: Attributes i j
+emptyAttributes = Attributes []
+  
+data Attribute i j = Attribute
   { subject :: Text
   , verb    :: Text
-  , object  :: Text
-  } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+  , object  :: KnownAttribute i j -- AttributeObject
+  } deriving (Show,Eq,Ord,Generic,NFData) --,Read,Hashable)
+
+data KnownAttribute i j
+  = TextAttribute      Text
+  | DateAttribute      Date         
+  | ChromaticAttribute Chromatic
+  | HueAttribute       Hue
+  | ColorAttribute     Color
+  | NumericAttribute   (Numeric i)
+  | ManaAttribute      (ManaCost j)
+--X  | CostAttribute      (ManaCost j)
+  deriving (Show,Eq,Ord,Generic,NFData) --,Read,Hashable)
+ -- NOTE not (Date i), the `i` is for mana costs
 
 -- data Attribute = Attribute
 --   { identifier :: Text
@@ -491,6 +513,8 @@ data Attribute = Attribute
 --  mciFreeform    = [t]
 --  mciAttributes = []
 
+----------------------------------------
+
 {-| @magiccards.info@'s validated(/ higher-level) syntax.
 
 -}
@@ -502,7 +526,7 @@ data SyntaxError
 {-| @magiccards.info@'s validated(/ higher-level) syntax.
 
 -}
-data Syntax = Syntax
+data Syntax i j = Syntax
 
 ----------------------------------------
 
@@ -688,6 +712,14 @@ data Phyrexian
 -- data ManaSymbol
 --  | ColorSymbol Color
 --  | ColorlessSymbol
+
+----------------------------------------
+
+type Date = YearMonthDay -- Day
+
+-- data Date
+--  = Date Day
+--  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
 
 ----------------------------------------
 
@@ -1149,9 +1181,12 @@ Limited Edition Alpha al
 --type UnorderedPair a b = (a,b) --TODO
 
 -- data UnorderedPair a
---  = UnorderedPair 
+--  = UnorderedPair
 
-type Pretty a = a -> Text --TODO
+----------------------------------------
+
+type Print a = a    -> Text --TODO
+type Parse a = Text -> Maybe a --TODO
 
 ----------------------------------------
 

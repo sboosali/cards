@@ -4,6 +4,8 @@
 #ifdef USE_TEMPLATE_HASKELL
 {-# LANGUAGE TemplateHaskell #-}
 #endif
+  
+{-# LANGUAGE ScopedTypeVariables #-}
 
 {-| When the @-fuse-template-haskell@ is enabled, statically\/safely verify the injectivity of functions; otherwise, without @TemplateHaskell@, just dynamically\/unsafely assume so. 
 
@@ -14,8 +16,8 @@ Parsers for enums are defined "inverted" (i.e. as printers), for verifying total
 -}
 module Cards.Syntax.MagicCardsInfo.Static where
 
-import Cards.Syntax.Extra
-import Cards.Syntax.MagicCardsInfo.Types
+--import Cards.Syntax.Extra
+--import Cards.Syntax.MagicCardsInfo.Types
 --import Cards.Syntax.MagicCardsInfo.Printer
 
 import Enumerate
@@ -24,7 +26,7 @@ import Enumerate.Function
 --import qualified Data.Text.Lazy as T
 
 import Prelude.Spiros 
-import Prelude (error)
+--import Prelude (error)
 
 ----------------------------------------
 -- `enumerate-function`
@@ -44,30 +46,45 @@ injection
   :: (Enumerable a, Ord a, Ord b)
   => (a -> b)
   -> (b -> Maybe a)
-injection = unsafeInvertInjective
+injection = safeInvertInjective
 -- #endif
 
 ----------------------------------------
 
-#ifdef USE_TEMPLATE_HASKELL
--- | a macro.
-staticInvertInjective
-  :: (Enumerable a, Ord a, Ord b)
-  => (a -> b)
-  -> (b -> Maybe a)
-staticInvertInjective = _
-#endif
+--TODO #ifdef USE_TEMPLATE_HASKELL
+-- -- | a macro.
+-- staticInvertInjective
+--   :: (Enumerable a, Ord a, Ord b)
+--   => (a -> b)
+--   -> (b -> Maybe a)
+-- staticInvertInjective = _
+-- #endif
 
 ----------------------------------------
-  
+    
 -- | a function.
-unsafeInvertInjective
-  :: (Enumerable a, Ord a, Ord b)
+safeInvertInjective
+  :: forall a b.
+     ( Enumerable a, Ord a
+     , Ord b --, Monoid b
+     )
   => (a -> b)
   -> (b -> Maybe a)
-unsafeInvertInjective = isInjective > maybe (error message) id
+safeInvertInjective f = h
   where
-  message = "[unsafeInvertInjective] given function is not injective"
+  h b = g b & list2maybe
+    
+  g :: b -> [a]
+  g = invert f
+  
+-- -- | a function.
+-- unsafeInvertInjective
+--   :: (Enumerable a, Ord a, Ord b)
+--   => (a -> b)
+--   -> (b -> Maybe a)
+-- unsafeInvertInjective = isInjective > maybe (error message) id
+--   where
+--   message = "[unsafeInvertInjective] given function is not injective"
 
 ----------------------------------------
 

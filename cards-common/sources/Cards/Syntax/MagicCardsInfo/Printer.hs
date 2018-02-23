@@ -19,17 +19,17 @@ import Prelude.Spiros hiding (P)
 -- non-finite types...
 -- (i.e. not necessarily finite)
 
-displayChromatic :: Pretty Chromatic
+displayChromatic :: Print Chromatic
 displayChromatic (Chromatic cs)
   = cs
   & fmap displayChroma
   & T.intercalate "" 
 
-displayManaCost :: (Show i) => Pretty (ManaCost i)
+displayManaCost :: (Show i) => Print (ManaCost i)
 displayManaCost = \case
   ManaCost mana -> mana & maybe "" displayManaSymbols
 
-displayManaSymbols :: (Show i) => Pretty (ManaSymbols i)
+displayManaSymbols :: (Show i) => Print (ManaSymbols i)
 displayManaSymbols (ManaSymbols symbols) = t
     where
     t  = ts & T.intercalate ""         -- e.g. "{2}{U}{G}"
@@ -41,17 +41,17 @@ displayManaSymbols (ManaSymbols symbols) = t
 
 ----------------------------------------
 
-displayNumeric :: (Show i) => Pretty (Numeric i)
+displayNumeric :: (Show i) => Print (Numeric i)
 displayNumeric = \case
   Constant i -> displayNumericConstant i
   Variable i -> displayNumericVariable i
 
-displayNumericConstant :: (Show i) => Pretty (NumericConstant i)
+displayNumericConstant :: (Show i) => Print (NumericConstant i)
 displayNumericConstant = \case
   NumericLiteral i -> show' i
   WildcardConstant -> "*"
 
-displayNumericVariable :: Pretty NumericVariable
+displayNumericVariable :: Print NumericVariable
 displayNumericVariable = \case
   PowerVariable     -> "pow"
   ToughnessVariable -> "tou"
@@ -59,46 +59,52 @@ displayNumericVariable = \case
 
 ----------------------------------------
 
-displayChroma :: Pretty Chroma
+displayChroma :: Print Chroma
 displayChroma = \case
- Hue          hue -> hue2text hue
+ Hue          hue -> displayHue hue
  Multicolored     -> "m"
  LandColor        -> "l"
 
-displayColorIdentity :: Pretty ColorIdentity
+displayHue :: Print Hue
+displayHue = hue2text
+
+displayColor :: Print Color
+displayColor = color2text 
+
+displayColorIdentity :: Print ColorIdentity
 displayColorIdentity (ColorIdentity hue) = hue2text hue
 
-displayColorIndication :: Pretty ColorIndication
+displayColorIndication :: Print ColorIndication
 displayColorIndication (ColorIndication color) = color2text color 
 
 ----------------------------------------
 
-displayManaSymbol :: (Show i) => Pretty (ManaSymbol i)
+displayManaSymbol :: (Show i) => Print (ManaSymbol i)
 displayManaSymbol = \case
   GenericSymbol      i         -> displayGenericSymbol   i 
   HueSymbol          hue       -> displayHueSymbol       hue
   HybridSymbol       hybrid    -> displayHybridSymbol    hybrid
   PhyrexianSymbol    phyrexian -> displayPhyrexianSymbol phyrexian
 
-displayGenericSymbol :: (Show i) => Pretty i
+displayGenericSymbol :: (Show i) => Print i
 displayGenericSymbol = show > toS > braces
 
-displayHueSymbol :: Pretty Hue
+displayHueSymbol :: Print Hue
 displayHueSymbol = hue2letter > char2text > braces
 
 -- \case
 --   TrueColor c -> displayColor c
 --   Colorless c -> "{C}"
 
--- displayColor :: Pretty Color
+-- displayColor :: Print Color
 -- displayColor = color2letter > braces
 
-displayHybridSymbol :: (Show i) => Pretty (Hybrid i)
+displayHybridSymbol :: (Show i) => Print (Hybrid i)
 displayHybridSymbol = \case
   GuildHybrid  guild -> displayGuildHybridSymbol guild
   GrayHybrid i color -> displayGrayHybridSymbol i color
 
-displayGuildHybridSymbol :: Pretty Guild
+displayGuildHybridSymbol :: Print Guild
 displayGuildHybridSymbol
   = fromGuild'
   > fmap (color2text) -- e.g. ["U","G"]
@@ -117,7 +123,7 @@ displayRawHybridSymbol x y = "{" <> t <> "}"
   where
   t = x <> "/" <> y -- [x,y]
 
-displayPhyrexianSymbol :: Pretty Phyrexian
+displayPhyrexianSymbol :: Print Phyrexian
 displayPhyrexianSymbol = \case
   Phyrexian c -> "{P" <> t <> "}"
                      where
@@ -212,7 +218,7 @@ displayPredicate = \case
 "en"
 
 -}
-displayLanguage :: Pretty Language
+displayLanguage :: Print Language
 displayLanguage = language2abbreviation
   
 ----------------------------------------
@@ -232,10 +238,10 @@ languageInfo = \case
  Korean     -> LanguageInfo "ko" "한국어"
 
 language2abbreviation :: Language -> Text
-language2abbreviation = languageInfo > _abbreviation
+language2abbreviation = languageInfo > _languageAbbreviation
 
 language2endonym :: Language -> Text
-language2endonym = languageInfo > _endonym
+language2endonym = languageInfo > _languageEndonym
 
 ----------------------------------------
 
@@ -250,7 +256,7 @@ see 'edition2abbreviation' and 'language2abbreviation'.
 "al/en"
 
 -}
-displayQualifiedEdition :: Pretty QualifiedEdition
+displayQualifiedEdition :: Print QualifiedEdition
 displayQualifiedEdition QualifiedEdition{..} = e <> l
   where
   e  = _qEdition  & edition2abbreviation
@@ -260,13 +266,13 @@ displayQualifiedEdition QualifiedEdition{..} = e <> l
 ----------------------------------------
 
 edition2block :: Edition -> Block
-edition2block = editionInfo > _block 
+edition2block = editionInfo > _editionBlock 
 
 edition2abbreviation :: Edition -> Text
-edition2abbreviation = editionInfo > _abbreviation
+edition2abbreviation = editionInfo > _editionAbbreviation
 
 edition2description :: Edition -> Text
-edition2description = editionInfo > _description
+edition2description = editionInfo > _editionDescription
 
 editionInfo :: Edition -> EditionInfo
 editionInfo = \case
