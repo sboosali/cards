@@ -197,6 +197,8 @@ import Cards.Syntax.MagicCardsInfo.Printer
 import qualified Text.Parsers.Frisby.Char as F
 import           Text.Parsers.Frisby hiding (text, (<>))
 
+--import Text.Earley.Mixfix
+
 --import Data.Thyme (Day)
 
 import Data.Thyme.Calendar (YearMonthDay(..))
@@ -210,7 +212,7 @@ import Enumerate
 --import qualified Data.Map as Map
 
 import Prelude.Spiros hiding (P)
-import Prelude (error)
+import Prelude        (error)
 
 {-
 
