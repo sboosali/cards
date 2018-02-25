@@ -495,6 +495,11 @@ myOverlaysWith = pkgs: self: super: let
 
     frisby = prefetched_ ./frisby.json; 
 
+    validation = loosen (prefetched_ ./validation.json);
+
+    trifecta = prefetched_ ./trifecta.json;
+    parsers = prefetched_ ./parsers.json;
+    
     megaparsec = github {
       owner  = "mrkkrp";
       repo   = "megaparsec";
