@@ -112,6 +112,9 @@ library
                      ScopedTypeVariables StandaloneDeriving
 
  exposed-modules:
+
+                 Tokenize
+ 
                  Cards.Common
                  Cards.Common.Types
                  Cards.Common.Core		

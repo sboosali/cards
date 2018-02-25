@@ -523,6 +523,8 @@ newtype Attributes i j = Attributes
   { getAttributes :: [Attribute i j] -- [(Text, Text)]
   } deriving (Show,Eq,Ord,Generic,NFData) --,Read,Hashable)
 
+instance Wrapped (Attributes i j)
+
 instance Bifunctor Attributes where
   bimap fNumeric fMana = \case
     Attributes xs -> Attributes (xs & fmap (bimap fNumeric fMana))
@@ -740,6 +742,8 @@ data ManaCost i
 newtype ManaSymbols i = ManaSymbols 
  { getManaSymbols :: [ManaSymbol i]
  } deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable) --,Enumerable)
+
+instance Wrapped (ManaSymbols i)
   
 -- data ManaCost f i
 --  = ManaSymbols (f (ManaSymbol i))
@@ -1290,3 +1294,8 @@ type SyntaxTable a = [(Text,a)]
 
 ----------------------------------------
 
+{-
+
+insert-ordered-containers-0.2.1.0 Data.HashMap.Strict.InsOrd
+
+-}

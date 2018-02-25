@@ -183,6 +183,8 @@ not _
 module Cards.Syntax.MagicCardsInfo.Parser where
 
 import Cards.Syntax.Extra
+--import Cards.Syntax.Operators
+
 import Cards.Syntax.MagicCardsInfo.Types
 import Cards.Syntax.MagicCardsInfo.Static
 import Cards.Syntax.MagicCardsInfo.Known 
@@ -263,10 +265,14 @@ mci " o:Flying o:\"First strike\" "
 Right (StatementQuery_ (Statements {_statementFreeform = [], _statementAttributes = Attributes {getAttributes = [Attribute {subject = "o", verb = ":", object = TextAttribute "Flying"},Attribute {subject = "o", verb = ":", object = TextAttribute "First strike"}]}}))
 
 
-
+@
+>> tokens "e:al/en,be -e:al+be   year>=93 year<1996  o:\"First strike\" o:Flying"
+["e",":","al","/","en",",","be","-","e",":","al","+","be","year",">=","93","year","<","1996","o",":\"","First","strike","\"","o",":","Flying"]
+@
 
 
 -}
+
 mci :: String -> Either SyntaxError KnownQuery_
 mci sInput = x
   where

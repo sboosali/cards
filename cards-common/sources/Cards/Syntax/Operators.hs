@@ -3,6 +3,8 @@
 
 {-# LANGUAGE RankNTypes #-}
 
+--{-# LANGUAGE DeriveAnyClass #-}
+
 {-| 
 
 -}
@@ -15,7 +17,7 @@ import Text.Earley.Mixfix
 -- import qualified Text.Parsers.Frisby.Char as F
 -- import           Text.Parsers.Frisby hiding (text, (<>))
 
--- import Enumerate
+--import Enumerate (Enumerable)
 -- import Enumerate.Function
 
 import qualified Data.Text.Lazy as T
@@ -29,8 +31,8 @@ import Data.List (groupBy, sortOn)
 
 ----------------------------------------
 
-main :: IO ()
-main = do
+mainOperators :: IO ()
+mainOperators = do
   putStrLn ""
   mixfixComparisons & printComparisons
 
@@ -105,7 +107,7 @@ parses
   -> (String -> [String])
   -> String
   -> [a]
-parses p tokenize s = fullParses p (tokenize s) & fst
+parses p tokenize' s = fullParses p (tokenize' s) & fst
   --where
   -- s = fromString t
 
@@ -137,17 +139,30 @@ mixfixComparisons = let x = Ident [Just "x"] in
 
 {-|
 
+-}
+tokens :: String -> [String]
+tokens
+  = groupBy areCharactersSimilar
+  > filter (null > not)
+
+{-|
+
 broadens 'Prelude.words'.
 
 >>> words "[x]"
 ["[x]"]
 
->>> tokens "[x]"
+>>> tokensNoWhitespace "[x]"
 ["[","x","]"]
 
+NOTE:
+
+>>> generalCategory <$> [':', '"']
+[OtherPunctuation,OtherPunctuation]
+
 -}
-tokens :: String -> [String]
-tokens
+tokensNoWhitespace :: String -> [String]
+tokensNoWhitespace
   = groupBy areCharactersSimilar
   > fmap (filter (isSpace > not)) 
   > filter (null > not)
@@ -495,3 +510,545 @@ isOperatorTableSymbolic
 --  choice os
 
 ----------------------------------------
+
+{-
+
+
+
+
+NOTE:
+
+>> ([8..127] <&> chr <&> (generalCategory &&& (:[]))) & Map.fromListWith (++) & Map.traverseWithKey (\category characters -> (do; print category; traverse_ print characters; putStrLn ""))
+
+UppercaseLetter
+'Z'
+'Y'
+'X'
+'W'
+'V'
+'U'
+'T'
+'S'
+'R'
+'Q'
+'P'
+'O'
+'N'
+'M'
+'L'
+'K'
+'J'
+'I'
+'H'
+'G'
+'F'
+'E'
+'D'
+'C'
+'B'
+'A'
+
+LowercaseLetter
+'z'
+'y'
+'x'
+'w'
+'v'
+'u'
+'t'
+'s'
+'r'
+'q'
+'p'
+'o'
+'n'
+'m'
+'l'
+'k'
+'j'
+'i'
+'h'
+'g'
+'f'
+'e'
+'d'
+'c'
+'b'
+'a'
+
+DecimalNumber
+'9'
+'8'
+'7'
+'6'
+'5'
+'4'
+'3'
+'2'
+'1'
+'0'
+
+ConnectorPunctuation
+'_'
+
+DashPunctuation
+'-'
+
+OpenPunctuation
+'{'
+'['
+'('
+
+ClosePunctuation
+'}'
+']'
+')'
+
+OtherPunctuation
+'\\'
+'@'
+'?'
+';'
+':'
+'/'
+'.'
+','
+'*'
+'\''
+'&'
+'%'
+'#'
+'"'
+'!'
+
+MathSymbol
+'~'
+'|'
+'>'
+'='
+'<'
+'+'
+
+CurrencySymbol
+'$'
+
+ModifierSymbol
+'`'
+'^'
+
+Space
+' '
+
+Control
+'\DEL'
+'\US'
+'\RS'
+'\GS'
+'\FS'
+'\ESC'
+'\SUB'
+'\EM'
+'\CAN'
+'\ETB'
+'\SYN'
+'\NAK'
+'\DC4'
+'\DC3'
+'\DC2'
+'\DC1'
+'\DLE'
+'\SI'
+'\SO'
+'\r'
+'\f'
+'\v'
+'\n'
+'\t'
+'\b'
+
+-}
+
+
+
+
+
+
+
+{-
+
+
+fromList [(UppercaseLetter,"ZYXWVUTSRQPONMLKJIHGFEDCBA"),(LowercaseLetter,"zyxwvutsrqponmlkjihgfedcba"),(DecimalNumber,"9876543210"),(ConnectorPunctuation,"_"),(DashPunctuation,"-"),(OpenPunctuation,"{[("),(ClosePunctuation,"}])"),(OtherPunctuation,"\\@?;:/.,*'&%#\"!"),(MathSymbol,"~|>=<+"),(CurrencySymbol,"$"),(ModifierSymbol,"`^"),(Space," "),(Control,"\DEL\US\RS\GS\FS\ESC\SUB\EM\CAN\ETB\SYN\NAK\DC4\DC3\DC2\DC1\DLE\SI\SO\r\f\v\n\t\b")]
+*Cards.Syntax.Operators Data.List Map>
+
+([8..127] <&> chr <&> (generalCategory &&& id)) & fromListWith (++) 
+
+>>> ascii = chr <$> 
+>>> asciiCategories = (id &&& generalCategory) <$> ascii
+>>> asciiCategorized = asciiCategories & foldr (\(character, category) -> Map.insert character category)
+>>> asciiCategorized & traverse_ 
+
+>>> asciiCategories & traverse_ (\(character, category) -> do putStrLn""; print character; print category)
+
+
+'\b'
+Control
+
+'\t'
+Control
+
+'\n'
+Control
+
+'\v'
+Control
+
+'\f'
+Control
+
+'\r'
+Control
+
+'\SO'
+Control
+
+'\SI'
+Control
+
+'\DLE'
+Control
+
+'\DC1'
+Control
+
+'\DC2'
+Control
+
+'\DC3'
+Control
+
+'\DC4'
+Control
+
+'\NAK'
+Control
+
+'\SYN'
+Control
+
+'\ETB'
+Control
+
+'\CAN'
+Control
+
+'\EM'
+Control
+
+'\SUB'
+Control
+
+'\ESC'
+Control
+
+'\FS'
+Control
+
+'\GS'
+Control
+
+'\RS'
+Control
+
+'\US'
+Control
+
+' '
+Space
+
+'!'
+OtherPunctuation
+
+'"'
+OtherPunctuation
+
+'#'
+OtherPunctuation
+
+'$'
+CurrencySymbol
+
+'%'
+OtherPunctuation
+
+'&'
+OtherPunctuation
+
+'\''
+OtherPunctuation
+
+'('
+OpenPunctuation
+
+')'
+ClosePunctuation
+
+'*'
+OtherPunctuation
+
+'+'
+MathSymbol
+
+','
+OtherPunctuation
+
+'-'
+DashPunctuation
+
+'.'
+OtherPunctuation
+
+'/'
+OtherPunctuation
+
+'0'
+DecimalNumber
+
+'1'
+DecimalNumber
+
+'2'
+DecimalNumber
+
+'3'
+DecimalNumber
+
+'4'
+DecimalNumber
+
+'5'
+DecimalNumber
+
+'6'
+DecimalNumber
+
+'7'
+DecimalNumber
+
+'8'
+DecimalNumber
+
+'9'
+DecimalNumber
+
+':'
+OtherPunctuation
+
+';'
+OtherPunctuation
+
+'<'
+MathSymbol
+
+'='
+MathSymbol
+
+'>'
+MathSymbol
+
+'?'
+OtherPunctuation
+
+'@'
+OtherPunctuation
+
+'A'
+UppercaseLetter
+
+'B'
+UppercaseLetter
+
+'C'
+UppercaseLetter
+
+'D'
+UppercaseLetter
+
+'E'
+UppercaseLetter
+
+'F'
+UppercaseLetter
+
+'G'
+UppercaseLetter
+
+'H'
+UppercaseLetter
+
+'I'
+UppercaseLetter
+
+'J'
+UppercaseLetter
+
+'K'
+UppercaseLetter
+
+'L'
+UppercaseLetter
+
+'M'
+UppercaseLetter
+
+'N'
+UppercaseLetter
+
+'O'
+UppercaseLetter
+
+'P'
+UppercaseLetter
+
+'Q'
+UppercaseLetter
+
+'R'
+UppercaseLetter
+
+'S'
+UppercaseLetter
+
+'T'
+UppercaseLetter
+
+'U'
+UppercaseLetter
+
+'V'
+UppercaseLetter
+
+'W'
+UppercaseLetter
+
+'X'
+UppercaseLetter
+
+'Y'
+UppercaseLetter
+
+'Z'
+UppercaseLetter
+
+'['
+OpenPunctuation
+
+'\\'
+OtherPunctuation
+
+']'
+ClosePunctuation
+
+'^'
+ModifierSymbol
+
+'_'
+ConnectorPunctuation
+
+'`'
+ModifierSymbol
+
+'a'
+LowercaseLetter
+
+'b'
+LowercaseLetter
+
+'c'
+LowercaseLetter
+
+'d'
+LowercaseLetter
+
+'e'
+LowercaseLetter
+
+'f'
+LowercaseLetter
+
+'g'
+LowercaseLetter
+
+'h'
+LowercaseLetter
+
+'i'
+LowercaseLetter
+
+'j'
+LowercaseLetter
+
+'k'
+LowercaseLetter
+
+'l'
+LowercaseLetter
+
+'m'
+LowercaseLetter
+
+'n'
+LowercaseLetter
+
+'o'
+LowercaseLetter
+
+'p'
+LowercaseLetter
+
+'q'
+LowercaseLetter
+
+'r'
+LowercaseLetter
+
+'s'
+LowercaseLetter
+
+'t'
+LowercaseLetter
+
+'u'
+LowercaseLetter
+
+'v'
+LowercaseLetter
+
+'w'
+LowercaseLetter
+
+'x'
+LowercaseLetter
+
+'y'
+LowercaseLetter
+
+'z'
+LowercaseLetter
+
+'{'
+OpenPunctuation
+
+'|'
+MathSymbol
+
+'}'
+ClosePunctuation
+
+'~'
+MathSymbol
+
+'\DEL'
+Control
+
+
+-}
