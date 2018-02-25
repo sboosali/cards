@@ -10,14 +10,38 @@ module MTGJSON.Extra
 
 import Data.Aeson as X (eitherDecode)
 
+import Enumerate as X (Enumerable)
+
 import qualified Data.Aeson        as J 
 --import qualified Data.Aeson.Types  as J
+
+import Data.Validation as X (AccValidation(..))
 
 import Data.ByteString.Lazy (ByteString) 
 
 import Control.Monad.Fail (MonadFail)
 
-import Prelude.Spiros 
+import Data.List.NonEmpty as X (NonEmpty(..))
+
+
+import Prelude.Spiros
+
+----------------------------------------
+
+type V = AccValidation
+
+success :: a -> AccValidation e a
+success = AccSuccess
+
+failure :: e -> AccValidation (NonEmpty e) a
+failure = (:|[]) > AccFailure
+
+maybe2validation :: e -> Maybe a -> AccValidation (NonEmpty e) a
+maybe2validation e = maybe (failure e) success
+
+----------------------------------------
+
+type List = []
 
 ----------------------------------------
 
@@ -38,5 +62,15 @@ i2n i = if i >= 0
 
 concatenateA :: (Applicative f) => (a -> f [b]) -> [a] -> f [b]
 concatenateA f = traverse f >>> fmap concat
+
+----------------------------------------
+
+show' :: (Show a, StringConv String s) => a -> s
+show' = show > toS
+
+----------------------------------------
+
+type Print a = a    -> Text 
+type Parse a = Text -> Maybe a 
 
 ----------------------------------------

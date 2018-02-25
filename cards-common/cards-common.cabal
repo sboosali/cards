@@ -137,7 +137,13 @@ library
             
                  MTGJSON
                  MTGJSON.Types
+                 MTGJSON.Kinds
                  MTGJSON.Core
+
+                 MTGJSON.Printer
+                 MTGJSON.Printer.Finite
+
+                 MTGJSON.Parser                 
 
                  MTGJSON.Version
 
@@ -192,6 +198,8 @@ library
              , lens
 
 -- parsing
+             , trifecta
+             , parsers
              , Earley >= 0.12
              , frisby >=0.2
 --             , megaparsec
@@ -202,6 +210,7 @@ library
              , file-embed
              , time
              , thyme
+             , validation
 
 ----------------------------------------
 
