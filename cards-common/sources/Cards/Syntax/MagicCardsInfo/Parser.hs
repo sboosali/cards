@@ -1160,8 +1160,14 @@ unaryPrefixOperators =
   , "not"        
   ]
 
-binaryPrefixOperators :: [Text]
-binaryPrefixOperators =
+multaryPrefixOperators :: [Text]
+multaryPrefixOperators =
+  [ "any" -- "or"         
+  , "all" -- "and"        
+  ]
+
+binaryInfixOperators :: [Text]
+binaryInfixOperators =
   [ "or"         
   , "and"        
   ]

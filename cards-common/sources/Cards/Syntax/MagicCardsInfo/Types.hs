@@ -480,7 +480,10 @@ data Query_ i j
 instance Bifunctor Query_ where
   bimap fNumeric fMana = \case
     ExactQuery_      t -> ExactQuery_ t
-    StatementQuery_ xs -> StatementQuery_ (xs & bimap fNumeric fMana)
+    StatementQuery_ xs -> StatementQuery_ (go xs)
+      where go = bimap fNumeric fMana
+
+----------------------------------------
 
 data Statements i j = Statements
  { _statementFreeform   :: [Text]         -- Maybe Text
@@ -489,8 +492,9 @@ data Statements i j = Statements
 
 instance Bifunctor Statements where
   bimap fNumeric fMana = \case
-    Statements x ys -> Statements x (ys & bimap fNumeric fMana)
- 
+    Statements x ys -> Statements x (go ys)
+       where go = bimap fNumeric fMana
+
 instance Semigroup (Statements i j) where
   (Statements a b) <> (Statements c d) =
     Statements (a <> c) (b <> d)
@@ -499,7 +503,37 @@ instance Semigroup (Statements i j) where
 instance Monoid (Statements i j) where
   mempty = Statements mempty mempty
   mappend = (<>)
-  
+
+----------------------------------------
+
+newtype Expressions i j = Expressions
+ { getExpressions :: [Expression i j]
+ } deriving (Show,Eq,Ord,Generic,NFData) --,Read,Hashable)
+
+----------------------------------------
+
+--TODO Sentence
+data Expression i j = Expression
+ { _expressionOperator   :: Operator
+ , _expressionAttributes :: (Attributes i j)
+ } deriving (Show,Eq,Ord,Generic,NFData) --,Read,Hashable)
+
+-- instance Bifunctor Statements where
+--   bimap fNumeric fMana = \case
+
+--        where go = bimap fNumeric fMana
+
+----------------------------------------
+
+data Operator
+ = NotOperator
+ | OrOperator
+ | AndOperator
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
+ --deriving (Show,Eq,Ord,Generic,NFData) --,Read,Hashable)
+
+----------------------------------------
+
 -- emptySyntax_ ::  i j
 -- emptySyntax_ =  [] emptyAttributes
 
@@ -525,13 +559,17 @@ newtype Attributes i j = Attributes
 
 instance Wrapped (Attributes i j)
 
+_Attributes :: Iso' (Attributes i j) [Attribute i j] 
+_Attributes = _Wrapped'
+
+-- _Attributes :: Iso' (Attributes i j) [Attribute i j]
+-- _Attributes = iso getAttributes Attributes
+
 instance Bifunctor Attributes where
   bimap fNumeric fMana = \case
-    Attributes xs -> Attributes (xs & fmap (bimap fNumeric fMana))
+    Attributes xs -> Attributes (xs & fmap go)
+      where go = bimap fNumeric fMana
     
-_Attributes :: Iso' (Attributes i j) [Attribute i j]
-_Attributes = iso getAttributes Attributes
-
 instance Semigroup (Attributes i j) where
   (Attributes x) <> (Attributes y) = Attributes (x <> y)
   --TODO (<>) = au _Attributes (<>)
@@ -542,7 +580,10 @@ instance Monoid (Attributes i j) where
   
 emptyAttributes :: Attributes i j
 emptyAttributes = Attributes []
-  
+
+----------------------------------------
+
+--TODO Phrase
 data Attribute i j = Attribute
   { subject :: Text
   , verb    :: Text
@@ -551,8 +592,12 @@ data Attribute i j = Attribute
 
 instance Bifunctor Attribute where
   bimap fNumeric fMana = \case
-    Attribute s v o -> Attribute s v (o & bimap fNumeric fMana)
-    
+    Attribute s v o -> Attribute s v (go o)
+      where go = bimap fNumeric fMana
+
+----------------------------------------
+
+--TODO Object
 data KnownAttribute i j
   = TextAttribute      Text
   | DateAttribute      Date         
@@ -561,7 +606,7 @@ data KnownAttribute i j
   | ColorAttribute     Color
   | NumericAttribute   (Numeric i)
   | ManaAttribute      (ManaCost j)
-  | ListAttribute Text (KnownAttribute i j) -- ^ separator and (separated) sequence
+---  | ListAttribute Text (KnownAttribute i j) -- ^ separator and (separated) sequence
 --X  | CostAttribute      (ManaCost j)
   deriving (Functor,Show,Eq,Ord,Generic,NFData) --,Read,Hashable)
  -- NOTE not (Date i), the `i` is for mana costs
@@ -575,9 +620,10 @@ instance Bifunctor KnownAttribute where
       ChromaticAttribute  chromatic -> ChromaticAttribute  chromatic
       HueAttribute        hue       -> HueAttribute        hue
       ColorAttribute      color     -> ColorAttribute      color
-      ListAttribute     t as        -> ListAttribute     t (as & go)
+      {- ListAttribute     t as        -> ListAttribute     t (as & go)
     where
-      go = bimap fNumeric fMana 
+      go = bimap fNumeric fMana
+      -}
 
       -- x -> x
 

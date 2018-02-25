@@ -51,8 +51,8 @@ NOTE groups tokens by the custom 'CharacterCategory', not the Unicode 'GeneralCa
 
 examples:
 
->>> tokenizeByCharacterCategoryIsolatingGroupingAndQuotation "e:al/en,be -e:al+be  year>=93 year<1996  o:\"First strike\" o:Flying (not (t:bird or t:dragon))"
-["e",":","al","/","en",",","be"," ","-","e",":","al","+","be","  ","year",">=","93"," ","year","<","1996","  ","o",":","\"","First"," ","strike","\""," ","o",":","Flying"," ","(","not"," ","(","t",":","bird"," ","or"," ","t",":","dragon",")",")"]
+>> tokenizeByCharacterCategoryIsolatingGroupingAndQuotation "e:al/en,be -e:al+be  year>=93 year<1996  o:\"First strike\" o:Flying (not (t:bird or t:dragon))"
+["e", ":", "al", "/", "en", ", ", "be", " ", "-", "e", ":", "al", "+", "be", "  ", "year", ">=", "93", " ", "year", "<", "1996", "  ", "o", ":", "\"", "First", " ", "strike", "\"", " ", "o", ":", "Flying", " ", "(", "not", " ", "(", "t", ":", "bird", " ", "or", " ", "t", ":", "dragon", ")", ")"]
 
 
 

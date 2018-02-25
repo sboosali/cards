@@ -114,6 +114,7 @@ library
  exposed-modules:
 
                  Tokenize
+                 Mixfix
  
                  Cards.Common
                  Cards.Common.Types
