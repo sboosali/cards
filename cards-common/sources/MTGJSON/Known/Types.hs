@@ -17,7 +17,21 @@ import Control.Lens (Wrapped(..))--, Iso')
 
 ----------------------------------------
 
+type KnownAssets = MCIResource  
+ --TODO type KnownAssets = Maybe MCIResource
 
+-- | metadata to build URI's for @magiccards.info@ pages (including images). 
+data MCIResource = MCIResource
+ { _MCI_edition    :: Text
+ , _MCI_identifier :: Text
+ } deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+
+-- data ImageAssets = ImageAssets -- ImageIdentifiers
+ -- { _Image_multiverseId          :: Maybe Natural
+ -- , _Image_magiccardsinfoId      :: Maybe Text
+ -- , _Image_edition               :: KnownEdition
+ -- , _Image_magiccardsinfoEdition :: Text
+ -- }
 
 ----------------------------------------
 
@@ -363,6 +377,8 @@ data Nephilim
 
 ----------------------------------------
 
+type KnownLayout = Layout
+
 data Layout
  = Aftermath
  | DoubleFaced
@@ -377,6 +393,8 @@ data Layout
  | Token
  | Vanguard
  deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
+
+type KnownFrame = Frame
 
 data Frame
  = OldFrame

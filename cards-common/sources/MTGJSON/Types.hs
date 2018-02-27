@@ -59,6 +59,8 @@ data Card (f :: CHARACTERISTIC -> *) = Card
 
   , _typeline      :: Typeline f
 
+  , _numeric       :: f NUMERIC
+
   -- quasi-derivable stuff, card characteristics 
 
   -- non-gameplay-relevant stuff, card characteristics 
@@ -69,9 +71,6 @@ data Card (f :: CHARACTERISTIC -> *) = Card
   , _flavor        :: Text 
   , _artist        :: Text
     --TODO CardArtist, "x & y" as two artists
-
-  , _assets        :: f ASSETS --IMAGE
-    --TODO , _resources     :: Resource 
 
   -- metagame stuff
   , _edition       :: f EDITION
@@ -85,6 +84,10 @@ data Card (f :: CHARACTERISTIC -> *) = Card
   , _rulings       :: [Ruling] 
   , _originalText  :: Text
   , _originalType  :: Text
+
+  -- resources
+  , _assets        :: f ASSETS --IMAGE
+    --TODO , _resources     :: Resource 
 
   } -- deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
 
@@ -218,12 +221,14 @@ simpleResource ccn multiverseid
 
 type Date = Text -- TODO Day needs a hashable instance
 
-----------------------------------------  
+----------------------------------------
+
+type ConvertedManaCost = CMC -- TODO 
 
 {-| Can be added or subtracted. 
 
 -}
-newtype ConvertedManaCost = ConvertedManaCost Natural
+newtype CMC = CMC Natural
  deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
 
 ----------------------------------------
@@ -236,23 +241,29 @@ newtype Name = Name Text
 
 ----------------------------------------
 
+type UniqueIdentifier = UID
+
 {-| Uniquely identify a card of some set against all other cards (only by convention, not construction).
 
 -}
-data UniqueIdentifier = UniqueIdentifier Text
+data UID = UID Text
   deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
 
 
 ----------------------------------------
 
+type MultiverseIdentifier = MID
+
 {-| the Multiverse ID, used by `gather.wizards.com`. 
 
 the `MagicCards.info` number is almost always identical to this,
 -}
-data MultiverseIdentifier =  MultiverseIdentifier Text 
+data MID = MID Text 
   deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
 
 ----------------------------------------
+
+type CardCollectorsNumber = CCN
 
 {-| Each card in a set has a unique (within the set) "card collector number". 
 

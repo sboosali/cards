@@ -18,13 +18,15 @@ import MTGJSON.Known.Newtypes
 import MTGJSON.Known.Lens
 
 --import MTGJSON.Extra
-import MTGJSON.Types
+import MTGJSON.Types 
 import MTGJSON.Kinds
 
 ----------------------------------------
 
-newtype KnownCard = KnownCard
- (Card Known)
+type KnownCard = Card Known
+
+-- newtype KnownCard = KnownCard
+--  (Card Known)
 
 ----------------------------------------
 
@@ -68,6 +70,8 @@ type family KnownType (u :: CHARACTERISTIC) where
  KnownType FORMAT         = KnownFormat
 
  KnownType LANGUAGE       = KnownLanguage
+
+ KnownType ASSETS         = KnownAssets
 
 ----------------------------------------
 

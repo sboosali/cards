@@ -44,15 +44,30 @@ data SetsArray = SetsArray [SetObject]
 ----------------------------------------
 -- SetObject
 
+data SetCodes = SetCodes
+ { primaryCode        :: Text
+ , magicCardsInfoCode :: First Text
+ , gathererCode       :: First Text
+ }
+
+getSetCodes :: SetObject -> SetCodes
+getSetCodes SetObject{..} = SetCodes{..}
+ where
+ primaryCode        = _SetObject_code
+ gathererCode       = _SetObject_gathererCode
+   & First 
+ magicCardsInfoCode = _SetObject_magicCardsInfoCode
+   & First
+
 {-| 
 
 -}
 data SetObject = SetObject 
   { _SetObject_name               :: Text  -- ^ "Nemesis",       // The name of the set
   , _SetObject_code               :: Text  -- ^ "NMS",           // The set's abbreviated code
-  -- , _SetObject_gathererCode       :: Maybe Text  -- ^ "NE",            // The code that Gatherer uses for the set. Only present if different than 'code'
+  , _SetObject_gathererCode       :: Maybe Text  -- ^ "NE",            // The code that Gatherer uses for the set. Only present if different than 'code'
   -- , _SetObject_oldCode            :: Maybe Text  -- ^ "NEM",           // An old style code used by some Magic software. Only present if different than 'gathererCode' and 'code'
-  -- , _SetObject_magicCardsInfoCode :: Maybe Text  -- ^ "ne",            // The code that magiccards.info uses for the set. Only present if magiccards.info has this set
+ , _SetObject_magicCardsInfoCode :: Maybe Text  -- ^ "ne",            // The code that magiccards.info uses for the set. Only present if magiccards.info has this set
   -- , _SetObject_releaseDate        :: Maybe Text  -- ^ "2000-02-14"     // When the set was released (YYYY-MM-DD). For promo sets, the date the first card was released.
   -- , _SetObject_border             :: Text  -- ^ "black",         // The type of border on the cards, either "white", "black" or "silver"
   -- , _SetObject_type               :: Text  -- ^ "expansion",     // Type of set. One of: "core", "expansion", "reprint", "box", "un", "from the vault", "premium deck", "duel deck", "starter", "commander", "planechase", "archenemy","promo", "vanguard", "masters", "conspiracy", "masterpiece"
@@ -108,8 +123,8 @@ instance FromJSON MagicBoosterSlotObject where
 
 data CardObject = CardObject 
   { _CardObject_id            :: Text 
---  , _CardObject_layout        :: Text 
   , _CardObject_name          :: Text 
+  , _CardObject_layout        :: Maybe Text 
   , _CardObject_names         :: Maybe [Text] 
   , _CardObject_manaCost      :: Maybe Text 
   , _CardObject_cmc           :: Natural 
@@ -123,7 +138,7 @@ data CardObject = CardObject
   , _CardObject_text          :: Maybe Text 
   , _CardObject_flavor        :: Maybe Text 
   , _CardObject_artist        :: Text
-  , _CardObject_number        :: Maybe Text
+  , _CardObject_number        :: Maybe Text -- ^ CCN
   , _CardObject_power         :: Maybe Text -- ^ Un-cards can have non-integer power/toughness 
   , _CardObject_toughness     :: Maybe Text  
   , _CardObject_loyalty       :: Maybe Natural 

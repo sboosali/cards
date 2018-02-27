@@ -13,6 +13,7 @@ import Enumerate          as X (Enumerable)
 import Data.List.NonEmpty as X (NonEmpty(..))
 import Data.Aeson         as X (eitherDecode)
 import Data.Validation    as X (AccValidation(..))
+import Data.Monoid        as X (First(..))
 
 -- other
 import qualified Data.Aeson        as J 
@@ -36,6 +37,7 @@ import qualified Data.Map as Map
 -- base
 import Control.Monad.Fail (MonadFail)
 import Data.Coerce
+--import Data.Monoid (First(..))
 
 import Prelude.Spiros
 
@@ -167,5 +169,13 @@ char2text = T.singleton
   
 show' :: (Show a, StringConv String s) => a -> s
 show' = show > toS
+
+----------------------------------------
+
+-- maybe2first :: Maybe a -> First a
+-- maybe2first = First
+
+-- first2maybe :: First a -> Maybe a
+-- first2maybe = getFirst
 
 ----------------------------------------
