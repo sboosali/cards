@@ -148,8 +148,11 @@ coerceUnwrapped = coerce
 ----------------------------------------
 -- `text`
 
-braces :: String -> String
-braces s = "{" <> s <> "}"
+surround :: String -> String -> String -> String
+surround l r s = l <> s <> r
+
+-- braces :: String -> String
+-- braces s = "{" <> s <> "}"
 
 -- braces :: (IsString s) => s -> String
 -- braces s = fromString "{" <> fromString s <> fromString s "}"

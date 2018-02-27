@@ -113,13 +113,13 @@ displayManaSymbol = \case
  VariableSymbol     -> "{X}" -- braces "X" 
 
 displayChromaSymbol :: Print Chroma
-displayChromaSymbol = chroma2text > braces
+displayChromaSymbol = chroma2text > surround "{" "}"
 
 displayColorSymbol :: Print Color
-displayColorSymbol = color2text > braces
+displayColorSymbol = color2text > surround "{" "}"
 
 displayGenericSymbol :: (Show i) => Print i
-displayGenericSymbol = show > toS > braces
+displayGenericSymbol = show > toS > surround "{" "}"
 
 displayMonoHybridSymbol :: Print Color
 displayMonoHybridSymbol c = "{2/" <> t <> "}"
@@ -136,7 +136,7 @@ displayGuildSymbol
   = fromGuild'
   > fmap color2text   -- e.g. ["U","G"]
   > intercalate "/"   -- e.g. "U/G"
-  > braces            -- e.g. "{U/G}"
+  > surround "{" "}"  -- e.g. "{U/G}"
 
 ---------------------------------------
 
