@@ -9,6 +9,47 @@ module MTGJSON.Kinds where
 ----------------------------------------
 
 data CHARACTERISTIC
+
+ = CARD            -- ^ 
+
+ | UNIQUE          -- ^ 
+ | NAME            -- ^
+ | MULTIVERSEID    -- ^
+
+ | COLOR           -- ^ 
+ | CHROMA          -- ^ 
+
+ | MANA            -- ^ 
+ | COST            -- ^ 
+
+ | NUMERIC         -- ^ 
+
+ | SUPERTYPE       -- ^ 
+ | TYPE            -- ^ 
+ | SUBTYPE         -- ^ 
+
+ | ORACLE          -- ^ 
+  
+ | FACE            -- ^
+ {- TODO | LAYOUT    -}
+ 
+ | RARITY          -- ^
+ | WATERMARK       -- ^ 
+
+ | EDITION         -- ^
+ | BLOCK           -- ^
+ 
+ | FORMAT          -- ^ 
+ | LEGALITY        -- ^ 
+
+ | LANGUAGE        -- ^ 
+
+ | ASSETS          -- ^ 
+ {- TODO | IMAGE    -}
+ 
+
+
+{-
  = UNIQUE          -- ^ 
  | NAME            -- ^ 
  | MANACOST        -- ^ 
@@ -44,7 +85,8 @@ data CHARACTERISTIC
 
  | TEXT            -- ^
  | DATE            -- ^
- 
+-}
+
 ----------------------------------------
 
 {-

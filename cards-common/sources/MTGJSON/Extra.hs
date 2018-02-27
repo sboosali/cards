@@ -8,21 +8,22 @@ module MTGJSON.Extra
  , module MTGJSON.Extra
  ) where
 
-import Data.Aeson as X (eitherDecode)
-
-import Enumerate as X (Enumerable)
+-- re-exports
+import Enumerate          as X (Enumerable)
+import Data.List.NonEmpty as X (NonEmpty(..))
+import Data.Aeson         as X (eitherDecode)
+import Data.Validation    as X (AccValidation(..))
 
 import qualified Data.Aeson        as J 
 --import qualified Data.Aeson.Types  as J
-
-import Data.Validation as X (AccValidation(..))
 
 import Data.ByteString.Lazy (ByteString) 
 
 import Control.Monad.Fail (MonadFail)
 
-import Data.List.NonEmpty as X (NonEmpty(..))
+import Control.Lens (Wrapped(..))
 
+import Data.Coerce
 
 import Prelude.Spiros
 
@@ -72,5 +73,27 @@ show' = show > toS
 
 type Print a = a    -> Text 
 type Parse a = Text -> Maybe a 
+
+----------------------------------------
+
+-- | 'coerce' a @newtype@ to its 'Unwrapped' value. 
+coerceWrapped
+  :: forall a.
+    ( Wrapped a
+    , Coercible a (Unwrapped a)
+    )
+  => a
+  -> Unwrapped a
+coerceWrapped = coerce
+
+-- | 'coerce' an 'Unwrapped' value back to its @newtype@. 
+coerceUnwrapped
+  :: forall a.
+    ( Wrapped a
+    , Coercible a (Unwrapped a)
+    )
+  => Unwrapped a
+  -> a
+coerceUnwrapped = coerce
 
 ----------------------------------------

@@ -96,8 +96,11 @@ library
   --TODO -Werror=missing-fields
 
   -- use `typed-holes`, not `undefined`, during development
-  -fdefer-typed-holes
   -Wtyped-holes
+
+  -fdefer-typed-holes
+  -- with -XGeneralizedNewtypeDeriving: "Couldn't match representation of type ‘proxy ...’ with that of ‘proxy ...’"
+  -- > This only happens when -fdefer-type-errors is on. This is a duplicate of #12104, which has been fixed in GHC 8.2.1.
 
  default-language:   Haskell2010
  default-extensions: NoImplicitPrelude
@@ -140,6 +143,10 @@ library
                  MTGJSON.Kinds
                  MTGJSON.Core
 
+                 MTGJSON.Known
+                 MTGJSON.Known.Types
+                 MTGJSON.Known.Newtypes
+
                  MTGJSON.Printer
                  MTGJSON.Printer.Finite
 
@@ -178,7 +185,7 @@ library
 
 -- mine 
              , spiros
-             , enumerate          >=0.2
+             , enumerate          >=0.2.3
              , enumerate-function >=0.0.1
 
              , template-haskell
