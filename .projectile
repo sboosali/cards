@@ -16,3 +16,8 @@
 
 -TAGS
 -.DS_Store
+
+-/ignore/
+-/cards-common/data/json/
+-/cards-frontend/data/json/
+-/cards-backend/data/json/

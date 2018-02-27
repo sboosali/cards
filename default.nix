@@ -377,8 +377,8 @@ myOverlaysWith = pkgs: self: super: let
     #   # rev "2b7517f27242863ba153bc045dd269b348df05aa" 
 
     spiros = local_ ../spiros;
-    enumerate = loosen (local_ ../enumerate/enumerate);
-    enumerate-function = loosen (super.enumerate-function);
+    enumerate          = loosen (local_ ../enumerate/enumerate);
+    enumerate-function = loosen (local_ ../enumerate/enumerate-function);
 
     memo = local_ ../Haskell-Memoize;
 
