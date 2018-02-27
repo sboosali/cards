@@ -3,24 +3,26 @@
 
 module MTGJSON.AllSets.Lens where
 
+{-
+
 import MTGJSON.AllSets.Types 
 import MTGJSON.Extra (concatenateA) 
 
 import Control.Lens hiding ((<&>)) -- (makeLenses,makePrisms) 
 
---import Prelude.Spiros
+-}
 
 ----------------------------------------
 -- generated
 
-concatenateA makeLenses
-  [ ''CardData
-  ]
-  --NOTE ``Expecting one more argument to ‘CardData’``
+-- concatenateA makeLenses
+--   [ ''CardData
+--   ]
+--   --NOTE ``Expecting one more argument to ‘CardData’``
 
-concatenateA makePrisms
-  [ ''NumericCharacteristic
-  ]  
+-- concatenateA makePrisms
+--   [ ''NumericCharacteristic
+--   ]  
 
 ----------------------------------------
 -- derived

@@ -7,6 +7,8 @@
 -}
 module MTGJSON.AllSets.Types where
 
+{-
+
 import MTGJSON.AllSets.Kinds
 import MTGJSON.Extra
 import MTGJSON.Types
@@ -465,3 +467,5 @@ data KnownCardType
 type KnownCardSubtype = Text -- TODO 
 
 ----------------------------------------
+
+-}

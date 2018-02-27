@@ -3,6 +3,8 @@
 -}
 module MTGJSON.AllSets.Core where
 
+{-
+
 --import MTGJSON.Extra
 import MTGJSON.AllSets.Schema
 import MTGJSON.AllSets.Types
@@ -15,3 +17,5 @@ fromCardObject :: CardObject -> CardData
 fromCardObject CardObject{..} = undefined
 
 ----------------------------------------
+
+-}
