@@ -14,18 +14,52 @@ import Data.List.NonEmpty as X (NonEmpty(..))
 import Data.Aeson         as X (eitherDecode)
 import Data.Validation    as X (AccValidation(..))
 
+-- other
 import qualified Data.Aeson        as J 
 --import qualified Data.Aeson.Types  as J
 
-import Data.ByteString.Lazy (ByteString) 
-
-import Control.Monad.Fail (MonadFail)
+import qualified "parsers"  Text.Parser.Combinators as P
+-- import qualified "parsers"  Text.Parser.Token    as P
+import qualified "parsers"  Text.Parser.Char     as P
+-- import qualified "trifecta" Text.Trifecta.Parser as P
 
 import Control.Lens (Wrapped(..))
+  
+import Enumerate.Function
 
+import qualified Data.Text.Lazy as T
+
+import Data.ByteString.Lazy (ByteString) 
+
+import qualified Data.Map as Map
+
+-- base
+import Control.Monad.Fail (MonadFail)
 import Data.Coerce
 
 import Prelude.Spiros
+
+----------------------------------------
+
+printer
+  :: ( Enumerable a
+     , Ord        a
+     , P.CharParsing p
+     )
+  => Print a 
+  -> p a
+printer f = strings xs
+  where
+  xs = Map.toList f' --TODO just reifyFunction?
+  f' = fromInjective f
+
+----------------------------------------
+
+type Print a = a      -> String
+type Parse a = String -> Maybe a 
+
+-- type Print a = a    -> Text 
+-- type Parse a = Text -> Maybe a
 
 ----------------------------------------
 
@@ -46,8 +80,32 @@ type List = []
 
 ----------------------------------------
 
-decoded  :: (MonadFail m, J.FromJSON a) => ByteString -> m a
-decoded  = J.eitherDecode > either fail return 
+type Association k v = [(k,v)]
+
+strings
+  :: (P.CharParsing p)
+  => Association String a
+  -> p a
+strings
+  = fmap (\(s, a) -> P.string s $> a) 
+  > P.choice
+  
+  -- P.oneOf
+
+chars
+  :: (P.CharParsing p)
+  => Association Char a
+  -> p a
+chars
+  = fmap (char2string *** id)
+  > strings
+  where
+  char2string = (:[])
+
+----------------------------------------
+  
+decoded :: (MonadFail m, J.FromJSON a) => ByteString -> m a
+decoded = J.eitherDecode > either fail return 
 
 ----------------------------------------
 
@@ -64,15 +122,6 @@ i2n i = if i >= 0
 concatenateA :: (Applicative f) => (a -> f [b]) -> [a] -> f [b]
 concatenateA f = traverse f >>> fmap concat
 
-----------------------------------------
-
-show' :: (Show a, StringConv String s) => a -> s
-show' = show > toS
-
-----------------------------------------
-
-type Print a = a    -> Text 
-type Parse a = Text -> Maybe a 
 
 ----------------------------------------
 
@@ -95,5 +144,25 @@ coerceUnwrapped
   => Unwrapped a
   -> a
 coerceUnwrapped = coerce
+
+----------------------------------------
+-- `text`
+
+braces :: String -> String
+braces s = "{" <> s <> "}"
+
+-- braces :: (IsString s) => s -> String
+-- braces s = fromString "{" <> fromString s <> fromString s "}"
+
+-- braces :: Text -> Text
+-- braces t = T.pack "{" <> t <> T.pack "}"
+
+char2text :: Char -> Text
+char2text = T.singleton 
+
+----------------------------------------
+  
+show' :: (Show a, StringConv String s) => a -> s
+show' = show > toS
 
 ----------------------------------------

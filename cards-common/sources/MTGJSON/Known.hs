@@ -43,9 +43,9 @@ type family KnownType (u :: CHARACTERISTIC) where
  KnownType COLOR          = Color {-KnownColor-}
  KnownType CHROMA         = Chroma {-KnownChroma-}
 
--- KnownType MANA           = Mana {-KnownMana-}
-
+ KnownType COLORS         = KnownColors {-Colors-}
  KnownType COST           = KnownCost {-Cost-}
+-- KnownType MANA           = Mana {-KnownMana-}
 
  KnownType NUMERIC        = KnownNumeric {-Numeric-}
 

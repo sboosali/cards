@@ -13,29 +13,17 @@ module MTGJSON.Printer
 import MTGJSON.Printer.Finite
 
 import MTGJSON.Extra
-import MTGJSON.Types
+import MTGJSON.Known
+--import MTGJSON.Types
 
-import qualified Data.Text.Lazy as T
-
-import Prelude.Spiros hiding (P)
+--import qualified Data.Text.Lazy as T
 
 ----------------------------------------
-
-displayChromatic :: Print Chromatic
-displayChromatic (Chromatic cs)
-  = cs
-  & fmap displayChroma
-  & T.intercalate "" 
 
 displayManaCost :: (Show i) => Print (ManaCost i)
-displayManaCost = \case
-  ManaCost mana -> mana & maybe "" displayManaSymbols
-
-displayManaSymbols :: (Show i) => Print (ManaSymbols i)
-displayManaSymbols (ManaSymbols symbols) = t
-    where
-    t  = ts & T.intercalate ""         -- e.g. "{2}{U}{G}"
-    ts = symbols <&> displayManaSymbol -- e.g. ["{2}","{U}","{G}"]
+displayManaCost (ManaCost cs)
+  = cs
+  & fmap displayManaSymbol
+  & intercalate "" 
 
 ----------------------------------------
-

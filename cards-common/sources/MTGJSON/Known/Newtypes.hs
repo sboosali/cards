@@ -17,6 +17,44 @@ import Control.Lens hiding ((<&>))
 
 import qualified Data.Set as Set
 
+import GHC.Exts (IsList(..))
+
+----------------------------------------
+  
+type KnownColors = Colors
+  
+newtype Colors = Colors
+  (Set Color)
+  deriving (Show,Read,Eq,Ord,NFData,Generic)
+  -- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
+
+instance Wrapped Colors where
+
+instance Enumerable Colors where
+
+  enumerated = coerceColorIdentities enumerated
+    where
+    coerceColorIdentities
+      :: [Unwrapped Colors]
+      -> [          Colors] 
+    coerceColorIdentities = coerce
+
+  cardinality _ = cardinality (P :: P (Unwrapped Colors))
+  
+instance IsList (Colors) where
+ type Item (Colors) = Color
+ toList   = getColors >>> Set.toList
+ fromList = toColors
+
+getColors :: Colors -> Set Color
+getColors (Colors colors) = colors
+
+toColors :: [Color] -> Colors
+toColors = Set.fromList >>> Colors
+
+colorless :: Colors
+colorless = Colors Set.empty
+
 ----------------------------------------
 
 -- data ColorIdentity

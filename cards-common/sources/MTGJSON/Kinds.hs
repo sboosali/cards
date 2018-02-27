@@ -19,6 +19,7 @@ data CHARACTERISTIC
  | COLOR           -- ^ 
  | CHROMA          -- ^ 
 
+ | COLORS          -- ^ 
  | MANA            -- ^ 
  | COST            -- ^ 
 

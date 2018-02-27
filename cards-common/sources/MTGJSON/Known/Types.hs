@@ -60,7 +60,7 @@ data KnownSymbol
  = TapSymbol
  | UntapSymbol
  | ManaSymbol () --TODO
- | LoyaltySymbol ()
+ | LoyaltyActivationSymbol 
  deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
 
 ----------------------------------------
@@ -122,10 +122,10 @@ data Body i = Body
  { _power     :: NumericExpression i
  , _toughness :: NumericExpression i
  } deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
- 
+
 data NumericExpression i
  = SimpleNumeric (NumericLiteral i)
- | BinaryNumericExpression NumericOperation (NumericLiteral i) (NumericLiteral i)
+ | BinaryNumeric NumericOperation (NumericLiteral i) (NumericLiteral i)
  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
 
 data NumericOperation
@@ -152,7 +152,10 @@ type KnownColor  = Color
 
 data Chroma
  = Color Color
+ -- TODO Hue
  | Colorless
+ | SnowMana -- ^ @Snow@ has a naming conflict between 'Chroma' and 'Supertype'
+ | Energy
  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
 
 data Color
@@ -175,8 +178,8 @@ type Within20 = Between Positive 0 Positive 20
 see 'sansManaCost'. 
 
 -}
-newtype ManaCost i
- = ManaCost [ManaSymbol i]
+newtype ManaCost i = ManaCost
+ [ManaSymbol i]
  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 instance Wrapped (ManaCost i)
@@ -189,15 +192,16 @@ sansManaCost = ManaCost []
 ----------------------------------------
 
 data ManaSymbol i
- = ColorSymbol      Color
- | MonoHybridSymbol Color
+ = ChromaSymbol     Chroma
  | PhyrexianSymbol  Color
  | HybridSymbol     Guild
+ -- ^ "ravnica hybrid"
+ | MonoHybridSymbol Color
+ -- ^ "shadowmoor hybrid"
  | GenericSymbol    i
- | VariableSymbol --Variable
- | ColorlessSymbol
- | SnowSymbol
- | EnergySymbol 
+ -- ^ @{1}, {2}, ...@
+ | VariableSymbol
+ -- ^ @{X}@
  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
 
 {-
@@ -246,6 +250,64 @@ data Guild
  | Simic
  deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
 
+----------------------------------------
+
+{-|
+
+the two colors must be different.
+
+>>> toGuild Green Green
+Nothing
+
+toGuild is symmetric, i.e. @toGuild x y = toGuild y x@
+
+>>> toGuild Blue Green
+Just Simic
+
+>>> toGuild Green Blue
+Just Simic
+
+-}
+toGuild :: Color -> Color -> Maybe Guild
+
+toGuild White Blue  = Just Azorius  
+toGuild Blue  White = Just Azorius  
+
+toGuild Blue  Black = Just Dimir    
+toGuild Black Blue  = Just Dimir    
+
+toGuild Black Red   = Just Rakdos   
+toGuild Red   Black = Just Rakdos   
+
+toGuild Red   Green = Just Gruul    
+toGuild Green Red   = Just Gruul    
+
+toGuild Green White = Just Selesnya 
+toGuild White Green = Just Selesnya 
+
+toGuild White Black = Just Orzhov
+toGuild Black White = Just Orzhov
+
+toGuild Black Green = Just Golgari  
+toGuild Green Black = Just Golgari  
+
+toGuild Green Blue  = Just Simic    
+toGuild Blue  Green = Just Simic    
+
+toGuild Blue  Red   = Just Izzet    
+toGuild Red   Blue  = Just Izzet    
+
+toGuild Red   White = Just Boros    
+toGuild White Red   = Just Boros
+
+toGuild White White = Nothing
+toGuild Blue  Blue  = Nothing
+toGuild Black Black = Nothing
+toGuild Red   Red   = Nothing
+toGuild Green Green = Nothing
+
+----------------------------------------
+
 {-
 {W}{U} Azorius Senate
 {U}{B} House Dimir
@@ -258,6 +320,8 @@ data Guild
 {R}{W} Boros Legion
 {G}{U} Simic Combine
 -}
+
+----------------------------------------
 
 -- | Three colors (i.e. either a wedge or a shard), a "slice of the color pie".
 -- like an unordered triplet of 'Color' (inlined).
@@ -664,8 +728,8 @@ type KnownSupertype = Supertype
 data Supertype
  = Basic
  | Legendary
- | Ongoing
  | Snow
+ | Ongoing
  | World
  deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
 

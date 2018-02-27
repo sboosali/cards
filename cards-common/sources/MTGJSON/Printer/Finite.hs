@@ -8,101 +8,135 @@ the inverse/opposite of @"MTGJSON.Parser"@.
 module MTGJSON.Printer.Finite where
 
 import MTGJSON.Extra
-import MTGJSON.Types
-
-import qualified Data.Text.Lazy as T
-
-import Prelude.Spiros hiding (P)
+--import MTGJSON.Types
+import MTGJSON.Known
 
 ----------------------------------------
 
+{-
+
+numericTarmogoyf = NumericCreature (Body (SimpleNumeric NumericWildcard) (BinaryNumeric NumericAddition (SimpleNumeric (NumericLiteral 1)) (SimpleNumeric NumericWildcard)))
+displayNumeric numericTarmogoyf
+
+e.g.
+
+@
+> numericTarmogoyf = 'NumericCreature' ('Body' ('SimpleNumeric' 'NumericWildcard') ('BinaryNumeric' 'NumericAddition' ('SimpleNumeric' ('NumericLiteral' 1)) ('SimpleNumeric' 'NumericWildcard'))) :: 'Numeric' Int
+@
+
+>>> numericTarmogoyf = NumericCreature (Body (SimpleNumeric NumericWildcard) (BinaryNumeric NumericAddition (SimpleNumeric (NumericLiteral 1)) (SimpleNumeric NumericWildcard))) :: Numeric Int
+>>> displayNumeric numericTarmogoyf
+"*/1+*"
+
+-}
 displayNumeric :: (Show i) => Print (Numeric i)
 displayNumeric = \case
-  Constant i -> displayNumericConstant i
-  Variable i -> displayNumericVariable i
+ NumericCreature body -> displayBody body
+ NumericLoyalty  x    -> show' x
 
-displayNumericConstant :: (Show i) => Print (NumericConstant i)
-displayNumericConstant = \case
-  NumericLiteral i -> show' i
-  WildcardConstant -> "*"
+displayBody :: (Show i) => Print (Body i)
+displayBody Body{..} = mconcat
+  [ displayNumericExpression _power
+  , "/"
+  , displayNumericExpression _toughness
+  ]
 
-displayNumericVariable :: Print NumericVariable
-displayNumericVariable = \case
-  PowerVariable     -> "pow"
-  ToughnessVariable -> "tou"
-  CostVariable      -> "cmc"
+displayNumericExpression :: (Show i) => Print (NumericExpression i)
+displayNumericExpression = \case
+  SimpleNumeric     x -> displayNumericLiteral x
+  BinaryNumeric o x y -> mconcat
+    [ displayNumericLiteral   x
+    , displayNumericOperation o
+    , displayNumericLiteral   y
+    ]
+
+displayNumericLiteral :: (Show i) => Print (NumericLiteral i)
+displayNumericLiteral = \case
+  NumericConstant i -> show' i
+  NumericWildcard   -> "*"
+
+displayNumericOperation :: Print NumericOperation
+displayNumericOperation = \case
+  NumericAddition    -> "+"
+  NumericSubtraction -> "-"
 
 ----------------------------------------
 
 displayChroma :: Print Chroma
-displayChroma = \case
- Hue          hue -> displayHue hue
- Multicolored     -> "m"
- LandColor        -> "l"
-
-displayHue :: Print Hue
-displayHue = hue2text
+displayChroma = chroma2text
 
 displayColor :: Print Color
 displayColor = color2text 
 
-displayColorIdentity :: Print ColorIdentity
-displayColorIdentity (ColorIdentity hue) = hue2text hue
+-- displayChroma :: Print Chroma
+-- displayChroma = \case
+--  Color color -> color
+--  Colorless   -> 'C'
 
-displayColorIndication :: Print ColorIndication
-displayColorIndication (ColorIndication color) = color2text color 
+-- displayColorIdentity :: Print ColorIdentity
+-- displayColorIdentity (ColorIdentity hue) = hue2text hue
+
+-- displayColorIndication :: Print ColorIndication
+-- displayColorIndication (ColorIndication color) = color2text color
+
+chroma2text :: Chroma -> String
+chroma2text = chroma2letter > (:[])  -- char2text
+
+color2text :: Color -> String
+color2text = color2letter > (:[])  -- char2text
+
+chroma2letter :: Chroma -> Char
+chroma2letter = \case
+  Color color -> color2letter color
+  Colorless   -> 'C'
+  SnowMana    -> 'S' 
+  Energy      -> 'E'
+
+color2letter :: Color -> Char
+color2letter = \case
+   White -> 'W'
+   Blue  -> 'U'
+   Black -> 'B'
+   Red   -> 'R'
+   Green -> 'G'
 
 ----------------------------------------
 
 displayManaSymbol :: (Show i) => Print (ManaSymbol i)
 displayManaSymbol = \case
-  GenericSymbol      i         -> displayGenericSymbol   i 
-  HueSymbol          hue       -> displayHueSymbol       hue
-  HybridSymbol       hybrid    -> displayHybridSymbol    hybrid
-  PhyrexianSymbol    phyrexian -> displayPhyrexianSymbol phyrexian
+
+ ChromaSymbol     c -> displayChromaSymbol      c
+ MonoHybridSymbol c -> displayMonoHybridSymbol c
+ PhyrexianSymbol  c -> displayPhyrexianSymbol  c
+ HybridSymbol    cs -> displayGuildSymbol      cs
+ GenericSymbol    i -> displayGenericSymbol    i
+ VariableSymbol     -> "{X}" -- braces "X" 
+
+displayChromaSymbol :: Print Chroma
+displayChromaSymbol = chroma2text > braces
+
+displayColorSymbol :: Print Color
+displayColorSymbol = color2text > braces
 
 displayGenericSymbol :: (Show i) => Print i
 displayGenericSymbol = show > toS > braces
 
-displayHueSymbol :: Print Hue
-displayHueSymbol = hue2letter > char2text > braces
+displayMonoHybridSymbol :: Print Color
+displayMonoHybridSymbol c = "{2/" <> t <> "}"
+  where
+  t = color2text c
 
--- \case
---   TrueColor c -> displayColor c
---   Colorless c -> "{C}"
-
--- displayColor :: Print Color
--- displayColor = color2letter > braces
-
-displayHybridSymbol :: (Show i) => Print (Hybrid i)
-displayHybridSymbol = \case
-  GuildHybrid  guild -> displayGuildHybridSymbol guild
-  GrayHybrid i color -> displayGrayHybridSymbol i color
-
-displayGuildHybridSymbol :: Print Guild
-displayGuildHybridSymbol
+displayPhyrexianSymbol :: Print Color
+displayPhyrexianSymbol c = "{P" <> t <> "}"
+  where
+  t = color2text c
+   
+displayGuildSymbol :: Print Guild
+displayGuildSymbol
   = fromGuild'
-  > fmap (color2text) -- e.g. ["U","G"]
-  > T.intercalate "/" -- e.g. "U/G"
+  > fmap color2text   -- e.g. ["U","G"]
+  > intercalate "/"   -- e.g. "U/G"
   > braces            -- e.g. "{U/G}"
-  --displayColorHybrid colors = (colors & fromGuild) & 
-
-displayGrayHybridSymbol :: (Show i) => i -> Color -> Text
-displayGrayHybridSymbol i c = displayRawHybridSymbol i' c'
-  where
-  i' = show' i
-  c' = char2text (color2letter c)
-
-displayRawHybridSymbol :: Text -> Text -> Text
-displayRawHybridSymbol x y = "{" <> t <> "}"
-  where
-  t = x <> "/" <> y -- [x,y]
-
-displayPhyrexianSymbol :: Print Phyrexian
-displayPhyrexianSymbol = \case
-  Phyrexian c -> "{P" <> t <> "}"
-                     where
-                     t = char2text (color2letter c)
 
 ---------------------------------------
 
@@ -112,24 +146,18 @@ fromGuild' = fromGuild > pair2list > sort
  where
  pair2list (x,y) = [x,y]
 
-hue2text :: Hue -> Text
-hue2text = hue2letter > char2text
+-- | in ascending (canonical, i.e. WUBRG) order,
+-- followed by TODO. 
+fromSlice' :: Slice -> [Color]
+fromSlice' = fromSlice > triplet2list > sort --TODO
+ where
+ triplet2list (x,y,z) = [x,y,z]
 
-color2text :: Color -> Text
-color2text = color2letter > char2text
-
-hue2letter :: Hue -> Char
-hue2letter = \case
-  TrueColor color -> color2letter color
-  Colorless       -> 'C'
-
-color2letter :: Color -> Char
-color2letter = \case
-   White -> 'W'
-   Blue  -> 'U'
-   Black -> 'B'
-   Red   -> 'R'
-   Green -> 'G'
+-- | in ascending (canonical, i.e. WUBRG) order
+fromNephilim' :: Nephilim -> [Color]
+fromNephilim' = fromNephilim > quadruplet2list > sort
+ where
+ quadruplet2list (w,x,y,z) = [w,x,y,z]
 
 ---------------------------------------
 
@@ -153,8 +181,8 @@ fromSlice = \case
 
 fromShard :: Shard -> (Color,Color,Color)
 fromShard = \case
- Bant   -> (Green,Wedge,Blue)
- Esper  -> (Wedge,Blue,Black)
+ Bant   -> (Green,White,Blue)
+ Esper  -> (White,Blue,Black)
  Grixis -> (Blue,Black,Red)
  Jund   -> (Black,Red,Green)
  Naya   -> (Red,Green,White)
@@ -173,8 +201,8 @@ fromNephilim = \case
  Chaos      -> (Blue, Black, Red, Green)
  Aggression -> (Black, Red, Green, White)
  Altruism   -> (Red, Green, White, Blue)
- Growth     -> (Growth, White, Blue, Black)
-                                                                                                             
+ Growth     -> (Green, White, Blue, Black)
+                                                                                        
 ---------------------------------------
 
 displayLayout :: Layout -> Text
@@ -194,40 +222,33 @@ displayLayout = \case
 
 ---------------------------------------
 
--- --Map Text Is’
-
-displayIs :: Is -> Text
-displayIs = \case
- IsFace      face      -> face      & displayFace
- IsFrame     frame     -> frame     & displayFrame
- IsBorder    border    -> border    & displayBorder
- IsPredicate predicate -> predicate & displayPredicate
-
-displayFace :: Face -> Text
+displayFace :: Print Layout
 displayFace = \case
- NormalFace       -> "normal"
- DoubleFace       -> "double"
- SplitFace        -> "split"
- FlipFace         -> "flip"
+ Aftermath   -> "aftermath"
+ DoubleFaced -> "doublefaced"
+ Flip        -> "flip"
+ Leveler     -> "leveler"
+ Meld        -> "meld"
+ Normal      -> "normal"
+ Phenomenon  -> "phenomenon"
+ Plane       -> "plane"
+ Scheme      -> "scheme"
+ Split       -> "split"
+ Token       -> "token"
+ Vanguard    -> "vanguard"
  
-displayFrame :: Frame -> Text
+displayFrame :: Print Frame 
 displayFrame = \case
  OldFrame         -> "old"
  TimeshiftedFrame -> "timeshifted"
  NewFrame         -> "new"
  FutureFrame      -> "future"
 
-displayBorder :: Border -> Text
+displayBorder :: Print Border
 displayBorder = \case
  BlackBordered    -> "black"
  WhiteBordered    -> "white"
  SilverBordered   -> "silver"
-
-displayPredicate :: KnownPredicate -> Text
-displayPredicate = \case
- Spell            -> "spell"
- Permanent        -> "permanent"
- Vanilla          -> "vanilla"
 
 ----------------------------------------
 
@@ -242,8 +263,8 @@ displayPredicate = \case
 
 -}
 displayLanguage :: Print Language
-displayLanguage = language2abbreviation
-  
+displayLanguage = language2abbreviation > toS
+
 ----------------------------------------
 
 languageInfo :: Language -> LanguageInfo
@@ -282,8 +303,8 @@ see 'edition2abbreviation' and 'language2abbreviation'.
 displayQualifiedEdition :: Print QualifiedEdition
 displayQualifiedEdition QualifiedEdition{..} = e <> l
   where
-  e  = _qEdition  & edition2abbreviation
-  l  = l' & maybe "" (\t -> "/" <> t)
+  e  = toS$ _qEdition  & edition2abbreviation
+  l  = toS$ l' & maybe "" (\t -> "/" <> t)
   l' = _qLanguage <&> displayLanguage 
 
 ----------------------------------------

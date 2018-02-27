@@ -42,16 +42,16 @@ data Card (f :: CHARACTERISTIC -> *) = Card
 
   --TODO , _Card_names         :: [f NAME] -- ^ Only used for split, flip, double-faced, and meld cards. Will contain all the names on this card, front or back. For meld cards, the first name is the card with the meld ability, which has the top half on its back, the second name is the card with the reminder text, and the third name is the melded back face.
 
-  , _Card_manaCost      :: ManaCost f
+  , _Card_manaCost      :: f COST   -- Cost f
   , _Card_cmc           :: ConvertedManaCost 
 
-  , _Card_colors        :: Colors        f
+  , _Card_colors        :: f COLORS   -- Colors f
   -- ^ colors
   -- e.g. [ "Blue", "Green" ]
   -- The card colors. Usually this is derived from the casting cost, but some cards are special (like the back of double-faced cards and Ghostfire).
   -- @Reality Smasher@'s colors are 'colorless'.
 
-  , _Card_colorIdentity :: Colors f
+  , _Card_colorIdentity :: f COLORS   -- Colors f
   -- ^ colorIdentity
   -- e.g. [ "U", "G" ]
   -- This is created reading all card color information and costs. It is the same for double-sided cards (if they have different colors, the identity will have both colors). It also identifies all mana symbols in the card (cost and text). Mostly used on commander decks.
@@ -109,20 +109,23 @@ simpleCardTypes x = Typeline{..}
   _Card_types      = x :| [] 
   _Card_subtypes   = []
 
+
+{-
+
 ----------------------------------------
   
 {-|
 
 -}
-data ManaCost (f :: CHARACTERISTIC -> *) = ManaCost
-  { _Cost_symbols :: List (f COST)
+data Cost f = Cost
+  { {-_Cost-} _symbols :: List (f COST)
   } -- deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
 
-sansManaCost :: ManaCost f
-sansManaCost = ManaCost _Cost_symbols
+sansManaCost :: Cost f  
+sansManaCost = Cost _Cost_symbols
  where
- _Cost_symbols = []
- 
+ _symbols = []
+
 ----------------------------------------
 
 {-|
@@ -144,6 +147,13 @@ colorless = Colors []
 -- colorlessIdentity = ColorIdentity []
 
 ----------------------------------------
+
+-}
+
+
+
+
+
 
 {-
 
