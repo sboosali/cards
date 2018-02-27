@@ -18,7 +18,7 @@ import "parsers"  Text.Parser.Token
 import "parsers"  Text.Parser.Char        
 --import "parsers" Text.Parser.Permutation
 
---import "trifecta" Text.Trifecta.Parser    as P
+import "trifecta" Text.Trifecta as P
 
 --import qualified Data.List.NonEmpty as NonEmpty
 
@@ -26,27 +26,20 @@ import "parsers"  Text.Parser.Char
 
 ----------------------------------------
 
-type CardValidation = V CardErrors
+----------------------------------------
 
-type CardErrors = NonEmpty CardError
+parseManaCost
+  :: (Integral i)
+  => String
+  -> Maybe (ManaCost i)
+parseManaCost
+  = P.parseString pManaCost mempty  -- runParser
+  > result2maybe
 
-data CardError
- = MustBeNatural {-String-} Integer
- | MustBeInteger {-String-} Double
- | UnknownColor  {-String-} String
- | BadManaCost String
- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
- --deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
-
-{-
-
-error $ "Invalid mana cost " <> show s <> ": " <> show err
-
-import qualified Text.ParserCombinators.ReadP as ReadP
-import           Text.ParserCombinators.ReadP (ReadP)
-
-
--}
+  where
+  result2maybe = \case
+    P.Success a  -> Just a
+    P.Failure _e -> Nothing
 
 ----------------------------------------
 
@@ -195,11 +188,11 @@ pGuild :: forall p. (MonadFail p, CharParsing p) => p Guild
 pGuild = do
   guild' <- toGuild <$> pColor <*> (char '/' *> pColor)
 
-  guild <- guild' & maybe failed return
+  guild <- guild' & maybe pFailure return
   return guild
 
   where
-  failed = unexpected expectation --TODO ignored
+  pFailure = unexpected expectation --TODO ignored
   expectation = "a hybrid mana symbol (the two colors must be different)"
 
   {-
@@ -260,3 +253,14 @@ p "{Z}"
 
 
 -}
+
+  {-
+
+error $ "Invalid mana cost " <> show s <> ": " <> show err
+
+import qualified Text.ParserCombinators.ReadP as ReadP
+import           Text.ParserCombinators.ReadP (ReadP)
+
+
+-}
+

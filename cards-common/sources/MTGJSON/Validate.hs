@@ -5,30 +5,46 @@
 {-|
 
 -}
-module MTGJSON.Core where
+module MTGJSON.Validate where
 
 import MTGJSON.Extra
-import MTGJSON.Types
+--import MTGJSON.Types
 import MTGJSON.Known
+import MTGJSON.AllSets -- .Types
 
 import MTGJSON.Parser
---import MTGJSON.Printer
+import MTGJSON.Printer.Finite
 
---import Enumerate.Function (invertInjection)
-import Data.Validation
+import Enumerate.Function (invertInjection)
+--import Data.Validation
 
 --import qualified Data.List.NonEmpty as NonEmpty
 
-import Prelude.Spiros
+--import Prelude.Spiros
+
 
 ----------------------------------------
 
-fromCardObject :: CardObject -> KnownCard
-fromCardObject CardObject{..} = _
+type CardValidation = V CardErrors
+
+type CardErrors = NonEmpty CardError
+
+data CardError
+ = MustBeNatural {-String-} Integer
+ | MustBeInteger {-String-} Double
+ | UnknownColor  {-String-} String
+ | BadManaCost String
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+ --deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
 
 ----------------------------------------
 
-validateNatural :: Int -> V CardErrors Natural
+validateCardObject :: CardObject -> CardValidation KnownCard
+validateCardObject CardObject{..} = _
+
+----------------------------------------
+
+validateNatural :: Int -> CardValidation Natural
 validateNatural (toInteger -> i)
   = i2n i
   & maybe (failure e) success 
@@ -45,7 +61,7 @@ validateNatural (toInteger -> i)
 --   e = MustBeNatural schemaFieldName i
 --     -- mconcat [schemaFieldName, " must be a natural (non-negative integer): ", show' i]
 
-validateColors :: Maybe (List String) -> V CardErrors Colors
+validateColors :: Maybe (List String) -> CardValidation Colors
 validateColors
   = maybe [] id --  -- Set.empty id
   > fmap parseColor'
@@ -59,12 +75,19 @@ validateColors
 
   parseColor = invertInjection displayColor
 
-validateManaCost :: Maybe String -> CardValidation (List ManaSymbol)
-validateManaCost = \case
-  Nothing -> success []
-  Just s  -> case runParser s $ many manaSymbol of
-    Left err -> 
-    Right manaCost -> pure manaCost
+validateManaCost
+  :: (Integral i)
+  => Maybe String
+  -> CardValidation (ManaCost i)
+validateManaCost
+  = maybe "" id
+  > parseManaCost'
+
+  where
+  parseManaCost' s
+    = s
+    & parseManaCost
+    & maybe2validation (BadManaCost s)
 
 ----------------------------------------
 

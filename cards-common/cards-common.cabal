@@ -141,7 +141,6 @@ library
                  MTGJSON
                  MTGJSON.Types
                  MTGJSON.Kinds
-                 MTGJSON.Core
 
                  MTGJSON.Known
                  MTGJSON.Known.Types
@@ -152,10 +151,12 @@ library
 
                  MTGJSON.Parser                 
 
+                 MTGJSON.Validate
+
+                 MTGJSON.Core
+
                  MTGJSON.Version
-
                  MTGJSON.SetList
-
                  MTGJSON.AllSets               
                  MTGJSON.AllSets.Schema
                  MTGJSON.AllSets.Types
