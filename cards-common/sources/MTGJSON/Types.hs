@@ -32,59 +32,59 @@ import MTGJSON.Kinds
 ----------------------------------------
 
 data Card (f :: CHARACTERISTIC -> *) = Card 
-  { _Card_uid           :: f UNIQUE
-  , _Card_multiverseid  :: f MULTIVERSEID 
-    --TODO , _Card_ids           :: {-Unique-}Identifiers
+  { _uid           :: f UNIQUE
+  , _multiverseid  :: f MULTIVERSEID 
+    --TODO , _ids           :: {-Unique-}Identifiers
  
   -- gameplay-relevant stuff, card characteristic 
-  , _Card_name          :: f NAME 
-  , _Card_face          :: f FACE 
+  , _name          :: f NAME 
+  , _face          :: f FACE 
 
-  --TODO , _Card_names         :: [f NAME] -- ^ Only used for split, flip, double-faced, and meld cards. Will contain all the names on this card, front or back. For meld cards, the first name is the card with the meld ability, which has the top half on its back, the second name is the card with the reminder text, and the third name is the melded back face.
+  --TODO , _names         :: [f NAME] -- ^ Only used for split, flip, double-faced, and meld cards. Will contain all the names on this card, front or back. For meld cards, the first name is the card with the meld ability, which has the top half on its back, the second name is the card with the reminder text, and the third name is the melded back face.
 
-  , _Card_manaCost      :: f COST   -- Cost f
-  , _Card_cmc           :: ConvertedManaCost 
+  , _manaCost      :: f COST   -- Cost f
+  , _cmc           :: ConvertedManaCost 
 
-  , _Card_colors        :: f COLORS   -- Colors f
+  , _colors        :: f COLORS   -- Colors f
   -- ^ colors
   -- e.g. [ "Blue", "Green" ]
   -- The card colors. Usually this is derived from the casting cost, but some cards are special (like the back of double-faced cards and Ghostfire).
   -- @Reality Smasher@'s colors are 'colorless'.
 
-  , _Card_colorIdentity :: f COLORS   -- Colors f
+  , _colorIdentity :: f COLORS   -- Colors f
   -- ^ colorIdentity
   -- e.g. [ "U", "G" ]
   -- This is created reading all card color information and costs. It is the same for double-sided cards (if they have different colors, the identity will have both colors). It also identifies all mana symbols in the card (cost and text). Mostly used on commander decks.
   -- @Reality Smasher@'s colorIdentity is 'colorless' (not @[ "C" ]@, which isn't valid).
 
-  , _Card_typeline      :: Typeline f
+  , _typeline      :: Typeline f
 
   -- quasi-derivable stuff, card characteristics 
 
   -- non-gameplay-relevant stuff, card characteristics 
-  , _Card_rarity        :: f RARITY 
-  , _Card_watermark     :: f WATERMARK 
+  , _rarity        :: f RARITY 
+  , _watermark     :: f WATERMARK 
 
-  , _Card_oracle        :: f ORACLE
-  , _Card_flavor        :: Text 
-  , _Card_artist        :: Text
+  , _oracle        :: f ORACLE
+  , _flavor        :: Text 
+  , _artist        :: Text
     --TODO CardArtist, "x & y" as two artists
 
-  , _Card_assets        :: f ASSETS --IMAGE
-    --TODO , _Card_resources     :: Resource 
+  , _assets        :: f ASSETS --IMAGE
+    --TODO , _resources     :: Resource 
 
   -- metagame stuff
-  , _Card_edition       :: f EDITION
-  , _Card_printings     :: [f EDITION]      -- ^ reprints across sets
+  , _edition       :: f EDITION
+  , _printings     :: [f EDITION]      -- ^ reprints across sets
 
-  , _Card_legalities    :: [FormatLegality f]
+  , _legalities    :: [FormatLegality f]
 
-  , _Card_variations    :: [f MULTIVERSEID] -- ^ different images of the same card within a set
-  , _Card_foreignVariations :: [ForeignVariation f]
+  , _variations    :: [f MULTIVERSEID] -- ^ different images of the same card within a set
+  , _foreignVariations :: [ForeignVariation f]
 
-  , _Card_rulings       :: [Ruling] 
-  , _Card_originalText  :: Text
-  , _Card_originalType  :: Text
+  , _rulings       :: [Ruling] 
+  , _originalText  :: Text
+  , _originalType  :: Text
 
   } -- deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
 
@@ -94,9 +94,9 @@ data Card (f :: CHARACTERISTIC -> *) = Card
 
 -}
 data Typeline (f :: CHARACTERISTIC -> *) = Typeline
-  { _Card_supertypes :: List     (f 'SUPERTYPE)
-  , _Card_types      :: NonEmpty (f 'TYPE) 
-  , _Card_subtypes   :: List     (f 'SUBTYPE)
+  { _supertypes :: List     (f 'SUPERTYPE)
+  , _types      :: NonEmpty (f 'TYPE) 
+  , _subtypes   :: List     (f 'SUBTYPE)
   } -- deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
 
 {-| most non-creature cards have a single card type, without supertypes or subtypes. 
@@ -105,9 +105,9 @@ data Typeline (f :: CHARACTERISTIC -> *) = Typeline
 simpleCardTypes :: f TYPE -> Typeline f
 simpleCardTypes x = Typeline{..} 
   where 
-  _Card_supertypes = []
-  _Card_types      = x :| [] 
-  _Card_subtypes   = []
+  _supertypes = []
+  _types      = x :| [] 
+  _subtypes   = []
 
 
 {-
@@ -173,8 +173,8 @@ colorlessIndication = ColorIndication []
 ----------------------------------------
 
 data FormatLegality f = FormatLegality
- { _Card_format   :: f FORMAT
- , _Card_legality :: f LEGALITY
+ { _format   :: f FORMAT
+ , _legality :: f LEGALITY
  } -- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
 
 ----------------------------------------

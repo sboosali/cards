@@ -116,28 +116,7 @@ library
 
  exposed-modules:
 
-                 Tokenize
-                 Mixfix
- 
-                 Cards.Common
-                 Cards.Common.Types
-                 Cards.Common.Core		
-                 Cards.Common.Example   
-
-                 Cards.Syntax.Operators
-
-                 Cards.Query
-                 Cards.Query.Types
-
-                 Cards.Syntax.MagicCardsInfo
-                 Cards.Syntax.MagicCardsInfo.Types
-                 Cards.Syntax.MagicCardsInfo.Static     
-                 Cards.Syntax.MagicCardsInfo.Known 
-                 Cards.Syntax.MagicCardsInfo.Parser
-                 Cards.Syntax.MagicCardsInfo.Validator 
-                 Cards.Syntax.MagicCardsInfo.Compiler
-                 Cards.Syntax.MagicCardsInfo.Printer
-            
+                 -- the repl loads only the first module
                  MTGJSON
                  MTGJSON.Types
                  MTGJSON.Kinds
@@ -145,6 +124,7 @@ library
                  MTGJSON.Known
                  MTGJSON.Known.Types
                  MTGJSON.Known.Newtypes
+                 MTGJSON.Known.Lens 
 
                  MTGJSON.Printer
                  MTGJSON.Printer.Finite
@@ -169,6 +149,28 @@ library
                  MTGJSON.Macros
                  MTGJSON.Extra                 
                  
+                 Cards.Common
+                 Cards.Common.Types
+                 Cards.Common.Core		
+                 Cards.Common.Example   
+
+                 Cards.Syntax.Operators
+
+                 Cards.Query
+                 Cards.Query.Types
+
+                 Cards.Syntax.MagicCardsInfo
+                 Cards.Syntax.MagicCardsInfo.Types
+                 Cards.Syntax.MagicCardsInfo.Static     
+                 Cards.Syntax.MagicCardsInfo.Known 
+                 Cards.Syntax.MagicCardsInfo.Parser
+                 Cards.Syntax.MagicCardsInfo.Validator 
+                 Cards.Syntax.MagicCardsInfo.Compiler
+                 Cards.Syntax.MagicCardsInfo.Printer
+            
+                 Tokenize
+                 Mixfix
+ 
  other-modules:
 
                  Cards.Syntax.Extra

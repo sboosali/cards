@@ -1,23 +1,35 @@
 
 module MTGJSON
- ( module MTGJSON.AllSets
+ ( module MTGJSON.Types
+ , module MTGJSON.Kinds
+ , module MTGJSON.Known
+ , module MTGJSON.Printer
+ , module MTGJSON.Parser                 
+ , module MTGJSON.Validate
+ -- , module MTGJSON.Core
+
+ , module MTGJSON.AllSets
  , module MTGJSON.SetList
  , module MTGJSON.Version
 
- , module MTGJSON.Types 
--- , module MTGJSON.Core
  , module MTGJSON.Paths   
--- , module MTGJSON.Macros
+ -- , module MTGJSON.Macros
  ) where
 
 ----------------------------------------
 
+import MTGJSON.Types
+import MTGJSON.Kinds
+import MTGJSON.Known
+import MTGJSON.Printer
+import MTGJSON.Parser                 
+import MTGJSON.Validate
+--import MTGJSON.Core
+
+import MTGJSON.Version
 import MTGJSON.AllSets
 import MTGJSON.SetList
-import MTGJSON.Version
 
-import MTGJSON.Types 
---import MTGJSON.Core
 import MTGJSON.Paths
 --import MTGJSON.Macros
 

@@ -9,11 +9,13 @@ module MTGJSON.Known
  ( module MTGJSON.Known
  , module MTGJSON.Known.Types
  , module MTGJSON.Known.Newtypes
+ , module MTGJSON.Known.Lens
  ) where
 
 -- re-exports
 import MTGJSON.Known.Types
 import MTGJSON.Known.Newtypes
+import MTGJSON.Known.Lens
 
 --import MTGJSON.Extra
 import MTGJSON.Types
