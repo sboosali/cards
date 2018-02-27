@@ -55,7 +55,8 @@ type family KnownType (u :: CHARACTERISTIC) where
 
  KnownType SUPERTYPE      = KnownSupertype {-Supertype-}
  KnownType TYPE           = KnownBaseType {-BaseType-}
- KnownType SUBTYPE        = KnownSubtype {-Subtype-}
+ KnownType SUBTYPE        = UnknownSubtype
+ --TODO KnownType SUBTYPE        = KnownSubtype {-Subtype-}
 
  KnownType FACE           = KnownFace {-KnownFace-}
  --TODOKnownType LAYOUT         = KnownLayout

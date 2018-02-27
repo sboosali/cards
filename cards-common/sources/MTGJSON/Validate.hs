@@ -19,7 +19,7 @@ import MTGJSON.Printer.Finite
 import Enumerate.Function (invertInjection)
 --import Data.Validation
 
---import qualified Data.List.NonEmpty as NonEmpty
+import Data.List.NonEmpty (nonEmpty)
 
 --import Prelude.Spiros
 
@@ -39,6 +39,8 @@ data CardError
  | UnknownWatermark         String
  | BadManaCost              String
  | BadMagicCardsInfoURI     CardIds
+ | ZeroBaseTypes            --String
+ | UnknownType              String String
  deriving (Show,Read,Eq,Ord,Generic,NFData)
  --deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
 
@@ -127,7 +129,7 @@ validateCardObject setCodes c@CardObject{..} = Card
   <*> (fmap Known <$> validate_variations        _CardObject_variations)
       -- ^ _variations
 
-  <*> (id    <$> validate_foreignVariations _CardObject_foreignVariations)
+  <*> (id    <$> validate_foreignVariations _CardObject_foreignNames)
       -- ^ _foreignVariations
 
   <*> (validate_rulings
@@ -245,15 +247,87 @@ parseWatermark = toS > f --TODO text-versus-string
   f = print2parse (displayWatermark > toS)
 
 ----------------------------------------
--- non-trivial validators
+-- types
 
 validate_typeline
   :: Maybe [Text]
   -> Maybe [Text]
   -> Maybe [Text]
   -> CardValidation (Typeline Known)
-validate_typeline supertypes types subtypes = _
+validate_typeline supertypes basetypes subtypes = Typeline
+ <$> (validate_supertypes supertypes <&> fmap Known)
+ <*> (validate_basetypes  basetypes  <&> fmap Known)
+ <*> (validate_subtypes   subtypes   <&> fmap Known)
 
+validate_supertypes
+  :: Maybe [Text]
+  -> CardValidation (List KnownSupertype)
+validate_supertypes
+ = maybe [] id
+ > traverse validate_supertype
+
+validate_basetypes
+  :: Maybe [Text]
+  -> CardValidation (NonEmpty KnownBaseType)
+validate_basetypes
+ = maybe [] id
+ > nonEmpty'
+ > either failure go -- (:|[]) 
+ where
+ go = traverse validate_basetype
+ 
+ nonEmpty' :: forall a. [a] -> Either CardError (NonEmpty a)
+ nonEmpty' = (nonEmpty > maybe2either (ZeroBaseTypes))
+ -- nonEmpty' s
+ --   = s
+ --   & (nonEmpty > maybe2validation (ZeroBaseTypes s))
+
+validate_subtypes
+  :: Maybe [Text]
+  -> CardValidation (List UnknownSubtype)
+validate_subtypes  
+ = maybe [] id
+ > traverse validate_subtype
+
+validate_supertype
+  :: Text
+  -> CardValidation KnownSupertype
+validate_supertype supertype = go supertype
+ where
+ go
+   = (toS > parseSupertype)
+   > maybe2validation (UnknownType "super" (toS supertype))
+
+validate_basetype
+  :: Text
+  -> CardValidation KnownBaseType
+validate_basetype basetype
+ = basetype
+ & go
+ where
+ go
+   = (toS > parseBaseType)
+   > maybe2validation (UnknownType "base" (toS basetype))
+
+validate_subtype
+  :: Text
+  -> CardValidation UnknownSubtype
+validate_subtype = toS > success
+
+{-
+validate_subtype
+  :: Text
+  -> CardValidation KnownSubtype
+validate_subtype subtype
+ = subtype
+ & go
+ where
+ go = maybe2validation (UnknownType "sub" (toS supertype))
+-}
+
+----------------------------------------
+-- non-trivial validators
+  
 validate_numeric
   :: Maybe Text
   -> Maybe Text

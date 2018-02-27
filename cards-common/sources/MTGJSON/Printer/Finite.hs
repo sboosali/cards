@@ -496,3 +496,31 @@ editionInfo = \case
  AL     -> EditionInfo Antediluvian         "al" "Limited Alpha Edition"
 
 ----------------------------------------
+
+displaySupertype :: Print Supertype
+displaySupertype = show
+{-
+displaySupertype = \case
+   Basic
+   Legendary
+   Snow
+   Ongoing
+   World
+-}
+
+displayBaseType :: Print BaseType
+displayBaseType = show
+
+{-
+displayBaseType = \case
+   Instant
+   Sorcery
+   Land
+   Artifact
+   Enchantment
+   Creature
+   Planeswalker
+   Conspiracy
+-}
+
+----------------------------------------

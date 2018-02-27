@@ -222,6 +222,15 @@ pColor = printer displayColor
 
 ----------------------------------------
 
+parseSupertype :: Parse Supertype
+parseSupertype = print2parse displaySupertype
+
+parseBaseType :: Parse BaseType
+parseBaseType = print2parse displayBaseType
+
+--parseSubtype :: Parse Subtype
+--parseSubtype = print2parse displaySubtype
+
 {-
 
 pNatural :: Parser  Natural

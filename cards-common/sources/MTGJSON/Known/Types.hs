@@ -775,12 +775,12 @@ data BaseType
  | Enchantment
  | Creature
  | Planeswalker
- {-
  | Conspiracy
+ {-
+ | Scheme
  | Phenomenon
  | Plane
  | Vanguard
- | Scheme
  -}
  deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
 
@@ -808,6 +808,8 @@ Vanguard
 -}
 
 ----------------------------------------
+
+type UnknownSubtype = Text
 
 type KnownSubtype = Subtype
 
