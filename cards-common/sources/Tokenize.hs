@@ -96,6 +96,8 @@ tokenizeByCharacterCategoryIsolatingGroupingAndQuotation
   -- predicate x y = eqCharacterCategory
   --  = all isntGroupingCharacter ([x,y] :: String)
 
+--TODO charset-0.3.7.1 Data.CharSet.Unicode
+
 
 ----------------------------------------
 

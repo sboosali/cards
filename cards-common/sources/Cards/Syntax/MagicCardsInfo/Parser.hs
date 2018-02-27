@@ -161,6 +161,8 @@ l:jp
 
 o:"whenever ~" ((o:"deals damage to a" or o:"deals combat damage to a") (o:opponent or o:player)) or o:"attacks and isn't blocked")
 
+e:al/en,be -e:al+be  year>=93 year<1996  o:"First strike" o:Flying (not (t:bird or t:dragon))
+
 @
 
 e.g.
@@ -215,6 +217,105 @@ import Enumerate
 
 import Prelude.Spiros hiding (P)
 import Prelude        (error)
+
+----------------------------------------
+
+--type MCI = Statements KnownSize KnownCost
+
+----------------------------------------
+
+{-
+
+-- KnownStatements Query
+
+mci :: String -> Either SyntaxError MCI
+mci s = x
+  where
+  (result, unconsumed) = p s
+  x = result & maybe l r
+  l = (Left (SyntaxError (unconsumed&toS)))
+  r = Right  
+  p = runPeg g
+  g = complete gMCI 
+
+----------------------------------------
+
+gMCI
+  :: forall i j s.
+     ( ParseableNumeric i
+     , ParseableNumeric j
+     )
+  => G s (Statements i j)
+gMCI = mdo
+
+  -- boundary between attributes (i.e. simultaneous tokenization)
+  boundary <- rule$ choice
+      [ bof
+      , matches $ oneOf "\n\t ()"
+      , eof
+      ]
+
+  psTextAttributes      <- textAttribute
+    boundary
+    ["o","t","a"] 
+
+  {- ^ NOTE magiccards.info itself doesn't support strict equality for oracle text.
+       e.g. `o!Flying`, French vanillas creatures that have no other text besides flying.
+  -}
+
+  psNumericAttributes   <- do
+    numericAttribute
+      ["cmc","pow","tou"] 
+
+  psManaAttributes      <- do
+    manaAttribute
+      ["mana"] 
+
+  psColorAttributes     <- do
+    chromaticAttribute
+      ["c","ci","in"]
+
+  psDateAttributes      <- do
+    dateAttribute
+      boundary
+      ["year"]
+
+  psOrderedAttributes   <- rule$
+    orderedEnumAttribute
+      ["e","r"]
+
+  psUnorderedAttributes <- rule$
+    unorderedEnumAttribute
+      ["l"
+      ,"f"
+      ,"is", "not","has" 
+      ,"banned", "legal", "restricted"
+      ]
+
+  pAttribute <- rule$ choice
+      [ psTextAttributes     
+      , psNumericAttributes
+      , psManaAttributes
+      , psColorAttributes
+      , psDateAttributes
+      , psOrderedAttributes
+      , psUnorderedAttributes
+      ]
+
+  pAttributes <- rule$ many1 pAttribute <&> Attributes
+
+  pFreeform <- rule$ pure []
+
+  p <- rule$ Statements <$> pFreeform <*> pAttributes
+  return p
+
+  -- where
+  -- pN :: P s (Attribute i j)
+  -- pN = numericAttribute ["cmc","pow","tou"] 
+
+-}
+
+----------------------------------------  
 
 {-
 
@@ -273,12 +374,12 @@ Right (StatementQuery_ (Statements {_statementFreeform = [], _statementAttribute
 
 -}
 
-mci :: String -> Either SyntaxError KnownQuery_
-mci sInput = x
-  where
-  (result, sRest) = sInput & runMagicCardsInfo'
-  x = result & maybe (Left (SyntaxError (toS sRest))) Right  
-  -- maybe2either
+-- mci :: String -> Either SyntaxError KnownQuery_
+-- mci sInput = x
+--   where
+--   (result, sRest) = sInput & runMagicCardsInfo'
+--   x = result & maybe (Left (SyntaxError (toS sRest))) Right  
+--   -- maybe2either
 
 {-|
 

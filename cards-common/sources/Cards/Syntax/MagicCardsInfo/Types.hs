@@ -862,6 +862,23 @@ type Date = YearMonthDay -- Day
 
 ----------------------------------------
 
+data Layout
+ = Aftermath
+ | DoubleFaced
+ | Flip
+ | Leveler
+ | Meld
+ | Normal
+ | Phenomenon
+ | Plane
+ | Scheme
+ | Split
+ | Token
+ | Vanguard
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
+
+----------------------------------------
+
 data Is
  = IsFace        Face
  | IsFrame       Frame

@@ -237,7 +237,7 @@ printer f = aliases g
 
 quoted :: P s a -> P s a
 quoted = between (char '"') (char '"')
-  
+
 ----------------------------------------
 -- `text`
 
@@ -261,5 +261,3 @@ invert' = fromFunction > invertMap > Map.map NonEmpty.head
 -- update :: Ord k => (a -> Maybe a) -> k -> Map k a -> Map k a
 
 ----------------------------------------
-
-  

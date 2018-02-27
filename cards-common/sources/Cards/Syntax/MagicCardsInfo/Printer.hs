@@ -137,7 +137,7 @@ fromGuild' = fromGuild > pair2list > sort
  where
  pair2list (x,y) = [x,y]
 
-fromGuild :: Guild -> (Color,Color)
+fromGuild :: Guild -> (Color,Color) --TODO unordered tuple?
 fromGuild = \case
  Azorius  -> (White, Blue)
  Dimir    -> (Blue,  Black)
@@ -168,6 +168,23 @@ color2letter = \case
    Black -> 'B'
    Red   -> 'R'
    Green -> 'G'
+
+---------------------------------------
+
+displayLayout :: Layout -> Text
+displayLayout = \case
+ Aftermath   -> "aftermath"
+ DoubleFaced -> "double-faced"
+ Flip        -> "flip"
+ Leveler     -> "leveler"
+ Meld        -> "meld"
+ Normal      -> "normal"
+ Phenomenon  -> "phenomenon"
+ Plane       -> "plane"
+ Scheme      -> "scheme"
+ Split       -> "split"
+ Token       -> "token"
+ Vanguard    -> "vanguard"  
 
 ---------------------------------------
 
