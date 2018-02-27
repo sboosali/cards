@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+# set -e
 ########################################
 
 GHCID_FILE=./cards-common/ghcid.txt
