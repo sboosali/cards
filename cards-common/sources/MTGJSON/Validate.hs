@@ -31,9 +31,12 @@ type CardValidation = AccValidation CardErrors
 type CardErrors = NonEmpty CardError
 
 data CardError
- = MustBeNatural {-String-} Integer
- | MustBeInteger {-String-} Double
- | UnknownColor  {-String-} String
+ = MustBeNatural            Integer
+ | MustBeInteger            Double
+ | UnknownColor             String
+ | UnknownEdition           String
+ | UnknownRarity            String
+ | UnknownWatermark         String
  | BadManaCost              String
  | BadMagicCardsInfoURI     CardIds
  deriving (Show,Read,Eq,Ord,Generic,NFData)
@@ -100,7 +103,7 @@ validateCardObject setCodes c@CardObject{..} = Card
   <*> (Known <$> validate_rarity            _CardObject_rarity)
       -- ^ _rarity
 
-  <*> (Known <$> validate_watermark         _CardObject_watermark)
+  <*> (fmap Known <$> validate_watermark         _CardObject_watermark)
       -- ^ _watermark
 
   <*> (Known <$> validate_oracle            _CardObject_text)
@@ -112,10 +115,10 @@ validateCardObject setCodes c@CardObject{..} = Card
   <*> (id    <$> validate_artist            _CardObject_artist)
       -- ^ _artist
 
-  <*> (Known <$> validate_edition           _CardObject_edition)
+  <*> (Known <$> validate_edition'          setCodes)
       -- ^ _edition
 
-  <*> (fmap Known <$> validate_printings         _CardObject_printings)
+  <*> (fmap Known <$> validate_printings   _CardObject_printings)
       -- ^ _printings
 
   <*> (id    <$> validate_legalities        _CardObject_legalities)
@@ -222,6 +225,25 @@ validateManaCost
 validateDate :: Text -> CardValidation Date
 validateDate t = success t
 
+parseEdition :: Text -> Maybe Edition
+parseEdition = toS > f --TODO text-versus-string 
+  where
+  f = print2parse (edition2abbreviation > toS)
+
+parseRarity :: Text -> Maybe Rarity
+parseRarity = \case
+  "common"     -> Just Common
+  "uncommon"   -> Just Uncommon
+  "rare"       -> Just Rare
+  "mythic"     -> Just Mythic
+ -- "basic land" -> Just BasicLand
+  _            -> Nothing
+
+parseWatermark :: Text -> Maybe Watermark
+parseWatermark = toS > f --TODO text-versus-string 
+  where
+  f = print2parse (displayWatermark > toS)
+
 ----------------------------------------
 -- non-trivial validators
 
@@ -320,22 +342,47 @@ validate_assets SetCodes{..} is@CardIds{..}
 
 ----------------------------------------
 
-validate_edition :: Maybe Text -> CardValidation Edition
-validate_edition t = _
+validate_edition'
+  :: SetCodes 
+  -> CardValidation Edition
+validate_edition' SetCodes{..} = validate_edition primaryCode
 
-validate_rarity :: Text -> CardValidation Rarity 
-validate_rarity rarity = _
+validate_edition
+  :: Text
+  -> CardValidation Edition
+validate_edition t
+  = parseEdition t
+  & maybe2validation (UnknownEdition (toS t))
 
-validate_watermark :: Maybe Text -> CardValidation Watermark 
-validate_watermark watermark = _
+validate_rarity
+  :: Text
+  -> CardValidation Rarity 
+validate_rarity t
+  = parseRarity t
+  & maybe2validation (UnknownRarity (toS t))
+
+validate_watermark
+  :: Maybe Text
+  -> CardValidation (Maybe Watermark)
+validate_watermark = \case
+  Nothing -> success Nothing
+  Just t  -> Just <$> go t
+  where
+  go t
+    = parseWatermark t
+    & maybe2validation (UnknownWatermark (toS t))
 
 ----------------------------------------
 -- lists/records
 
 validate_printings
-  :: Maybe Text
+  :: Maybe [Text]
   -> CardValidation [KnownEdition]
-validate_printings es = _
+validate_printings
+  = maybe [] id
+  > traverse validate_printing
+  where
+  validate_printing e = validate_edition e
 
 validate_variations
   :: Maybe [Natural]

@@ -202,7 +202,54 @@ fromNephilim = \case
  Aggression -> (Black, Red, Green, White)
  Altruism   -> (Red, Green, White, Blue)
  Growth     -> (Green, White, Blue, Black)
-                                                                                        
+                                                                    ----------------------------------------
+
+displayWatermark :: Print Watermark
+displayWatermark = \case  
+  AbzanWatermark                 -> "Abzan"
+  AgentsOfSNEAKWatermark         -> "Agents of S.N.E.A.K."
+  AtarkaWatermark                -> "Atarka"
+  AzoriusWatermark               -> "Azorius"
+  BlackWatermark                 -> "Black"
+  BlueWatermark                  -> "Blue"
+  BorosWatermark                 -> "Boros"
+  ColorlessWatermark             -> "Colorless"
+  CrossbreedLabsWatermark        -> "Crossbreed Labs"
+  DimirWatermark                 -> "Dimir"
+  DromokaWatermark               -> "Dromoka"
+  GoblinExplosioneersWatermark   -> "Goblin Explosioneers"
+  GolgariWatermark               -> "Golgari"
+  GreenWatermark                 -> "Green"
+  GruulWatermark                 -> "Gruul"
+  IzzetWatermark                 -> "Izzet"
+  JeskaiWatermark                -> "Jeskai"
+  KolaghanWatermark              -> "Kolaghan"
+  LeagueOfDastardlyDoomWatermark -> "League of Dastardly Doom"
+  MarduWatermark                 -> "Mardu"
+  MirranWatermark                -> "Mirran"
+  OjutaiWatermark                -> "Ojutai"
+  OrderOfTheWidgetWatermark      -> "Order of the Widget"
+  OrzhovWatermark                -> "Orzhov"
+  PhyrexianWatermark             -> "Phyrexian"
+  PlaneswalkerWatermark          -> "Planeswalker"
+  RakdosWatermark                -> "Rakdos"
+  RedWatermark                   -> "Red"
+  SelesnyaWatermark              -> "Selesnya"
+  SilumgarWatermark              -> "Silumgar"
+  SimicWatermark                 -> "Simic"
+  SultaiWatermark                -> "Sultai"
+  TemurWatermark                 -> "Temur"
+  WhiteWatermark                 -> "White"
+
+----------------------------------------
+
+displayRarity :: Print Rarity
+displayRarity = \case
+  Common   -> "C"
+  Uncommon -> "U"
+  Rare     -> "R"
+  Mythic   -> "M"
+                    
 ---------------------------------------
 
 displayLayout :: Layout -> Text

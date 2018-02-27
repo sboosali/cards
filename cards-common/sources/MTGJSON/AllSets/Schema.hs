@@ -156,7 +156,9 @@ data CardObject = CardObject
   , _CardObject_mciNumber     :: Maybe Text  -- ^ used by `MagicCards.info`, almost always identical to '_CardObject_number' 
   , _CardObject_rulings       :: Maybe [CardRulingObject] 
   , _CardObject_foreignNames  :: Maybe [CardForeignPrintingObject] 
---  , _CardObject_printings     :: [Text]  
+  , _CardObject_printings     :: Maybe [Text]
+    -- ^ e.g. ["ICE", "CHR" ]
+    -- The sets that this card was printed in, expressed as an array of set codes.
   , _CardObject_originalText  :: Maybe Text 
   , _CardObject_originalType  :: Maybe Text
   , _CardObject_legalities    :: Maybe [CardFormatLegalityObject]

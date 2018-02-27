@@ -65,7 +65,7 @@ data Card (f :: CHARACTERISTIC -> *) = Card
 
   -- non-gameplay-relevant stuff, card characteristics 
   , _rarity        :: f RARITY 
-  , _watermark     :: f WATERMARK 
+  , _watermark     :: Maybe (f WATERMARK)
 
   , _oracle        :: f ORACLE
   , _flavor        :: Text 

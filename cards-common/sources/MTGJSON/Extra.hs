@@ -43,6 +43,16 @@ import Prelude.Spiros
 
 ----------------------------------------
 
+print2parse
+  :: ( Enumerable a
+     , Ord        a
+     )
+  => Print a 
+  -> Parse a
+print2parse f = f'
+  where
+  f' = invertInjection f
+
 printer
   :: ( Enumerable a
      , Ord        a
