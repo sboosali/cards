@@ -233,7 +233,7 @@ validateColors
     > maybe2validation (UnknownColor s)
     )
 
-  parseColor = invertInjection displayColor
+  parseColor = invertInjection displayColorChar
 
 validateManaCost
   :: (Integral i)
@@ -442,10 +442,51 @@ validate_cost
   -> CardValidation KnownCost
 validate_cost = fmap toS > validateManaCost
 
+------------------------------------------
+
+validate_colors
+  :: Maybe [Text]
+  -> CardValidation Colors 
+validate_colors
+  = maybe [] id
+  > traverse validate_colorWord -- e.g. [ "Blue", "Green" ]
+  > fmap fromList -- TODO duplicates
+
+validate_colorWord
+  :: Text
+  -> CardValidation Color 
+validate_colorWord (toS -> s) = go s
+  where
+  go
+    = parseColorWord -- e.g. "Blue"
+    > maybe2validation (UnknownColor s)
+
+validate_colorIdentity
+  :: Maybe [Text]
+  -> CardValidation Colors -- ColorIdentity 
+validate_colorIdentity
+  = maybe [] id
+  > traverse validate_colorChar -- e.g. [ "U", "G" ]
+  > fmap fromList -- TODO duplicates
+                  -- TODO "warnings" i.e. Writer not Either/Validation
+
+validate_colorChar
+  :: Text
+  -> CardValidation Color 
+validate_colorChar (toS -> s) = go s
+  where
+  go
+    = parseColorChar -- e.g. "U"
+    > maybe2validation (UnknownColor s)
+    
+------------------------------------------
+
 validate_oracle
   :: Maybe Text
   -> CardValidation (Oracle)  
 validate_oracle t = _
+
+------------------------------------------
 
 validate_face
   :: Maybe [Text]
@@ -460,6 +501,8 @@ validate_face = go
 --   -> CardValidation MultiverseIdentifier
 -- validate_multiverseid i = _
 
+------------------------------------------
+
 validate_cmc
   :: Natural
   -> CardValidation CMC
@@ -467,17 +510,8 @@ validate_cmc
   = CMC
   > success
 
-validate_colors
-  :: Maybe [Text]
-  -> CardValidation Colors 
-validate_colors ts = _
-
-validate_colorIdentity
-  :: Maybe [Text]
-  -> CardValidation Colors -- Identity 
-validate_colorIdentity ts = _
-
-
+------------------------------------------
+  
 {-|
 
 We prioritize the @magiccards.info@-specialized identifiers\/codes;

@@ -59,14 +59,32 @@ displayNumericOperation :: Print NumericOperation
 displayNumericOperation = \case
   NumericAddition    -> "+"
   NumericSubtraction -> "-"
+  
+----------------------------------------
+
+displayColorChar :: Print Color
+displayColorChar = color2letter > (:[])
+
+color2letter :: Color -> Char
+color2letter = \case
+   White -> 'W'
+   Blue  -> 'U'
+   Black -> 'B'
+   Red   -> 'R'
+   Green -> 'G'
+
+displayColorWord :: Print Color
+displayColorWord = \case
+   White -> "White"
+   Blue  -> "Blue"
+   Black -> "Black"
+   Red   -> "Red"
+   Green -> "Green"
 
 ----------------------------------------
 
 displayChroma :: Print Chroma
 displayChroma = chroma2text
-
-displayColor :: Print Color
-displayColor = color2text 
 
 -- displayChroma :: Print Chroma
 -- displayChroma = \case
@@ -91,14 +109,6 @@ chroma2letter = \case
   Colorless   -> 'C'
   SnowMana    -> 'S' 
   Energy      -> 'E'
-
-color2letter :: Color -> Char
-color2letter = \case
-   White -> 'W'
-   Blue  -> 'U'
-   Black -> 'B'
-   Red   -> 'R'
-   Green -> 'G'
 
 ----------------------------------------
 

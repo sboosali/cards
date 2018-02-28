@@ -27,6 +27,23 @@ import "trifecta" Text.Trifecta as P
 
 ----------------------------------------
 
+parseColorChar :: Parse Color
+parseColorChar = print2parse displayColorChar
+
+parseColorWord :: Parse Color
+parseColorWord = print2parse displayColorWord
+
+--   :: Parse [Color]
+-- parseColorsAsChars
+--   = _
+
+-- parseColorsAsWords
+--   :: Parse [Color]
+-- parseColorsAsWords
+--   = _
+
+----------------------------------------
+
 {-|
 
 e.g.
@@ -306,8 +323,8 @@ pMonoHybrid = pPermutedColor $ string "2"
 
 pPermutedColor :: forall p. (CharParsing p) => p String -> p Color
 pPermutedColor pSymbol
-    = pColor  <* pSlash <* pSymbol
-  <|> pSymbol *> pSlash *> pColor
+    = pColorChar  <* pSlash <* pSymbol
+  <|> pSymbol *> pSlash *> pColorChar
  where
  pSlash = skipOptional $ char '/'
  --permute p
@@ -316,7 +333,7 @@ pPermutedColor pSymbol
 
 pGuild :: forall p. (MonadFail p, CharParsing p) => p Guild
 pGuild = do
-  guild' <- toGuild <$> pColor <*> (char '/' *> pColor)
+  guild' <- toGuild <$> pColorChar <*> (char '/' *> pColorChar)
 
   guild <- guild' & maybe pFailure return
   return guild
@@ -340,8 +357,14 @@ pGuild = do
 pChroma :: forall p. (CharParsing p) => p Chroma
 pChroma = printer displayChroma
 
-pColor :: forall p. (CharParsing p) => p Color
-pColor = printer displayColor
+----------------------------------------  
+
+pColorChar :: forall p. (CharParsing p) => p Color
+pColorChar = printer displayColorChar
+
+-- pColorWord :: forall p. (CharParsing p) => p Color
+-- pColorWord = printer displayColorWord
+
      -- chars
      -- [ 'W' $> White
      -- , 'U' $> Blue
