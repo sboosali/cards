@@ -13,7 +13,7 @@ import MTGJSON.Known
 
 ----------------------------------------
 
-{-
+{-|
 
 numericTarmogoyf = NumericCreature (Body (SimpleNumeric NumericWildcard) (BinaryNumeric NumericAddition (SimpleNumeric (NumericLiteral 1)) (SimpleNumeric NumericWildcard)))
 displayNumeric numericTarmogoyf

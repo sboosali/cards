@@ -1,3 +1,4 @@
+{-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE ViewPatterns #-}
 
 {-# LANGUAGE DeriveAnyClass #-}
@@ -26,8 +27,59 @@ import "trifecta" Text.Trifecta as P
 
 ----------------------------------------
 
+{-|
+
+e.g.
+
+@
+*/1+*
+*/*+1
+@
+
+
+@
+>>> numericTarmogoyf = NumericCreature (Body (SimpleNumeric NumericWildcard) (BinaryNumeric NumericAddition (SimpleNumeric (NumericLiteral 1)) (SimpleNumeric NumericWildcard))) :: Numeric Int
+>>> parseNumeric "*/1+*" == numericTarmogoyf
+True
+>>> parseNumeric "*/*+1" == numericTarmogoyf
+True
+@
+
+-}
+parseNumeric
+  :: (Integral i)
+  => Parse (Numeric i)
+parseNumeric
+  = P.parseString pNumeric mempty
+  > result2maybe
+
+-- | see 'pLoyalty'
+parseLoyalty
+  :: (Integral i)
+  => Parse (Numeric i)
+parseLoyalty
+  = P.parseString pLoyalty mempty
+  > result2maybe
+  > fmap NumericLoyalty
+
+-- -- | see 'pNumericExpression'
+-- parseNumericBody
+--   :: (Integral i)
+--   => Text -> Text -> Maybe (NumericExpression i)
+-- parseNumericBody p t = do
+--   parseNumericExpression
+
+-- | see 'pNumericExpression'
+parseNumericExpression
+  :: (Integral i)
+  => Parse (NumericExpression i)
+parseNumericExpression 
+  = P.parseString pNumericExpression mempty
+  > result2maybe
+  
 ----------------------------------------
 
+-- | see 'pManaSymbol'
 parseManaCost
   :: (Integral i)
   => String
@@ -36,10 +88,88 @@ parseManaCost
   = P.parseString pManaCost mempty  -- runParser
   > result2maybe
 
-  where
-  result2maybe = \case
-    P.Success a  -> Just a
-    P.Failure _e -> Nothing
+----------------------------------------
+
+parseSupertype :: Parse Supertype
+parseSupertype = print2parse displaySupertype
+
+parseBaseType :: Parse BaseType
+parseBaseType = print2parse displayBaseType
+
+--parseSubtype :: Parse Subtype
+--parseSubtype = print2parse displaySubtype
+  
+----------------------------------------
+
+pNumeric
+  :: forall p i. (Integral i)
+  => (MonadFail p, TokenParsing p)
+  => p (Numeric i)
+
+pNumeric = choice $
+  [ try $ NumericCreature <$> pBody
+                          <?> "a power/toughness (two expressions)"
+
+  , try $ NumericLoyalty  <$> pLoyalty
+                          <?> "a loyalty (one literal)"
+  ]
+
+----------------------------------------
+
+pLoyalty
+  :: forall p i. (Integral i)
+  => (MonadFail p, TokenParsing p)
+  => p i
+pLoyalty = pNatural --TODO replace with validator (Between's fromIntegral clips, without failing)
+
+pBody
+  :: forall p i. (Integral i)
+  => (TokenParsing p)
+  => p (Body i)
+pBody = Body
+ <$> (pNumericExpression <* char '/')
+ <*>  pNumericExpression
+
+{-|
+
+Commutative operations (like @+@ i.e. 'NumericAddition') don't care about order (by definition). Thus their arguments can be provided in any order, and are normalized to the same 'NumericExpression'. 
+
+-}
+pNumericExpression
+  :: forall p i. (Integral i)
+  => (TokenParsing p)
+  => p (NumericExpression i)
+pNumericExpression = choice $
+  [ try $ do
+       l <- pNumericLiteral
+       o <- pNumericOperation
+       r <- pNumericLiteral
+       pure $ BinaryNumeric o l r
+
+  -- [ try $ BinaryNumeric <$> pNumericLiteral
+  --                       <*> pNumericOperation
+  --                       <*> pNumericLiteral
+
+  , try $ SimpleNumeric <$> pNumericLiteral
+  ]
+
+pNumericLiteral
+  :: forall p i. (Integral i)
+  => (TokenParsing p)
+  => p (NumericLiteral i)
+pNumericLiteral = choice $
+  [ NumericWildcard <$ char '*'
+  , NumericConstant <$> pInteger --TODO replace with validator (Between's fromIntegral clips, without failing)
+  ]
+
+pNumericOperation
+  :: (CharParsing p)
+  => p NumericOperation
+pNumericOperation = printer displayNumericOperation
+  -- parseNumericOperation 
+
+-- parseNumericOperation :: Parse NumericOperation
+-- parseNumericOperation = print2parse displayNumericOperation
 
 ----------------------------------------
 
@@ -156,7 +286,7 @@ pManaSymbol = braces $  -- between (char '{') (char '}') $
     , try $ MonoHybridSymbol <$> pMonoHybrid
                              <?> "mono-hybrid symbol"
 
-    , try $ GenericSymbol    <$> (natural <&> fromIntegral)
+    , try $ GenericSymbol    <$> pNatural
                              <?> "generic symbol"
 
     ,       ChromaSymbol     <$> pChroma
@@ -222,14 +352,19 @@ pColor = printer displayColor
 
 ----------------------------------------
 
-parseSupertype :: Parse Supertype
-parseSupertype = print2parse displaySupertype
+pInteger
+  :: forall p i. (Integral i)
+  => (TokenParsing p)
+  => p i
+pInteger = (integer <&> fromIntegral)
 
-parseBaseType :: Parse BaseType
-parseBaseType = print2parse displayBaseType
+pNatural
+  :: forall p i. (Integral i)
+  => (TokenParsing p)
+  => p i
+pNatural = (natural <&> fromIntegral)
 
---parseSubtype :: Parse Subtype
---parseSubtype = print2parse displaySubtype
+----------------------------------------  
 
 {-
 

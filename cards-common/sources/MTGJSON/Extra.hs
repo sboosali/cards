@@ -22,7 +22,7 @@ import qualified Data.Aeson        as J
 import qualified "parsers"  Text.Parser.Combinators as P
 -- import qualified "parsers"  Text.Parser.Token    as P
 import qualified "parsers"  Text.Parser.Char     as P
--- import qualified "trifecta" Text.Trifecta.Parser as P
+import qualified "trifecta" Text.Trifecta as P
 
 import Control.Lens (Wrapped(..))
   
@@ -114,6 +114,11 @@ chars
   where
   char2string = (:[])
 
+result2maybe :: P.Result a -> Maybe a
+result2maybe = \case
+    P.Success a  -> Just a
+    P.Failure _e -> Nothing
+    
 ----------------------------------------
   
 decoded :: (MonadFail m, J.FromJSON a) => ByteString -> m a

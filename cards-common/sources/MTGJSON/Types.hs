@@ -59,7 +59,7 @@ data Card (f :: CHARACTERISTIC -> *) = Card
 
   , _typeline      :: Typeline f
 
-  , _numeric       :: f NUMERIC
+  , _numeric       :: Maybe (f NUMERIC)
 
   -- quasi-derivable stuff, card characteristics 
 

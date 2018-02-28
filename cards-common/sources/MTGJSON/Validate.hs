@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE DeriveAnyClass #-}
 
@@ -41,6 +42,10 @@ data CardError
  | BadMagicCardsInfoURI     CardIds
  | ZeroBaseTypes            --String
  | UnknownType              String String
+ | BadNumeric               String String String
+ | BadLoyalty               String   -- Natural 
+ | BadPower                 String 
+ | BadToughness             String 
  deriving (Show,Read,Eq,Ord,Generic,NFData)
  --deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
 
@@ -67,29 +72,36 @@ validateCardObject
   -> CardValidation KnownCard
 validateCardObject setCodes c@CardObject{..} = Card
 
-  <$> (Known <$> validate_uid               _CardObject_id)
+  <$> (Known <$> validate_uid
+                 _CardObject_id)
       -- ^ _uid
 
-  <*> (Known <$> validate_multiverseid      _CardObject_multiverseid)
+  <*> (Known <$> validate_multiverseid
+                 _CardObject_multiverseid)
       -- ^ _multiverseid
 
-  <*> (Known <$> validate_name              _CardObject_name)
+  <*> (Known <$> validate_name
+                 _CardObject_name)
       -- ^ _name
 
-  <*> (Known <$> validate_face  _CardObject_layout
-                                _CardObject_names)
+  <*> (Known <$> validate_face _CardObject_names
+                               _CardObject_layout)
       -- ^ _face
 
-  <*> (Known <$> validate_cost              _CardObject_manaCost)
+  <*> (Known <$> validate_cost
+                 _CardObject_manaCost)
       -- ^ _cost
 
-  <*> (id    <$> validate_cmc               _CardObject_cmc)
+  <*> (id    <$> validate_cmc
+                 _CardObject_cmc)
       -- ^ _cmc
 
-  <*> (Known <$> validate_colors            _CardObject_colors)
+  <*> (Known <$> validate_colors
+                 _CardObject_colors)
       -- ^ _colors
 
-  <*> (Known <$> validate_colorIdentity     _CardObject_colorIdentity)
+  <*> (Known <$> validate_colorIdentity
+                 _CardObject_colorIdentity)
       -- ^ _colorIdentity
 
   <*> (id    <$> validate_typeline _CardObject_supertypes
@@ -97,49 +109,62 @@ validateCardObject setCodes c@CardObject{..} = Card
                                    _CardObject_subtypes)
       -- ^ _typeline
 
-  <*> (Known <$> validate_numeric _CardObject_power
-                                  _CardObject_toughness 
-                                  _CardObject_loyalty)
+  <*> (fmap Known <$> validate_numeric'
+                          _CardObject_power
+                          _CardObject_toughness 
+                          _CardObject_loyalty)
       -- ^ _numeric
 
-  <*> (Known <$> validate_rarity            _CardObject_rarity)
+  <*> (Known <$> validate_rarity
+                 _CardObject_rarity)
       -- ^ _rarity
 
-  <*> (fmap Known <$> validate_watermark         _CardObject_watermark)
+  <*> (fmap Known <$> validate_watermark
+                      _CardObject_watermark)
       -- ^ _watermark
 
-  <*> (Known <$> validate_oracle            _CardObject_text)
+  <*> (Known <$> validate_oracle
+                 _CardObject_text)
       -- ^ _oracle
 
-  <*> (id    <$> validate_flavor            _CardObject_flavor)
+  <*> (id    <$> validate_flavor
+                 _CardObject_flavor)
       -- ^ _flavor
 
-  <*> (id    <$> validate_artist            _CardObject_artist)
+  <*> (id    <$> validate_artist
+                 _CardObject_artist)
       -- ^ _artist
 
-  <*> (Known <$> validate_edition'          setCodes)
+  <*> (Known <$> validate_edition'
+                 setCodes)
       -- ^ _edition
 
-  <*> (fmap Known <$> validate_printings   _CardObject_printings)
+  <*> (fmap Known <$> validate_printings
+                      _CardObject_printings)
       -- ^ _printings
 
-  <*> (id    <$> validate_legalities        _CardObject_legalities)
+  <*> (id    <$> validate_legalities
+                 _CardObject_legalities)
       -- ^ _legalities
 
-  <*> (fmap Known <$> validate_variations        _CardObject_variations)
+  <*> (fmap Known <$> validate_variations
+                      _CardObject_variations)
       -- ^ _variations
 
-  <*> (id    <$> validate_foreignVariations _CardObject_foreignNames)
+  <*> (id    <$> validate_foreignVariations
+                 _CardObject_foreignNames)
       -- ^ _foreignVariations
 
   <*> (validate_rulings
        _CardObject_rulings)
       -- ^ _rulings
 
-  <*> (id    <$> validate_originalText      _CardObject_originalText)
+  <*> (id    <$> validate_originalText
+                 _CardObject_originalText)
       -- ^ _originalText
 
-  <*> (id    <$> validate_originalType      _CardObject_originalType)
+  <*> (id    <$> validate_originalType
+                 _CardObject_originalType)
       -- ^ _originalType
 
   <*> (Known <$> validate_assets
@@ -328,12 +353,89 @@ validate_subtype subtype
 ----------------------------------------
 -- non-trivial validators
   
-validate_numeric
+validate_numeric'
   :: Maybe Text
   -> Maybe Text
   -> Maybe Natural
-  -> CardValidation (KnownNumeric)
-validate_numeric power toughness loyalty = _
+  -> CardValidation (Maybe KnownNumeric)
+validate_numeric' = validate_numeric
+
+validate_numeric
+  :: ( Integral i
+     )
+  => Maybe Text
+  -> Maybe Text
+  -> Maybe Natural
+  -> CardValidation (Maybe (Numeric i))
+validate_numeric Nothing      Nothing          Nothing        =
+  success Nothing
+
+validate_numeric (Just power) (Just toughness) Nothing        =
+  Just <$> validate_body power toughness  
+
+validate_numeric Nothing      Nothing          (Just loyalty) =
+  Just <$> validate_loyalty loyalty
+
+validate_numeric p            t                l              =
+  failure (BadNumeric p' t' l')
+  where
+  p' = p & maybe "" toS
+  t' = t & maybe "" toS
+  l' = l & maybe "" show'
+
+validate_body
+  :: ( Integral i
+     )
+  => Text
+  -> Text
+  -> CardValidation (Numeric i)
+validate_body power toughness = NumericCreature
+  <$> parsePowerToughness
+
+  where
+  parsePowerToughness = Body
+    <$> parsePower
+    <*> parseToughness
+    
+  parsePower  
+    = parseNumericExpression (power&toS)
+    & maybe2validation (BadPower (power&toS))
+
+  parseToughness 
+    = parseNumericExpression (toughness&toS)
+    & maybe2validation (BadToughness (toughness&toS))
+
+validate_loyalty 
+  :: ( Integral i
+     )
+  => Natural
+  -> CardValidation (Numeric i)
+validate_loyalty n = go n
+  where
+  go
+    = toLoyalty
+    > Just 
+    > maybe2validation (BadLoyalty s)
+
+  toLoyalty
+    = n2i
+    > fromInteger    --TODO replace with validator (Between's fromIntegral clips, without failing)
+    > NumericLoyalty
+
+  s = show' n
+
+-- validate_loyalty 
+--   :: ( Integral i
+--      )
+--   => Text
+--   -> CardValidation (Numeric i)
+-- validate_loyalty s = go
+--   where
+--   go
+--     = parseLoyalty
+--     > maybe2validation (BadLoyalty s)
+
+------------------------------------------
 
 validate_cost
   :: Maybe Text
@@ -346,10 +448,12 @@ validate_oracle
 validate_oracle t = _
 
 validate_face
-  :: Maybe Text
-  -> Maybe [Text]
+  :: Maybe [Text]
+  -> Maybe Text
   -> CardValidation KnownFace
-validate_face layout names = _
+validate_face = go
+ where
+ go names layout = _
 
 -- validate_multiverseid
 --   :: Maybe Natural
