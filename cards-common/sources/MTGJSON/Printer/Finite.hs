@@ -262,37 +262,31 @@ displayRarity = \case
                     
 ---------------------------------------
 
-displayLayout :: Layout -> Text
+displayFace_ :: Print (Face x)
+displayFace_ = \case
+ NormalFace       -> "normal"
+ SplitFace     {} -> "split"    
+ FlipFace      {} -> "flip"      
+ DoubleFace    {} -> "double-faced"
+ AftermathFace {} -> "aftermath"
+ MeldFace      {} -> "meld"      
+
+displayLayout :: Print Layout -- Layout -> Text
 displayLayout = \case
- Aftermath   -> "aftermath"
- DoubleFaced -> "double-faced"
- Flip        -> "flip"
- Leveler     -> "leveler"
- Meld        -> "meld"
- Normal      -> "normal"
- Phenomenon  -> "phenomenon"
- Plane       -> "plane"
- Scheme      -> "scheme"
- Split       -> "split"
- Token       -> "token"
- Vanguard    -> "vanguard"  
+ AftermathLayout   -> "aftermath"
+ DoubleFacedLayout -> "double-faced"
+ FlipLayout        -> "flip"
+ LevelerLayout     -> "leveler"
+ MeldLayout        -> "meld"
+ NormalLayout      -> "normal"
+ PhenomenonLayout  -> "phenomenon"
+ PlaneLayout       -> "plane"
+ SchemeLayout      -> "scheme"
+ SplitLayout       -> "split"
+ TokenLayout       -> "token"
+ VanguardLayout    -> "vanguard"  
 
 ---------------------------------------
-
-displayFace :: Print Layout
-displayFace = \case
- Aftermath   -> "aftermath"
- DoubleFaced -> "doublefaced"
- Flip        -> "flip"
- Leveler     -> "leveler"
- Meld        -> "meld"
- Normal      -> "normal"
- Phenomenon  -> "phenomenon"
- Plane       -> "plane"
- Scheme      -> "scheme"
- Split       -> "split"
- Token       -> "token"
- Vanguard    -> "vanguard"
  
 displayFrame :: Print Frame 
 displayFrame = \case

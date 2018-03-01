@@ -44,7 +44,16 @@ parseColorWord = print2parse displayColorWord
 
 ----------------------------------------
 
-  
+{-|
+
+see 'displayLayout'
+
+-}
+parseLayout :: Parse Layout
+parseLayout = print2parse displayLayout
+
+----------------------------------------
+
 {-|
 
 see 'parseOracle'
@@ -685,6 +694,10 @@ pColorChar = printer displayColorChar
 
 ----------------------------------------
 
+  
+
+----------------------------------------
+
 pInteger
   :: forall i p. (Integral i)
   => (TokenParsing p)
@@ -697,7 +710,7 @@ pNatural
   => p i
 pNatural = (natural <&> fromIntegral)
 
-----------------------------------------  
+---------------------------------------- 
 
 {-
 

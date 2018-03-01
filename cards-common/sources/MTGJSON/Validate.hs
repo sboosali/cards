@@ -27,12 +27,13 @@ import Data.List.NonEmpty (nonEmpty)
 
 ----------------------------------------
 
-type CardValidation = AccValidation CardErrors
+type CardValidation = Validation CardErrors
 
 type CardErrors = NonEmpty CardError
 
 data CardError
- = MustBeNatural            Integer
+ = BadName                  String
+ | MustBeNatural            Integer
  | MustBeInteger            Double
  | UnknownColor             String
  | UnknownEdition           String
@@ -45,7 +46,9 @@ data CardError
  | BadNumeric               String String String
  | BadLoyalty               String   -- Natural 
  | BadPower                 String 
- | BadToughness             String 
+ | BadToughness             String
+ | UnknownLayout            String 
+ | WrongFaceArity           String [String] 
  deriving (Show,Read,Eq,Ord,Generic,NFData)
  --deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
 
@@ -504,14 +507,139 @@ validate_face
   :: Maybe [Text]
   -> Maybe Text
   -> CardValidation KnownFace
-validate_face = go
- where
- go names layout = _
+validate_face (fromMaybe [] -> names') layout'
+  = either2validation $ do
+  
+     names <- (validate_name `traverse` names')
+       & validation2either 
+   
+     -- NOTE monadic validation requires the Either Monad over the Validation Applicative
+    
+     layout <- validateLayout layout'
+       & maybe2either (UnknownLayout sLayout)
+       & first (:|[])
+    
+     face   <- validateFace names layout
+       & maybe2either (WrongFaceArity sLayout sNames)
+       & first (:|[])
+    
+     return face
 
+ where
+ sLayout = layout' & fromMaybe "" & toS
+ sNames  = names' <&> toS
+
+{-NOTE
+
+bindValidation :: Validation e a -> (a -> Validation e b) -> Validation e b
+
+-}
+
+
+{-
+
+  where
+  names'' = names'
+    & fromMaybe []
+    & 
+
+
+fromEither $ do
+ --NOTE fromEither :: Either e a -> Validation e a
+ 
+ -- NOTE monadic validation requires the Either Monad over the Validation Applicative
+  
+ names <- validate_name `traverse` names'
+
+
+
+
+ either2validation $ do
+     -- NOTE monadic validation requires the Either Monad over the Validation Applicative
+    
+     layout <- validateLayout layout'
+       & maybe2either (UnknownLayout (toS layout'))
+    
+     face   <- validateFace names layout
+       & maybe2either (WrongFaceArity (toS layout') (toS names'))
+    
+     return face
+
+
+ names  <- validateName `traverse` names
+ 
+ layout <- validateLayout layout'
+   & maybe2validation (UnknownLayout (toS layout'))
+
+ face   <- validateFace names layout
+   & maybe2validation (WrongFaceArity (toS layout') (toS names'))
+
+ return face
+-}
+  
 -- validate_multiverseid
 --   :: Maybe Natural
 --   -> CardValidation MultiverseIdentifier
 -- validate_multiverseid i = _
+
+validateLayout
+  :: Maybe Text
+  -> Maybe KnownLayout -- CardValidation KnownLayout
+validateLayout =
+  maybe (Just NormalLayout) (toS > parseLayout)
+  --- ^ normal is the default
+  
+  -- \case
+  -- Nothing -> Just NormalLayout
+  -- Just t -> parseLayout t
+
+validateFace
+  :: [Name]
+  -> KnownLayout 
+  -> Maybe KnownFace
+validateFace names = \case
+  
+  NormalLayout      -> validateNullaryFace NormalFace names
+
+  SplitLayout       -> validateBinaryFace SplitCard names
+                      <&> SplitFace
+  DoubleFacedLayout -> validateBinaryFace DoubleFacedCard names
+                      <&> DoubleFace
+  FlipLayout        -> validateBinaryFace FlipCard names
+                      <&> FlipFace
+  AftermathLayout   -> validateBinaryFace AftermathCard names
+                      <&> AftermathFace
+
+  MeldLayout        -> validateTernaryFace MeldCard names
+                      <&> MeldFace
+
+  _                 -> Just NormalFace -- TODO V Warning
+  
+------------------------------------------
+
+validateNullaryFace
+  :: f card
+  -> [card]
+  -> Maybe (f card)
+validateNullaryFace f = \case
+  [] -> Just f 
+  _  -> Nothing
+
+validateBinaryFace
+  :: (card -> card -> f card)
+  -> [card]
+  -> Maybe (f card)
+validateBinaryFace f = \case
+  [x,y] -> Just $ f x y
+  _     -> Nothing
+
+validateTernaryFace
+  :: (card -> card -> card -> f card)
+  -> [card]
+  -> Maybe (f card)
+validateTernaryFace f = \case
+  [x,y,z] -> Just $ f x y z
+  _       -> Nothing
 
 ------------------------------------------
 
@@ -650,13 +778,6 @@ validate_uid
   = UID
   > success
 
-validate_name
-  :: Text
-  -> CardValidation Name
-validate_name
-  = Name
-  > success
-
 validate_multiverseid
   :: Maybe Natural
   -> CardValidation MID
@@ -664,6 +785,22 @@ validate_multiverseid
   = maybe "" show' --TODO 
   > MID
   > success
+
+validate_name
+  :: Text
+  -> CardValidation Name
+validate_name s = go s
+  where
+  go
+    = validateName
+    > maybe2validation (BadName (toS s))
+
+validateName
+  :: Text
+  -> Maybe Name
+validateName
+  = Name
+  > Just
 
 ----------------------------------------
 -- text

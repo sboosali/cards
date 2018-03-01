@@ -9,13 +9,14 @@ module MTGJSON.Extra
  ) where
 
 -- re-exports
-import Enumerate          as X (Enumerable)
-import Data.List.NonEmpty as X (NonEmpty(..))
-import Data.Aeson         as X (eitherDecode)
-import Data.Validation    as X (AccValidation(..))
-import Data.Monoid        as X (First(..))
+import              Enumerate          as X (Enumerable)
+import              Data.List.NonEmpty as X (NonEmpty(..))
+import              Data.Aeson         as X (eitherDecode)
+import "validation" Data.Validation    as X (Validation(..))
+import              Data.Monoid        as X (First(..))
 
--- other
+----------------------------------------
+
 import qualified Data.Aeson        as J 
 --import qualified Data.Aeson.Types  as J
 
@@ -25,8 +26,11 @@ import qualified "parsers"  Text.Parser.Char     as P
 import qualified "trifecta" Text.Trifecta as P
 
 import Control.Lens (Wrapped(..))
-  
+
 import Enumerate.Function
+
+import "validation" Data.Validation
+--NOTE "Validation" is deprecated in favor of "validation"
 
 import qualified Data.Text.Lazy as T
 
@@ -34,6 +38,7 @@ import Data.ByteString.Lazy (ByteString)
 
 import qualified Data.Map as Map
 
+----------------------------------------
 -- base
 import Control.Monad.Fail (MonadFail)
 import Data.Coerce
@@ -75,15 +80,15 @@ type Parse a = String -> Maybe a
 
 ----------------------------------------
 
-type V = AccValidation
+type V = Validation
 
-success :: a -> AccValidation e a
-success = AccSuccess
+success :: a -> Validation e a
+success = Success
 
-failure :: e -> AccValidation (NonEmpty e) a
-failure = (:|[]) > AccFailure
+failure :: e -> Validation (NonEmpty e) a
+failure = (:|[]) > Failure
 
-maybe2validation :: e -> Maybe a -> AccValidation (NonEmpty e) a
+maybe2validation :: e -> Maybe a -> Validation (NonEmpty e) a
 maybe2validation e = maybe (failure e) success
 
 ----------------------------------------
@@ -186,6 +191,18 @@ show' :: (Show a, StringConv String s) => a -> s
 show' = show > toS
 
 ----------------------------------------
+
+either2validation' :: Either e a -> Validation (NonEmpty e) a
+either2validation' = validationNel
+
+either2validation :: Either e a -> Validation e a
+either2validation = fromEither
+
+validation2either :: Validation e a -> Either e a
+validation2either = toEither
+
+error2errors :: Validation e a -> Validation (NonEmpty e) a
+error2errors = first (:|[])
 
 -- maybe2first :: Maybe a -> First a
 -- maybe2first = First

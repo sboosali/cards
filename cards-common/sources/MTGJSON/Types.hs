@@ -32,61 +32,61 @@ import MTGJSON.Kinds
 ----------------------------------------
 
 data Card (f :: CHARACTERISTIC -> *) = Card 
-  { _uid           :: f UNIQUE
-  , _multiverseid  :: f MULTIVERSEID 
+  { _cUID           :: f UNIQUE
+  , _cMultiverseId  :: f MULTIVERSEID 
     --TODO , _ids           :: {-Unique-}Identifiers
  
   -- gameplay-relevant stuff, card characteristic 
-  , _name          :: f NAME 
-  , _face          :: f FACE 
+  , _cName          :: f NAME 
+  , _cFace          :: f FACE 
 
   --TODO , _names         :: [f NAME] -- ^ Only used for split, flip, double-faced, and meld cards. Will contain all the names on this card, front or back. For meld cards, the first name is the card with the meld ability, which has the top half on its back, the second name is the card with the reminder text, and the third name is the melded back face.
 
-  , _manaCost      :: f COST   -- Cost f
-  , _cmc           :: ConvertedManaCost 
+  , _cManaCost      :: f COST   -- Cost f
+  , _cCMC           :: ConvertedManaCost 
 
-  , _colors        :: f COLORS   -- Colors f
+  , _cColors        :: f COLORS   -- Colors f
   -- ^ colors
   -- e.g. [ "Blue", "Green" ]
   -- The card colors. Usually this is derived from the casting cost, but some cards are special (like the back of double-faced cards and Ghostfire).
   -- @Reality Smasher@'s colors are 'colorless'.
 
-  , _colorIdentity :: f COLORS   -- Colors f
+  , _cColorIdentity :: f COLORS   -- Colors f
   -- ^ colorIdentity
   -- e.g. [ "U", "G" ]
   -- This is created reading all card color information and costs. It is the same for double-sided cards (if they have different colors, the identity will have both colors). It also identifies all mana symbols in the card (cost and text). Mostly used on commander decks.
   -- @Reality Smasher@'s colorIdentity is 'colorless' (not @[ "C" ]@, which isn't valid).
 
-  , _typeline      :: Typeline f
+  , _cTypeline      :: Typeline f
 
-  , _numeric       :: Maybe (f NUMERIC)
+  , _cNumeric       :: Maybe (f NUMERIC)
 
   -- quasi-derivable stuff, card characteristics 
 
   -- non-gameplay-relevant stuff, card characteristics 
-  , _rarity        :: f RARITY 
-  , _watermark     :: Maybe (f WATERMARK)
+  , _cRarity        :: f RARITY 
+  , _cWatermark     :: Maybe (f WATERMARK)
 
-  , _oracle        :: f ORACLE
-  , _flavor        :: Text 
-  , _artist        :: Text
+  , _cOracle        :: f ORACLE
+  , _cFlavor        :: Text 
+  , _cArtist        :: Text
     --TODO CardArtist, "x & y" as two artists
 
   -- metagame stuff
-  , _edition       :: f EDITION
-  , _printings     :: [f EDITION]      -- ^ reprints across sets
+  , _cEdition       :: f EDITION
+  , _cPrintings     :: [f EDITION]      -- ^ reprints across sets
 
-  , _legalities    :: [FormatLegality f]
+  , _cLegalities    :: [FormatLegality f]
 
-  , _variations    :: [f MULTIVERSEID] -- ^ different images of the same card within a set
-  , _foreignVariations :: [ForeignVariation f]
+  , _cVariations    :: [f MULTIVERSEID] -- ^ different images of the same card within a set
+  , _cForeignVariations :: [ForeignVariation f]
 
-  , _rulings       :: [Ruling] 
-  , _originalText  :: Text
-  , _originalType  :: Text
+  , _cRulings       :: [Ruling] 
+  , _cOriginalText  :: Text
+  , _cOriginalType  :: Text
 
   -- resources
-  , _assets        :: f ASSETS --IMAGE
+  , _cAssets        :: f ASSETS --IMAGE
     --TODO , _resources     :: Resource 
 
   } -- deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)

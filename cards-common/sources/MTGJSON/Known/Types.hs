@@ -18,22 +18,25 @@ import Control.Lens (Wrapped(..))--, Iso')
 
 type KnownFace = Face Name
 
+{-| Multiple "mechanical cards" can be different "faces" of the same "physical card".
+
+This is related to, but distinct from, 'Layout'. e.g. Levelers or Vehicles have a special visual layout, but they don't (by themselves) have multiple faces, and thus are 'NormalFace'd cards. 
+
+-}
 data Face card
- = NormalFace                     card
+ = NormalFace                           -- ^ the card doesn't refernce any other card(s)
  | SplitFace     (SplitCard       card)
- | DoubleFace    (DoubleFacedCard card)
  | FlipFace      (FlipCard        card)
+ | DoubleFace    (DoubleFacedCard card)
  | AftermathFace (AftermathCard   card)
+ | MeldFace      (MeldCard        card)
  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable)
+
+-- = NormalFace                     card
 
 data SplitCard card = SplitCard
  { _leftCard  :: card
  , _rightCard :: card
- } deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable)
-
-data DoubleFacedCard card = DoubleFacedCard
- { _frontFace :: card
- , _backFace  :: card
  } deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable)
  
 data FlipCard card = FlipCard
@@ -47,6 +50,52 @@ data FlipCard card = FlipCard
 data AftermathCard card = AftermathCard
  { _initialFace :: card
  , _rotatedFace :: card
+ } deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable)
+
+data DoubleFacedCard card = DoubleFacedCard
+ { _frontFace :: card
+ , _backFace  :: card
+ } deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable)
+
+{-|
+
+e.g. @Brisela, Voice of Nightmares (&al)@
+
+this @mtgjson@ object:
+
+@
+{
+    "layout" : "meld",
+    "name" : "Bruna, the Fading Light",
+    "names" : [ 
+        "Gisela, the Broken Blade", 
+        "Bruna, the Fading Light", 
+        "Brisela, Voice of Nightmares"
+    ],
+}
+@
+
+is represented by this @MeldCard@ datatype:
+
+@
+brisela :: MeldCard String
+brisela = MeldCard
+ { _melderSmallFace   = "Gisela, the Broken Blade" 
+ , _reminderSmallFace = "Bruna, the Fading Light"
+ , _meldedLargeFace   = "Brisela, Voice of Nightmares"
+ }
+@
+
+where
+
+* @Gisela@ has oracle text @At the beginning of your end step, if you both own and control Gisela, the Broken Blade and a creature named Bruna, the Fading Light, exile them, then meld them into Brisela, Voice of Nightmares.@
+* @Bruna@ has reminder text @(Melds with Gisela, the Broken Blade.)@
+
+-}
+data MeldCard card = MeldCard
+ { _melderSmallFace   :: card
+ , _reminderSmallFace :: card
+ , _meldedLargeFace   :: card
  } deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 
@@ -510,18 +559,20 @@ data Nephilim
 type KnownLayout = Layout
 
 data Layout
- = Aftermath
- | DoubleFaced
- | Flip
- | Leveler
- | Meld
- | Normal
- | Phenomenon
- | Plane
- | Scheme
- | Split
- | Token
- | Vanguard
+ = NormalLayout
+ | SplitLayout
+ | LevelerLayout
+ | FlipLayout
+ | DoubleFacedLayout
+ | AftermathLayout
+ | MeldLayout
+
+ | PhenomenonLayout
+ | PlaneLayout
+ | SchemeLayout
+ | TokenLayout
+ | VanguardLayout
+ 
  deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
 
 type KnownFrame = Frame
