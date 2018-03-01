@@ -220,7 +220,7 @@ library
              , file-embed
              , time
              , thyme
-             , validation
+             , validation >= 1
 
 ----------------------------------------
 
@@ -279,23 +279,22 @@ executable example-cards-common
 --   , tasty-quickcheck
 
 
--- -- $ stack test documentation
--- test-suite documentation 
---  hs-source-dirs:      tests
---  main-is:             DocTests.hs
---  type:                exitcode-stdio-1.0
+test-suite doctest
+ hs-source-dirs:      tests
+ main-is:             DocTests.hs
 
---  default-language:    Haskell2010
---  ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+ type:                exitcode-stdio-1.0
+ default-language:    Haskell2010
+ ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
 
--- -- ghcjsi doesn't work, or `doctest` needs the GHC API more tightly?
---  if impl(ghcjs)
---     buildable: False
---  else
---     build-depends:
---        base
---      , cards-common
---      , doctest
+-- ghcjsi doesn't work, or `doctest` needs the GHC API more tightly?
+ if impl(ghcjs)
+    buildable: False
+ else
+    build-depends:
+       base
+     , cards-common
+     , doctest
 
 
 -- -- $ stack test templates 

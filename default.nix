@@ -441,6 +441,7 @@ myOverlaysWith = pkgs: self: super: let
      # Test suite unicode-show-test: FAIL
      # Test suite logged to: dist/test/unicode-show-0.1.0.2-unicode-show-test.log
 
+
     reflex-vinyl = haskell.dontHaddock (local_ ../reflex-vinyl);
     # sources/DOM/Attribute/Singletons.hs:285:3: error:
     #     parse error on input ‘-- ^ Identifies the currently active element when DOM focus is on a composite widget, textbox, group, or application. ’

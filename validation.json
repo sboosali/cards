@@ -1,7 +1,7 @@
 {
   "url": "https://github.com/qfpl/validation",
-  "rev": "6eedd2ea18ba685878d2fa72f87363e371c46744",
-  "date": "2018-02-23T18:25:23+10:00",
-  "sha256": "02b58h80hh8v00nhdhrca9wh55dq4akcwsvkn1yzjy185jl6r05f",
+  "rev": "cefb4c7de4c8d05c159fd1986ad4a371c1851ac6",
+  "date": "2018-02-26T11:10:57+10:00",
+  "sha256": "0bh3i6dkkxc6sxzbdwk9hkyyqm9cvx7261vl7zrxk0myrj2klfbr",
   "fetchSubmodules": true
 }
