@@ -13,6 +13,41 @@ import MTGJSON.Types (Name(..))
 import Enumerate.Between
 
 import Control.Lens (Wrapped(..))--, Iso')
+  
+----------------------------------------
+
+type KnownFace = Face Name
+
+data Face card
+ = NormalFace                     card
+ | SplitFace     (SplitCard       card)
+ | DoubleFace    (DoubleFacedCard card)
+ | FlipFace      (FlipCard        card)
+ | AftermathFace (AftermathCard   card)
+ deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable)
+
+data SplitCard card = SplitCard
+ { _leftCard  :: card
+ , _rightCard :: card
+ } deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable)
+
+data DoubleFacedCard card = DoubleFacedCard
+ { _frontFace :: card
+ , _backFace  :: card
+ } deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable)
+ 
+data FlipCard card = FlipCard
+ { _uprightFace :: card
+ , _flippedFace :: card
+ } deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable)
+ -- { _rightsideupFace :: Card
+ -- , _upsidedownFace  :: Card
+ -- }
+ 
+data AftermathCard card = AftermathCard
+ { _initialFace :: card
+ , _rotatedFace :: card
+ } deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 
 ----------------------------------------
@@ -24,7 +59,7 @@ type KnownAssets = MCIResource
 data MCIResource = MCIResource
  { _MCI_edition    :: Text
  , _MCI_identifier :: Text
- } deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+ } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 -- data ImageAssets = ImageAssets -- ImageIdentifiers
  -- { _Image_multiverseId          :: Maybe Natural
@@ -35,23 +70,143 @@ data MCIResource = MCIResource
 
 ----------------------------------------
 
+{-| 
+
+-}
+data Oracle
+ = OracleVerbatim Text
+ | OracleFrames (NonEmpty (OracleFrame))
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+
+-- | 'fromList' calls 'list2oracle', which only builds the 'OracleFrames' case (i.e. not 'OracleVerbatim'). 
+-- 'toList' calls 'oracle2list'.
+-- @[]@ becomes 'vanilla'. 
+instance IsList Oracle where
+  type Item Oracle = OracleFrame
+  toList   = oracle2list
+  fromList = list2oracle
+
+list2oracle :: [OracleFrame] -> Oracle
+list2oracle = \case
+    []     -> vanilla
+    (x:xs) -> OracleFrames (x:|xs)
+
+oracle2list :: Oracle -> [OracleFrame]
+oracle2list = \case
+  OracleFrames   xs -> toList xs
+  OracleVerbatim _  -> [] --TODO lol
+
+-- | @~ 'Oracle'@ with singleton 'OracleFrame'.
+-- @""@ becomes 'vanilla'. 
+-- TODO parse with canonical rendition
+instance IsString Oracle where
+  fromString = \case
+    "" -> vanilla
+    s  -> s & (fromString > (:|[]) > OracleFrames)
+
+{-
+
+{-| 
+
+-}
 newtype Oracle = Oracle
  (NonEmpty (OracleFrame))
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+
+-- | 
+-- @[]@ becomes 'vanilla'. 
+instance IsList Oracle where
+  type Item Oracle = OracleFrame
+  toList (Oracle xs) = toList xs
+  fromList = \case
+    []     -> vanilla
+    (x:xs) -> Oracle (x:|xs)
+
+-- | @~ 'Oracle'@ with singleton 'OracleFrame'.
+-- @""@ becomes 'vanilla'. 
+-- TODO parse with canonical rendition
+instance IsString Oracle where
+  fromString = \case
+    "" -> vanilla
+    s  -> s & (fromString > (:|[]) > Oracle)
+-}
+
 
 -- { getOracle :: [
 
+{-| Some cards, like levelers, have multiple "frames",
+each with its own power / toughness and with distinct abilities. 
+
+-}
 data OracleFrame
   = OracleFrame [OracleParagraph]
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
+-- | (boilerplate wrapping\/unwrapping)
+instance IsList OracleFrame where
+  type Item OracleFrame = OracleParagraph
+  toList (OracleFrame xs) = xs
+  fromList = OracleFrame
+
+-- | @~ 'OraclePhrase'@ with singleton 'OracleParagraph'.
+-- TODO parse with canonical rendition
+instance IsString OracleFrame where
+  fromString = fromString > (:[]) > OracleFrame
+  
+{-| 
+
+-}
 newtype OracleParagraph
-  = OracleParagraph [OraclePhrase]
+  = OracleParagraph [OracleChunk]
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
-data OraclePhrase 
-  = OracleSentence Text
-  | OracleSymbol   KnownSymbol
+-- | (boilerplate wrapping\/unwrapping)
+instance IsList OracleParagraph where
+  type Item OracleParagraph = OracleChunk
+  toList (OracleParagraph xs) = xs
+  fromList = OracleParagraph
 
+-- | @~ 'OraclePhrase'@ with singleton 'OracleChunk'.
+-- TODO parse with canonical rendition
+instance IsString OracleParagraph where
+  fromString = fromString > (:[]) > OracleParagraph
+  
+{-|
+
+'OracleSymbol's are commonly rendered in text as surrounded by braces, e.g. @"{T}"@ is the tap symbol ('TapSymbol'). Unlike the text-only 'OraclePhrase's, they have a symbolic representation, for rendering when a visual interface is available. 
+
+
+-}
+data OracleChunk 
+  = OraclePhrase Text
+  | OracleSymbol OracleSymbol --TODO KnownSymbol
+  | OracleNamesake -- ^ a.k.a. @~@ or @CARDNAME@
+  --TODO OracleQuoted Text -- e.g. @Llanowar Mentor@
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+
+-- | @~ 'OraclePhrase'@
+instance IsString OracleChunk where
+  fromString = fromString > OraclePhrase
+
+----------------------------------------
+
+{-| A vanilla card is one with no oracle
+(i.e. non-reminder) text.
+
+In this representation, vanilla cards (like all cards)
+have an 'OracleFrame', but no 'OracleParagraph's. 
+
+@
+= 'Oracle' ('OracleFrame' [] ':|' [])
+@
+
+-}
 vanilla :: Oracle
-vanilla = Oracle (OracleFrame [] :| [])
+vanilla = OracleFrames (OracleFrame [] :| [])
+
+-- | @(== 'vanilla')@
+isVanilla :: Oracle -> Bool
+isVanilla = (== vanilla)
 
 -- newtype Oracle f = Oracle
 --  (NonEmpty (OracleFrame f))
@@ -70,47 +225,20 @@ vanilla = Oracle (OracleFrame [] :| [])
 
 ----------------------------------------
 
+type OracleSymbol = Either UnknownSymbol KnownSymbol --TODO
+
+type UnknownSymbol = Text
+
 data KnownSymbol
+ = ManaSymbol          KnownManaSymbol --TODO `i`
+ | MiscellaneousSymbol MiscellaneousSymbol
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+
+data MiscellaneousSymbol
  = TapSymbol
  | UntapSymbol
- | ManaSymbol () --TODO
- | LoyaltyActivationSymbol 
- deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
-
-----------------------------------------
-
-type KnownFace = Face Name
-
-data Face card
- = NormalFace                     card
- | SplitFace     (SplitCard       card)
- | DoubleFace    (DoubleFacedCard card)
- | FlipFace      (FlipCard        card)
- | AftermathFace (AftermathCard   card)
- deriving (Functor,Show,Read,Eq,Ord,Generic,NFData,Hashable)
-
-data SplitCard card = SplitCard
- { _leftCard  :: card
- , _rightCard :: card
- } deriving (Functor,Show,Read,Eq,Ord,Generic,NFData,Hashable)
-
-data DoubleFacedCard card = DoubleFacedCard
- { _frontFace :: card
- , _backFace  :: card
- } deriving (Functor,Show,Read,Eq,Ord,Generic,NFData,Hashable)
- 
-data FlipCard card = FlipCard
- { _uprightFace :: card
- , _flippedFace :: card
- } deriving (Functor,Show,Read,Eq,Ord,Generic,NFData,Hashable)
- -- { _rightsideupFace :: Card
- -- , _upsidedownFace  :: Card
- -- }
- 
-data AftermathCard card = AftermathCard
- { _initialFace :: card
- , _rotatedFace :: card
- } deriving (Functor,Show,Read,Eq,Ord,Generic,NFData,Hashable)
+ -- LoyaltyActivationSymbol 
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 ----------------------------------------
 
@@ -204,6 +332,8 @@ sansManaCost :: ManaCost i
 sansManaCost = ManaCost []
 
 ----------------------------------------
+
+type KnownManaSymbol = ManaSymbol Within20
 
 data ManaSymbol i
  = ChromaSymbol     Chroma

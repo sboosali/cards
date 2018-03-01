@@ -484,7 +484,19 @@ validate_colorChar (toS -> s) = go s
 validate_oracle
   :: Maybe Text
   -> CardValidation (Oracle)  
-validate_oracle t = _
+validate_oracle
+  = fromMaybe ""
+  > toS > parseOracleLoosely
+  > success
+
+  {-
+  > traverse go
+  where
+  go
+    = parseOracleLoosely 
+    -- > maybe2validation (Oracle)
+  TODO ValidationWarning
+  -}
 
 ------------------------------------------
 

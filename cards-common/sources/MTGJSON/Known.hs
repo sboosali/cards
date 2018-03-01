@@ -38,10 +38,12 @@ newtype Known (u :: CHARACTERISTIC)
 type family KnownType (u :: CHARACTERISTIC) where
 
  KnownType CARD           = Name
-
+ KnownType NAME           = Name
  KnownType UNIQUE         = UniqueIdentifier
  KnownType MULTIVERSEID   = MultiverseIdentifier
- KnownType NAME           = Name
+ KnownType FACE           = KnownFace {-KnownFace-}
+ --TODOKnownType LAYOUT         = KnownLayout
+
  KnownType ORACLE         = Oracle
 
  KnownType COLOR          = Color {-KnownColor-}
@@ -57,9 +59,6 @@ type family KnownType (u :: CHARACTERISTIC) where
  KnownType TYPE           = KnownBaseType {-BaseType-}
  KnownType SUBTYPE        = UnknownSubtype
  --TODO KnownType SUBTYPE        = KnownSubtype {-Subtype-}
-
- KnownType FACE           = KnownFace {-KnownFace-}
- --TODOKnownType LAYOUT         = KnownLayout
 
  KnownType RARITY         = KnownRarity
  KnownType WATERMARK      = KnownWatermark

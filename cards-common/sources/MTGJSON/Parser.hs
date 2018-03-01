@@ -44,6 +44,303 @@ parseColorWord = print2parse displayColorWord
 
 ----------------------------------------
 
+  
+{-|
+
+see 'parseOracle'
+
+-}
+parseOracleLoosely :: String -> Oracle
+parseOracleLoosely s
+  = s
+  & parseOracle
+  & fromMaybe (OracleVerbatim t)
+  where
+  t = toS s
+
+{-|
+
+
+e.g. @Ballynock Trapper@
+
+oracle text:
+
+@
+{T}: Tap target creature.
+Whenever you cast a white spell, you may untap Ballynock Trapper.
+@
+
+a.k.a.
+
+@
+{T}: Tap target creature.
+Whenever you cast a white spell, you may untap ~.
+@
+
+doctests:
+
+@
+-- with 'IsList' and 'IsString' sugar:
+ 
+>>> :set -XOverloadedLists
+>>> :set -XOverloadedStrings
+>>> oracleBallynockTrapper = [['OracleSymbol' "{T}", ": Tap target creature."], ["Whenever you cast a white spell, you may untap ", 'OracleNamesake', "."]] :: Oracle
+
+-- with explicit constructors:
+
+>>> oracleBallynockTrapper_explicit = 'OracleFrames' (('OracleFrame' ['OracleParagraph' ['OracleSymbol' "{T}", 'OraclePhrase' ": Tap target creature."], 'OracleParagraph' ['OraclePhrase' "Whenever you cast a white spell, you may untap ", 'OracleNamesake', 'OraclePhrase' "."]]) :|[])
+
+>>> oracleBallynockTrapper_explicit == oracleBallynockTrapper
+True
+
+>>> parseOracle "{T}: Tap target creature.\n"Whenever you cast a white spell, you may untap Ballynock Trapper." == oracleBallynockTrapper
+True
+
+
+e.g. @'vanilla'@
+
+>>> :set -XOverloadedLists
+>>> [] == vanilla
+True
+>>> :set -XOverloadedStrings
+>>> "" == vanilla
+True
+
+
+
+-}
+parseOracle :: Parse Oracle
+parseOracle 
+  = P.parseString pOracle mempty
+  > result2maybe
+
+----------------------------------------
+
+{-|
+
+
+-}
+pOracle
+  :: forall p.
+    ( TokenParsing p
+    , MonadFail p
+    )
+  => p Oracle
+pOracle = pOracleFrame <&> (:|[]) <&> OracleFrames --TODO levelers
+
+{-|
+
+
+-}
+pOracleFrame
+  :: forall p.
+    ( TokenParsing p
+    , MonadFail p
+    )
+  => p OracleFrame
+pOracleFrame = lineSep pOracleParagraph
+  <&> OracleFrame
+
+{-|
+
+
+-}
+pOracleParagraph
+  :: forall p.
+    ( TokenParsing p
+    , MonadFail p
+    )
+  => p OracleParagraph
+pOracleParagraph = many pOracleChunk
+  <&> OracleParagraph
+
+{-|
+
+
+-}
+pOracleChunk
+  :: forall p.
+    ( TokenParsing p
+    , MonadFail p
+    )
+  => p OracleChunk
+pOracleChunk = choice
+  [ try $ OracleNamesake <$  pOracleNamesake
+  , try $ OracleSymbol   <$> pOracleSymbol
+  , try $ OraclePhrase   <$> pOraclePhrase
+  ]
+
+----------------------------------------
+
+{-|
+
+
+-}
+pOraclePhrase
+  :: forall p.
+    ( TokenParsing p
+    )
+  => p Text
+pOraclePhrase = p <&> fromString -- T.pack
+ where
+ p    = good `manyTill` bad
+ good = satisfy (not . isSpace)
+ -- anyChar 
+ bad  = try (satisfy isOracleReservedCharacter)
+ -- (satisfy isOracleReservedCharacter)
+
+{-|
+
+
+-}
+pOracleNamesake
+  :: forall p.
+    ( TokenParsing p
+    )
+  => p ()
+pOracleNamesake = () <$ go
+ where
+ go = choice
+     [ string "~"  -- char '~'
+     , string "CARDNAME"
+     ]
+
+----------------------------------------
+
+{-|
+
+
+-}
+pOracleSymbol
+  :: forall p.
+    ( TokenParsing p
+    , MonadFail p
+    )
+  => p OracleSymbol
+pOracleSymbol = braces pOracleSymbol'
+
+
+{-|
+
+
+-}
+pOracleSymbol'
+  :: forall p.
+    ( TokenParsing p
+    , MonadFail p
+    )
+  => p OracleSymbol
+pOracleSymbol' = choice
+  [ try $ Right <$> pKnownSymbol
+  , try $ Left  <$> pUnknownSymbol' 
+  ]
+
+{-|
+
+
+-}
+pUnknownSymbol'
+  :: forall p.
+    ( TokenParsing p
+    )
+  => p Text
+pUnknownSymbol'
+  = f <$> some1 (satisfy isOracleSymbolCharacter)
+  where
+  f = toList > fromString -- T.pack
+
+{-|
+
+
+-}
+pKnownSymbol
+  :: forall p.
+    ( TokenParsing p
+    , MonadFail p
+    )
+  => p KnownSymbol
+pKnownSymbol = choice
+  [ try $ ManaSymbol <$> pKnownManaSymbol'
+  , try $ MiscellaneousSymbol <$> pMiscellaneousSymbol' 
+  ]
+  where
+  pKnownManaSymbol' = pManaSymbol' :: p KnownManaSymbol
+
+
+{-|
+
+
+-}
+pMiscellaneousSymbol'
+  :: forall p.
+    ( TokenParsing p
+    , MonadFail p
+    )
+  => p MiscellaneousSymbol
+pMiscellaneousSymbol' = choice
+ [ TapSymbol   <$ string "T"
+ , UntapSymbol <$ string "Q"
+ ]
+
+----------------------------------------
+
+theOracleReservedTokens :: [String]
+theOracleReservedTokens
+   = theOracleReservedKeywords
+  ++ (theOracleReservedCharacters & fmap (:[]))
+
+theOracleReservedKeywords :: [String]
+theOracleReservedKeywords =
+  [ "CARDNAME"
+  ]
+
+theOracleReservedCharacters :: [Char]
+theOracleReservedCharacters =
+  "~{}"
+
+isOracleReservedKeyword :: String -> Bool
+isOracleReservedKeyword = (`elem` theOracleReservedKeywords)
+
+isOracleReservedCharacter :: Char -> Bool
+isOracleReservedCharacter = (`elem` theOracleReservedCharacters)
+
+isOracleSymbolCharacter :: Char -> Bool
+isOracleSymbolCharacter c = any (all ($ c))
+  [ [ isAlphaNum ]
+  
+  , [ ((||) <$> isPunctuation <*> isSymbol)
+    , (not . (`elem` "{}"))
+    ]
+    
+  ] --TODO make consistent with Mana cost in the upper right, and the rest of the syntax
+
+----------------------------------------
+
+{-
+
+
+> [' '..'\DEL']
+" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\DEL"
+
+
+-}
+
+
+----------------------------------------
+
+-- | Token parser @semiSep p@ parses /zero/ or more occurrences of @p@
+-- separated by 'newline'. Returns a list of values returned by @p@.
+-- 
+lineSep :: TokenParsing m => m a -> m [a]
+lineSep p = sepBy p newline
+{-# INLINE lineSep #-}
+
+-- -- | Parses a newline character, @\n@.
+-- newline :: TokenParsing m => m ()
+-- newline = char '\n' $> ()
+
+----------------------------------------
+
 {-|
 
 e.g.
@@ -119,7 +416,7 @@ parseBaseType = print2parse displayBaseType
 ----------------------------------------
 
 pNumeric
-  :: forall p i. (Integral i)
+  :: forall i p. (Integral i)
   => (MonadFail p, TokenParsing p)
   => p (Numeric i)
 
@@ -134,13 +431,13 @@ pNumeric = choice $
 ----------------------------------------
 
 pLoyalty
-  :: forall p i. (Integral i)
+  :: forall i p. (Integral i)
   => (MonadFail p, TokenParsing p)
   => p i
 pLoyalty = pNatural --TODO replace with validator (Between's fromIntegral clips, without failing)
 
 pBody
-  :: forall p i. (Integral i)
+  :: forall i p. (Integral i)
   => (TokenParsing p)
   => p (Body i)
 pBody = Body
@@ -153,7 +450,7 @@ Commutative operations (like @+@ i.e. 'NumericAddition') don't care about order 
 
 -}
 pNumericExpression
-  :: forall p i. (Integral i)
+  :: forall i p. (Integral i)
   => (TokenParsing p)
   => p (NumericExpression i)
 pNumericExpression = choice $
@@ -171,7 +468,7 @@ pNumericExpression = choice $
   ]
 
 pNumericLiteral
-  :: forall p i. (Integral i)
+  :: forall i p. (Integral i)
   => (TokenParsing p)
   => p (NumericLiteral i)
 pNumericLiteral = choice $
@@ -191,7 +488,7 @@ pNumericOperation = printer displayNumericOperation
 ----------------------------------------
 
 pManaCost
-  :: forall p i. (Integral i)
+  :: forall i p. (Integral i)
   => (MonadFail p, TokenParsing p)
   => p (ManaCost i)
 pManaCost = ManaCost <$> many pManaSymbol
@@ -202,6 +499,10 @@ the parsers use the printers via 'fromInjective',
 but also are more lenient w.r.t. ordering. i.e.
 they don't just parse the single canonical form
 that's printed out, but any permutations too.
+
+
+@= 'braces' 'pManaSymbol''@
+
 
 e.g. the following are all accepted by this parser:
 
@@ -289,11 +590,20 @@ GenericSymbol 9
 
 -}
 pManaSymbol
-  :: forall p i. (Integral i)
+  :: forall i p. (Integral i)
   => (MonadFail p, TokenParsing p)
   => p (ManaSymbol i)
-pManaSymbol = braces $  -- between (char '{') (char '}') $
-  choice
+pManaSymbol = braces pManaSymbol'  -- between (char '{') (char '}') $
+
+
+{-| 
+
+-}
+pManaSymbol'
+  :: forall i p. (Integral i)
+  => (MonadFail p, TokenParsing p)
+  => p (ManaSymbol i)
+pManaSymbol' = choice
     [ try $ HybridSymbol     <$> pGuild
                              <?> "hybrid symbol"
     
@@ -376,13 +686,13 @@ pColorChar = printer displayColorChar
 ----------------------------------------
 
 pInteger
-  :: forall p i. (Integral i)
+  :: forall i p. (Integral i)
   => (TokenParsing p)
   => p i
 pInteger = (integer <&> fromIntegral)
 
 pNatural
-  :: forall p i. (Integral i)
+  :: forall i p. (Integral i)
   => (TokenParsing p)
   => p i
 pNatural = (natural <&> fromIntegral)
