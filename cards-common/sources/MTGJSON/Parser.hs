@@ -1,7 +1,9 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 {-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE ViewPatterns #-}
 
-{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveAnyClass, RankNTypes #-}
 
 {-|
 
@@ -10,31 +12,165 @@ module MTGJSON.Parser where
 
 import MTGJSON.Extra hiding (try)
 import MTGJSON.Constants
---import MTGJSON.Types
+import MTGJSON.Types
 import MTGJSON.Known
 
 import MTGJSON.Printer.Finite
 
-import "parsers"  Text.Parser.Combinators 
-import "parsers"  Text.Parser.Token       
-import "parsers"  Text.Parser.Char        
+import           "parsers"  Text.Parser.Combinators 
+import qualified "parsers"  Text.Parser.Char as P
+import           "parsers"  Text.Parser.Char (CharParsing)        
+import qualified "parsers"  Text.Parser.Token as Token
+import           "parsers"  Text.Parser.Token (TokenParsing)
 --import "parsers" Text.Parser.Permutation
+--import "parsers"  Text.Parser.Token.Style
 
-import "trifecta" Text.Trifecta as P
+import qualified "trifecta" Text.Trifecta as Trifecta
+
+import qualified Data.Text.Lazy as T
+
+--import qualified "parsec" Text.Parsec as Parsec
 
 --import qualified Data.List.NonEmpty as NonEmpty
 
 --import Prelude (read)
 
-----------------------------------------  
+----------------------------------------
+
+{-
+
+-- > (rC, rT, rL, rU)
+-- (Success [["w","x"],["y","z"]],Success [["w","x","y","z"]],Success [["w","x","y","z"]],Success [["w","x","y","z"]])
+
+rs = (rC, rT, rL, rU)
+
+pC :: (TokenParsing p) => p [[String]]  
+pC = sepBy1 (many (some (satisfy isAlphaNum) <* skipMany (satisfy $ \c -> c /= '\n' && isSpace c))) newline
+
+rC :: Result [[String]]
+rC = trifecta pC "w x \ny z"
+
+pT :: (TokenParsing p) => p [[String]]  
+pT = sepBy1 (many (token (some (satisfy isAlphaNum)))) newline
+
+rT :: Result [[String]]
+rT = trifecta pT "w x \ny z"
+
+pL :: (TokenParsing p, Monad p) => p [[String]]  
+pL = id (sepBy1 (id (many (ident haskellIdents))) newline)
+
+rL :: Result [[String]]
+rL = trifecta pL "w x \ny z"
+
+pU :: (TokenParsing p, Monad p) => p [[String]]  
+pU = runUnlined (sepBy1 (many (Unlined (ident haskellIdents))) newline)
+
+rU :: Result [[String]]
+rU = trifecta pU "w x \ny z"
+
+-}
+
+-- pU :: (TokenParsing p, Monad p) => p [[String]]  
+-- pU = lift $ Unlined (sepBy1 (many (ident haskellIdents)) newline)
+
+{-
+
+pU :: (TokenParsing p, Monad p) => Unlined p [[String]]  
+pU = Unlined (sepBy1 (many (ident haskellIdents)) newline)
+
+rU :: Result [[String]]
+rU = trifectaUnlined pU "w x \ny z"
+
+trifectaUnlined
+  :: forall a.
+     (forall p. (TokenParsing p, Monad p) => Unlined p a)
+  -> String
+  -> Result a
+-- trifecta :: forall a. (forall p. TokenParsing p => p a) -> String -> Result a
+trifectaUnlined p s = P.parseString (runUnlined p) mempty s
+
+-}
+
+----------------------------------------
+
+-- trifectaUnlined
+--   :: forall a.
+--      (forall p. TokenParsing p => p a)
+--   -> String
+--   -> Result a
+-- trifectaUnlined p = trifecta (Unlined p)
+
+-- trifectaUnlined
+--   :: forall a.
+--      (forall p. TokenParsing p => p a)
+--   -> String
+--   -> Result a
+-- trifectaUnlined pLined s = r
+--   where
+--   pUnlined :: Unlined  
+--   pUnlined = Unlined pLined
+--   r = P.parseString pUnlined mempty s
+
+{-
+parsec
+  :: forall a m.
+     (forall p.
+      ( TokenParsing p
+      , Monad p
+      , Parsec.Stream String m Char
+      ) => m p a
+     )
+  -> String
+  -> m (Either Parsec.ParseError a)
+parsec = runParserT
+
+{-NOTES
+
+runParserT :: Stream s m t => ParsecT s u m a -> u -> SourceName -> s -> m (Either ParseError a)
+
+-}
+-}
+
 
 {-| simple @trifecta@ parser runner (wraps 'P.parseString').  
 
 -}
-trifecta :: Parser a -> String -> Result a
-trifecta p = P.parseString p mempty
+trifecta
+  :: (forall p.
+      ( TokenParsing p
+      , MonadFail p
+      , MonadPlus p
+      -- NOTE required by a callee to satisfy `instance (TokenParsing m, MonadPlus m) => TokenParsing (ReaderT e m)`
+      ) => p a
+     )
+  -> String
+  -> Trifecta.Result a
+-- trifecta :: forall a. (forall p. TokenParsing p => p a) -> String -> Result a
+trifecta p s = Trifecta.parseString p mempty s
+
+{-
+trifectaOracle
+  :: Name
+  -> String
+  -> Trifecta.Result Oracle
+-- trifecta :: forall a. (forall p. TokenParsing p => p a) -> String -> Result a
+trifectaOracle name =
+  trifecta (runReaderT pOracle name)
+-}
+
+-- trifecta :: Parser a -> String -> Result a
+-- trifecta p = Trifecta.parseString p mempty
 
 {-e.g. trifecta: https://github.com/ekmett/trifecta/blob/master/examples/rfc2616/RFC2616.hs
+
+
+messageHeader :: (Monad m, TokenParsing m) => m Header
+messageHeader = (\h b c -> Header h (b : c))
+            <$!> (highlight ReservedIdentifier (some token)  <?> "header name")
+             <*  highlight Operator (char ':') <* skipHSpaces
+             <*> (highlight Identifier (manyTill anyChar endOfLine) <?> "header value")
+             <*> (many (skipHSpaces *> manyTill anyChar endOfLine) <?> "blank line")
+
 
 
 -}
@@ -43,9 +179,10 @@ trifecta p = P.parseString p mempty
 
 {-
 
-{-| simple @trifecta@ parser runner (wraps 'P.parseString').
+{-| simple @trifecta@ parser runner (wraps 'Trifecta.parseString').
 
 Wraps the given parser @p@ in 'Unlined', used by 'pOracle', since 'OracleParagraph's are split on newlines. 
+
 
 -}
 trifectaUnlined
@@ -53,12 +190,12 @@ trifectaUnlined
     ( TokenParsing p
     )
   => p a -> String -> Result a
-trifectaUnlined pLined = P.parseString pUnlined mempty
+trifectaUnlined pLined = Trifecta.parseString pUnlined mempty
   where
   pUnlined :: Unlined p a
   pUnlined = Unlined pLined
 
--- {-| simple @trifecta@ parser runner (wraps 'P.parseString').
+-- {-| simple @trifecta@ parser runner (wraps 'Trifecta.parseString').
 
 -- Wraps the given parser @p@ in 'Unlined', used by 'pOracle', since 'OracleParagraph's are split on newlines. 
 
@@ -68,7 +205,7 @@ trifectaUnlined pLined = P.parseString pUnlined mempty
 --     ( TokenParsing p
 --     )
 --   => p a -> String -> Result a
--- trifectaUnlined pLined = P.parseString pUnlined mempty
+-- trifectaUnlined pLined = Trifecta.parseString pUnlined mempty
 --   where
 --   pUnlined = Unlined pLined
 
@@ -105,18 +242,17 @@ parseLayout = print2parse displayLayout
 
 {-|
 
-see 'parseOracle'
+@
+>>> let _BallynockTrapper = "{T}: Tap target creature.\nWhenever you cast a white spell, you may untap "
+>>> parseOracle nameless (_BallynockTrapper <> "~") == parseOracle "Ballynock Trapper" (_BallynockTrapper <> "Ballynock Trapper")
+True
+@
 
--}
-parseOracleLoosely :: String -> Oracle
-parseOracleLoosely s
-  = s
-  & parseOracle
-  & fromMaybe (OracleVerbatim t)
-  where
-  t = toS s
-
-{-|
+@
+>>> parseOracle "{T}: Tap target creature.\nWhenever you cast a white spell, you may untap ~."
+Just (OracleFrames (OracleFrame [OracleParagraph [OracleSymbol (Right (MiscellaneousSymbol TapSymbol)),OraclePhrase [":","Tap","target","creature."]],OracleParagraph [OraclePhrase ["Whenever","you","cast","a","white","spell,","you","may","untap"],OracleNamesake,OraclePhrase ["."]]] :| []))
+>>> parseOracle "Ballynock Trapper" "{T}: Tap target creature.\nWhenever you cast a white spell, you may untap Ballynock Trapper."
+@
 
 
 e.g. @Ballynock Trapper@
@@ -164,20 +300,91 @@ True
 >>> "" == vanilla
 True
 
+-}
+parseOracle :: Knicknames -> TParse Oracle
+parseOracle knicknames
+  = parseOracleResult knicknames
+  > result2maybe
+
+{-|
+
+see 'parseOracle'
+
+-}
+parseOracleLoosely :: Knicknames -> Text -> Oracle
+parseOracleLoosely knicknames s
+  = s
+  & parseOracle knicknames
+  & fromMaybe (OracleVerbatim s)
+
+{-| see 'parseOracle'. 
+
+-}
+parseOracleResult :: Knicknames -> Text -> Trifecta.Result Oracle
+parseOracleResult knicknames
+  = mungeOracleText knicknames
+  > T.unpack
+ -- > trifecta pOracle
+  > trifecta (runReaderT' knicknames pOracle)
+
+{-| @= 'parseOracle' 'knicknameless'@
+
+-}
+parseOracle_ :: TParse Oracle
+parseOracle_ = parseOracle knicknameless
+
+{-|
+
+see 'parseOracle_'
+
+-}
+parseOracleResult_ :: Text -> Trifecta.Result Oracle
+parseOracleResult_ = parseOracleResult knicknameless
+
+{-|
+
+see 'parseOracle_'
+
+-}
+parseOracleLoosely_ :: Text -> Oracle
+parseOracleLoosely_ = parseOracleLoosely knicknameless
+
+----------------------------------------
+
+{- |
+
+Replaces newlines with 'puaNewline's, a Private Use Area character (a hack because I can't get 'Unlined' to work).
+
+
+e.g. @Phage the Untouchable@ is abbreviated:
+
+@
+When Phage the Untouchable enters the battlefield, if you didn't cast it from your hand, you lose the game.
+Whenever Phage deals combat damage to a creature, destroy that creature. It can't be regenerated.
+Whenever Phage deals combat damage to a player, that player loses the game.
+@
+
 
 
 -}
-parseOracle :: Parse Oracle
-parseOracle 
-  = P.parseString p mempty
-  > fmap id
-  > result2maybe
+mungeOracleText :: Knicknames -> Text -> Text
+mungeOracleText (knicknames2text -> names)
+  = replaceNewlines
+  > replaceKnicknames
+
   where
-  p = pOracle 
+  replaceNewlines = T.replace "\n" tPseudoNewline
+  
+  replaceKnicknames = foldr (.) id (replaceName <$> names)
+  replaceName name = T.replace name "~" 
+
+-- mungeOracleText (Knicknames (Name name :| _)) --TODO
+--   = T.replace "\n" tPseudoNewline
+--   > T.replace name "~" 
 
 {-
 
-  = P.parseString p mempty
+  = Trifecta.parseString p mempty
   > fmap runUnlined
   > result2maybe
   where
@@ -185,17 +392,20 @@ parseOracle
 
 > parseOracle "{T}: Tap target creature.\nWhenever you cast a white spell, you may untap ~."
 Just (OracleFrames (OracleFrame [OracleParagraph [OracleSymbol (Right (MiscellaneousSymbol TapSymbol))]] :| []))
-*MTGJSON> 
+
+trifecta pOracleParagraph "{U/G}{?}: Tap or untap ~.\nHexproof"
+
 
 -}
 
 ----------------------------------------
 
+
 {-|
 
 
 @
- P.parseString pOracle mempty "{T}: Tap target creature.\nWhenever you cast a white spell, you may untap ~."
+ Trifecta.parseString pOracle mempty "{T}: Tap target creature.\nWhenever you cast a white spell, you may untap ~."
 @
 
 
@@ -205,25 +415,98 @@ pOracle
   :: forall p.
     ( TokenParsing p
     , MonadFail p
+    , MonadReader Knicknames p
     )
   => p Oracle
 pOracle = pOracleFrame
   <&> (:|[]) <&> OracleFrames --TODO levelers
+{-
+-}
 
 {-|
 
+e.g.
+
+@
+{
+  "name": "Student of Warfare",
+  "text": "Level up {W} ({W}: Put a level counter on this. Level up only as a sorcery.)\nLEVEL 2-6\n3/3\nFirst strike\nLEVEL 7+\n4/4\nDouble strike"
+}
+@
+
+a.k.a., which is parsed into:
+
+@
+{
+  "name": "Student of Warfare",
+  "text": {
+            "frame": "leveler",
+            "cost": "Level up {W} ({W}: Put a level counter on this. Level up only as a sorcery.)",
+            "levels": [
+                        {
+                          "range": "2-6",
+                          "pt": "3/3",
+                          "text": "First strike"
+                        },
+                        {
+                          "range": "7+",
+                          "pt": "4/4",
+                          "text":"Double strike"
+                        }
+                      ]
+           }
+}
+@
+
+or?
+
+@
+{
+  "name": "Student of Warfare",
+  "text": {
+            "frame": "leveler",
+            "levels": [
+                        {
+                          "range": "",
+                          "pt": "",
+                          "text": "Level up {W} ({W}: Put a level counter on this. Level up only as a sorcery.)",
+                        },
+                        {
+                          "range": "2-6",
+                          "pt": "3/3",
+                          "text": "First strike"
+                        },
+                        {
+                          "range": "7+",
+                          "pt": "4/4",
+                          "text":"Double strike"
+                        }
+                      ]
+          }
+}
+@
 
 -}
 pOracleFrame
   :: forall p.
     ( TokenParsing p
     , MonadFail p
+    , MonadReader Knicknames p
     )
   => p OracleFrame
-pOracleFrame = runUnlined $ lineSep (Unlined pOracleParagraph)
+pOracleFrame = pseudoLineSep pOracleParagraph
   <&> OracleFrame
+
+
+{-
+pOracleFrame = lineSep pOracleParagraph
+  <&> OracleFrame
+-}
+
   {-NOTE the `Unlined` parser transformaer temporarily (?) disables the  automatic trailing newline (but not whitespace-in-general) consumption of the given token parser.
   -}
+
+-- pOracleFrame = runUnlined $ lineSep (Unlined pOracleParagraph)
 
 {-|
 
@@ -233,6 +516,7 @@ pOracleParagraph
   :: forall p.
     ( TokenParsing p
     , MonadFail p
+    , MonadReader Knicknames p
     )
   => p OracleParagraph
   
@@ -253,12 +537,17 @@ pOracleChunk
   :: forall p.
     ( TokenParsing p
     , MonadFail p
+    , MonadReader Knicknames p
     )
   => p OracleChunk
 pOracleChunk = choice
-  [ try $ OracleNamesake <$  pOracleNamesake -- is in a finite vocab
-  , try $ OracleSymbol   <$> pOracleSymbol   -- has a "{" prefix
-  , try $ OraclePhrase   <$> pOraclePhrase   -- anything non-reserved
+  [ try $ OracleNamesake <$
+            pOracleNamesakeStatic -- pOracleNamesakeDynamic
+    -- one of a finite vocab
+  , try $ OracleSymbol   <$> pOracleSymbol
+    -- has a "{" prefix
+  , try $ OraclePhrase   <$> pOraclePhrase
+    -- anything non-reserved
   ]
 
 ----------------------------------------
@@ -288,7 +577,7 @@ pOracleWord
 pOracleWord = pW <&> fromString -- T.pack
  where
  pW = token (some pC)
- pC = satisfy isOracleTokenChar
+ pC = P.satisfy isOracleTokenChar
 
 {-NOTE
 
@@ -298,26 +587,81 @@ class CharParsing m => TokenParsing m where
   token :: m a -> m a
   token p = p <* (someSpace <|> pure ())
 
-instance TokenParsing m => TokenParsing ( CharParsing m =>  m) where
-  nesting (Unlined m) = Unlined (nesting m)
-  {-# INLINE nesting #-}
+instance TokenParsing m => TokenParsing (Unlined m) where
   someSpace = skipMany (satisfy $ \c -> c /= '\n' && isSpace c)
 
+instance TokenParsing m => TokenParsing (Unspaced m) where
+  someSpace = empty
+
+
 -}
+
+----------------------------------------
 
 {-|
 
+e.g. @Squadron Hawk@
+
+@
+{
+        "name": "Squadron Hawk",
+        "text": "Flying\nWhen Squadron Hawk enters the battlefield, you may search your library for up to three cards named Squadron Hawk, reveal them, put them into your hand, then shuffle your library.",
+        ...
+}
+@
+
+
+
+TODO
+@o:"named ~"@ versus @o:"named" (not o:"named ~")@
+
+
 
 -}
-pOracleNamesake
+pOracleNamesakeDynamic
+  :: forall p.
+    ( TokenParsing p
+    , MonadReader Knicknames p
+    )
+  => p ()
+pOracleNamesakeDynamic = do
+  knicks <- ask
+  
+  let dynamicNames = knicknames2text knicks <&> toS
+  let pDynamicNames = dynamicNames <&> P.text
+
+  let pAllNames
+         = (pDynamicNames <&> try)
+        ++ pStaticNames
+
+  () <$ choice pAllNames
+
+  where
+  pStaticNames = staticNames <&> P.text
+  staticNames =
+    [ "~"      
+    , "CARDNAME"
+    ]
+
+  -- let Name name = nameless
+  -- let pName = () <$ P.text (name & toSL) 
+  
+  -- choice
+  --     [ pOracleNamesakeStatic
+  --     , pName
+  --     ]
+
+
+pOracleNamesakeStatic
   :: forall p.
     ( TokenParsing p
     )
   => p ()
-pOracleNamesake = symbols_
-  [ "~"      
-  , "CARDNAME"
-  ]
+pOracleNamesakeStatic = symbols_
+      [ "~"      
+      , "CARDNAME"
+      ]
+
 
 -- pOracleNamesake = symbols
 --   [ "~"      -: ()
@@ -343,7 +687,7 @@ pOracleSymbol
     , MonadFail p
     )
   => p OracleSymbol
-pOracleSymbol = braces pOracleSymbol'
+pOracleSymbol = Token.braces pOracleSymbol'
 
   -- = (betweenChars&uncurry) theOracleSymbolWrappingCharacters $
   --     pOracleSymbol'
@@ -373,7 +717,7 @@ pUnknownSymbol'
     )
   => p Text
 pUnknownSymbol'
-  = f <$> some1 (satisfy isOracleSymbolCharacter)
+  = f <$> some1 (P.satisfy isOracleSymbolCharacter)
   where
   f = toList > fromString -- T.pack
 
@@ -388,7 +732,7 @@ pKnownSymbol
     )
   => p KnownSymbol
 pKnownSymbol = choice
-  [ try $ ManaSymbol <$> pKnownManaSymbol'
+  [ try $ ManaSymbol <$> pKnownManaSymbol' --TODO doesn't pManaSymbol `try` enough?
   , try $ MiscellaneousSymbol <$> pMiscellaneousSymbol' 
   ]
   where
@@ -418,15 +762,27 @@ pMiscellaneousSymbol' = symbolics
 ----------------------------------------
 
 isOracleTokenChar :: Char -> Bool
-isOracleTokenChar c = any (all ($ c))
+isOracleTokenChar = predicateDisjunctionOfConjunctions
   --NOTE a disjunction of conjunctions,
   -- i.e. any of the groups,
   -- all of the predicates within a group. 
   [ [ isAlphaNum
     ]
-  , [ not . isSpace
-    , not . (=='~') --TODO `CARDNAME`
-    , not . (=='{')
+  , [ isntPseudoSpace
+    , (/='~') --TODO `CARDNAME`
+    , (/='{')
+    ]
+  ]
+
+isntPseudoSpace :: Char -> Bool
+isntPseudoSpace = isPseudoSpace > not
+
+isPseudoSpace :: Char -> Bool
+isPseudoSpace = predicateDisjunctionOfConjunctions
+  [ [ (== cPseudoNewline)
+    ]
+  , [ (/= '\n')
+    , isSpace
     ]
   ]
 
@@ -493,7 +849,7 @@ parseNumeric
   :: (Integral i)
   => Parse (Numeric i)
 parseNumeric
-  = P.parseString pNumeric mempty
+  = Trifecta.parseString pNumeric mempty
   > result2maybe
 
 -- | see 'pLoyalty'
@@ -501,7 +857,7 @@ parseLoyalty
   :: (Integral i)
   => Parse (Numeric i)
 parseLoyalty
-  = P.parseString pLoyalty mempty
+  = Trifecta.parseString pLoyalty mempty
   > result2maybe
   > fmap NumericLoyalty
 
@@ -517,7 +873,7 @@ parseNumericExpression
   :: (Integral i)
   => Parse (NumericExpression i)
 parseNumericExpression 
-  = P.parseString pNumericExpression mempty
+  = Trifecta.parseString pNumericExpression mempty
   > result2maybe
   
 ----------------------------------------
@@ -528,7 +884,7 @@ parseManaCost
   => String
   -> Maybe (ManaCost i)
 parseManaCost
-  = P.parseString pManaCost mempty  -- runParser
+  = Trifecta.parseString pManaCost mempty  -- runParser
   > result2maybe
 
 ----------------------------------------
@@ -570,7 +926,7 @@ pBody
   => (TokenParsing p)
   => p (Body i)
 pBody = Body
- <$> (pNumericExpression <* char '/')
+ <$> (pNumericExpression <* P.char '/')
  <*>  pNumericExpression
 
 {-|
@@ -601,7 +957,7 @@ pNumericLiteral
   => (TokenParsing p)
   => p (NumericLiteral i)
 pNumericLiteral = choice $
-  [ NumericWildcard <$ char '*'
+  [ NumericWildcard <$ P.char '*'
   , NumericConstant <$> pInteger --TODO replace with validator (Between's fromIntegral clips, without failing)
   ]
 
@@ -722,7 +1078,7 @@ pManaSymbol
   :: forall i p. (Integral i)
   => (MonadFail p, TokenParsing p)
   => p (ManaSymbol i)
-pManaSymbol = braces pManaSymbol'  -- between (char '{') (char '}') $
+pManaSymbol = Token.braces pManaSymbol'  -- between (char '{') (char '}') $
 
 
 {-| 
@@ -748,31 +1104,31 @@ pManaSymbol' = choice
     ,       ChromaSymbol     <$> pChroma
                              <?> "chroma symbol"
     
-    ,       VariableSymbol   <$  oneOf "XYZ"
+    ,       VariableSymbol   <$  P.oneOf "XYZ"
                              <?> "variable symbol"
     ]
 
 ----------------------------------------
 
 pPhyrexian :: forall p. (CharParsing p) => p Color
-pPhyrexian = pPermutedColor $ string "P"
+pPhyrexian = pPermutedColor $ P.string "P"
 
 pMonoHybrid :: forall p. (CharParsing p) => p Color
-pMonoHybrid = pPermutedColor $ string "2"
+pMonoHybrid = pPermutedColor $ P.string "2"
 
 pPermutedColor :: forall p. (CharParsing p) => p String -> p Color
 pPermutedColor pSymbol
     = pColorChar  <* pSlash <* pSymbol
   <|> pSymbol *> pSlash *> pColorChar
  where
- pSlash = skipOptional $ char '/'
+ pSlash = skipOptional $ P.char '/'
  --permute p
 
 ----------------------------------------
 
 pGuild :: forall p. (MonadFail p, CharParsing p) => p Guild
 pGuild = do
-  guild' <- toGuild <$> pColorChar <*> (char '/' *> pColorChar)
+  guild' <- toGuild <$> pColorChar <*> (P.char '/' *> pColorChar)
 
   guild <- guild' & maybe pFailure return
   return guild
@@ -822,13 +1178,13 @@ pInteger
   :: forall i p. (Integral i)
   => (TokenParsing p)
   => p i
-pInteger = (integer <&> fromIntegral)
+pInteger = (Token.integer <&> fromIntegral)
 
 pNatural
   :: forall i p. (Integral i)
   => (TokenParsing p)
   => p i
-pNatural = (natural <&> fromIntegral)
+pNatural = (Token.natural <&> fromIntegral)
 
 ---------------------------------------- 
 
@@ -886,3 +1242,15 @@ pOracleWord = p <&> fromString -- T.pack
 
 -}
 
+
+
+{-NOTES
+
+notFollowedBy :: Show a => m a -> m () 
+
+notFollowedBy p only succeeds when parser p fails. This parser does not consume any input. This parser can be used to implement the 'longest match' rule. For example, when recognizing keywords (for example let), we want to make sure that a keyword is not followed by a legal identifier character, in which case the keyword is actually an identifier (for example lets). We can program this behaviour as follows:
+
+ keywordLet  = try $ string "let" <* notFollowedBy alphaNum
+
+
+-}

@@ -127,6 +127,7 @@ validateCardObject setCodes c@CardObject{..} = Card
       --- ^^^ _watermark
 
   <*> (Known <$> validate_oracle
+                  (Name _CardObject_name) --TODO bindValidation
                  _CardObject_text)
       --- ^^^ _oracle
 
@@ -251,7 +252,7 @@ validateManaCost
     = s
     & parseManaCost
     & maybe2validation (BadManaCost s)
-  
+
 validateDate :: Text -> CardValidation Date
 validateDate t = success t
 
@@ -485,12 +486,15 @@ validate_colorChar (toS -> s) = go s
 ------------------------------------------
 
 validate_oracle
-  :: Maybe Text
+  :: Name
+  -> Maybe Text
   -> CardValidation (Oracle)  
-validate_oracle
+validate_oracle name
   = fromMaybe ""
-  > toS > parseOracleLoosely
+  > toS > parseOracleLoosely names
   > success
+  where
+  names = knickless name --TODO
 
   {-
   > traverse go

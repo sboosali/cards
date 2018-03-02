@@ -8,6 +8,10 @@ module MTGJSON.Extra
  , module MTGJSON.Extra
  ) where
 
+import qualified MTGJSON.Constants as Constants
+
+----------------------------------------
+
 -- re-exports
 import              Enumerate          as X (Enumerable)
 import              Data.List.NonEmpty as X (NonEmpty(..))
@@ -72,11 +76,14 @@ printer f = strings xs
 
 ----------------------------------------
 
-type Print a = a      -> String
-type Parse a = String -> Maybe a 
+type Print a = SPrint a
+type Parse a = SParse a
 
--- type Print a = a    -> Text 
--- type Parse a = Text -> Maybe a
+type SPrint a = a      -> String
+type SParse a = String -> Maybe a 
+
+type TPrint a = a    -> Text 
+type TParse a = Text -> Maybe a
 
 ----------------------------------------
 
@@ -120,6 +127,15 @@ chars
   > strings
   where
   char2string = (:[])
+
+token
+  :: (P.CharParsing p)
+  => p a -> p a
+token p = p <* P.skipMany (P.satisfy $ isWhitespaceExceptNewline)
+  where
+  isWhitespaceExceptNewline = \c
+    -> c /= '\n'
+    && isSpace c
 
 -- | 'P.choice' of 'P.symbol's
 symbols
@@ -167,12 +183,19 @@ betweenStrings
   => String -> String -> p a -> p a
 betweenStrings x y = P.between (P.string x) (P.string y)
 
--- | Token parser @semiSep p@ parses /zero/ or more occurrences of @p@
+-- | Token parser @lineSep p@ parses /one/ or more occurrences of @p@
 -- separated by 'newline'. Returns a list of values returned by @p@.
 -- 
 lineSep :: P.TokenParsing m => m a -> m [a]
 lineSep p = P.sepBy1 p P.newline
 {-# INLINE lineSep #-}
+
+pseudoLineSep :: P.TokenParsing m => m a -> m [a]
+pseudoLineSep p = p `P.sepBy1` pPseudoNewline
+
+pPseudoNewline :: P.TokenParsing m => m ()
+pPseudoNewline = () <$
+  token (P.char Constants.cPseudoNewline P.<?> "\n")
 
 -- -- | Parses a newline character, @\n@.
 -- newline :: TokenParsing m => m ()
@@ -182,9 +205,14 @@ result2maybe :: P.Result a -> Maybe a
 result2maybe = \case
     P.Success a  -> Just a
     P.Failure _e -> Nothing
-    
+
+endOfLine :: P.CharParsing m => m ()
+endOfLine
+    = (P.string "\r\n" *> pure ())
+  <|> (P.char   '\n'   *> pure ())
+
 ----------------------------------------
-  
+
 decoded :: (MonadFail m, J.FromJSON a) => ByteString -> m a
 decoded = J.eitherDecode > either fail return 
 
@@ -267,5 +295,16 @@ error2errors = first (:|[])
 
 -- first2maybe :: First a -> Maybe a
 -- first2maybe = getFirst
+
+----------------------------------------
+
+{-| builds a predicate from a disjunction of conjunctions of predicates.
+
+-}
+predicateDisjunctionOfConjunctions
+  :: [[a -> Bool]]
+  -> (a -> Bool)
+predicateDisjunctionOfConjunctions predicates
+  = \c -> any (all ($ c)) predicates
 
 ----------------------------------------

@@ -242,6 +242,64 @@ newtype CMC = CMC Natural
 newtype Name = Name Text
  deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
 
+instance IsString Name where fromString = fromString > Name
+
+getName :: Name -> Text
+getName (Name t) = t
+
+nameless :: Name
+nameless = fromString ""
+
+{-| a mandatory card 'Name' and its optional knicknames. 
+
+i.e.
+
+@
+Knicknames (name :| knicknames)
+--
+name       :: Name
+knicknames :: [Name]
+@
+
+In particular, legendary creatures may refer to themselves with an abbreviation of their card name: their first name without any title/modifier. e.g.:
+
+@
+> ["Phage the Untouchable", "Phage"] :: Knicknames
+@
+
+-}
+newtype Knicknames = Knicknames
+  { getKnicknames :: (NonEmpty Name) }
+  deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+
+-- | @fromList [] == 'knicknameless'@
+instance IsList Knicknames where
+  type Item Knicknames = Name
+  toList   = getKnicknames > toList
+  fromList = \case
+    []     -> knicknameless
+    (x:xs) -> Knicknames (x:|xs) 
+  
+  --TODO -- | 'fromList' calls @fromList NonEmpty'@, and thus is partial. 
+  --  fromList = fromList > Knicknames
+
+-- | 'knickless'
+instance IsString Knicknames where
+  fromString = fromString > knickless
+
+knickless :: Name -> Knicknames
+knickless name = Knicknames (name :|[])
+
+-- | @knicknameless = 'knickless' 'nameless'@
+knicknameless :: Knicknames
+knicknameless = knickless nameless
+
+-- knickless :: Name -> Knicknames
+-- knickless (Name name) = Knicknames (name:|[])
+
+knicknames2text :: Knicknames -> [Text]
+knicknames2text = toList > fmap getName
+
 ----------------------------------------
 
 type UniqueIdentifier = UID
@@ -263,6 +321,8 @@ the `MagicCards.info` number is almost always identical to this,
 -}
 data MID = MID Text 
   deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+
+instance IsString MID where fromString = fromString > MID
 
 ----------------------------------------
 
