@@ -99,6 +99,7 @@ type List = []
 
 type Association k v = [(k,v)]
 
+-- | 'P.choice' of 'P.string's
 strings
   :: (P.CharParsing p)
   => Association String a
@@ -109,6 +110,7 @@ strings
   
   -- P.oneOf
 
+-- | 'P.choice' of 'P.chars's
 chars
   :: (P.CharParsing p)
   => Association Char a
@@ -118,6 +120,63 @@ chars
   > strings
   where
   char2string = (:[])
+
+-- | 'P.choice' of 'P.symbol's
+symbols
+  :: (P.TokenParsing p)
+  => Association String a
+  -> p a
+symbols
+  = fmap (\(s, a) -> P.symbol s $> a) 
+  > P.choice
+
+-- | 'P.choice' of 'P.symbolic's
+symbolics
+  :: (P.TokenParsing p)
+  => Association Char a
+  -> p a
+symbolics
+  = fmap (\(c, a) -> P.symbolic c $> a) 
+  > P.choice
+
+-- | 'P.choice' of 'P.symbol's
+symbols_
+  :: (P.TokenParsing p)
+  => [String]
+  -> p ()
+symbols_
+  = fmap (-: ())
+  > symbols
+
+-- | 'P.choice' of 'P.symbol's
+symbolics_
+  :: (P.TokenParsing p)
+  => [Char]
+  -> p ()
+symbolics_
+  = fmap (-: ())
+  > symbolics
+
+betweenChars
+  :: (P.CharParsing p)
+  => Char -> Char -> p a -> p a
+betweenChars x y = P.between (P.char x) (P.char y)
+
+betweenStrings
+  :: (P.CharParsing p)
+  => String -> String -> p a -> p a
+betweenStrings x y = P.between (P.string x) (P.string y)
+
+-- | Token parser @semiSep p@ parses /zero/ or more occurrences of @p@
+-- separated by 'newline'. Returns a list of values returned by @p@.
+-- 
+lineSep :: P.TokenParsing m => m a -> m [a]
+lineSep p = P.sepBy1 p P.newline
+{-# INLINE lineSep #-}
+
+-- -- | Parses a newline character, @\n@.
+-- newline :: TokenParsing m => m ()
+-- newline = char '\n' $> ()
 
 result2maybe :: P.Result a -> Maybe a
 result2maybe = \case
@@ -143,7 +202,6 @@ i2n i = if i >= 0
 
 concatenateA :: (Applicative f) => (a -> f [b]) -> [a] -> f [b]
 concatenateA f = traverse f >>> fmap concat
-
 
 ----------------------------------------
 

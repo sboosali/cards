@@ -13,7 +13,9 @@ import MTGJSON.Types (Name(..))
 import Enumerate.Between
 
 import Control.Lens (Wrapped(..))--, Iso')
-  
+
+import qualified Data.Text.Lazy as T
+
 ----------------------------------------
 
 type KnownFace = Face Name
@@ -227,15 +229,16 @@ instance IsString OracleParagraph where
 
 -}
 data OracleChunk 
-  = OraclePhrase Text
+  = OraclePhrase [Text] -- ^ NOTE it's really a @NonEmpty Text@
   | OracleSymbol OracleSymbol --TODO KnownSymbol
   | OracleNamesake -- ^ a.k.a. @~@ or @CARDNAME@
-  --TODO OracleQuoted Text -- e.g. @Llanowar Mentor@
   deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+  --TODO OracleQuoted OracleChunk -- ^ e.g. @Llanowar Mentor@. recursive. 
+  --TODO OracleCost OracleChunk OracleChunk -- ^ e.g. @Llanowar Elf@. recursive, or a smaller type, without the cost grammar on the lhs, and without another on the rhs.
 
 -- | @~ 'OraclePhrase'@
 instance IsString OracleChunk where
-  fromString = fromString > OraclePhrase
+  fromString = fromString > T.words > OraclePhrase -- TODO
 
 ----------------------------------------
 

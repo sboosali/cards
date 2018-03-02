@@ -16,18 +16,21 @@ import MTGJSON.Kinds
 
 ----------------------------------------
 
--- {-| loosens a type. 
+{-| loosens a type. 
 
--- for example, if the "known type" @a@ is an Enum, this
--- "adds" infinitely many "unknown constructors" as strings.
+for example, if the "known type" @a@ is an Enum, this
+"adds" infinitely many "unknown constructors" as strings.
 
--- e.g. 
+e.g. 
 
--- -}
--- data Probably a
---   = Unknown String
---   | Known   a
---   deriving (Functor,Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+-}
+data Recognizable a 
+  = Unrecognized String
+  | Recognized   a
+  deriving (Functor,Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+
+  -- = Unknown String
+  --  Known   a
 
 ----------------------------------------
 

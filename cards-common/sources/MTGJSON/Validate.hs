@@ -77,103 +77,103 @@ validateCardObject setCodes c@CardObject{..} = Card
 
   <$> (Known <$> validate_uid
                  _CardObject_id)
-      -- ^ _uid
+      --- ^^^ _uid
 
   <*> (Known <$> validate_multiverseid
                  _CardObject_multiverseid)
-      -- ^ _multiverseid
+      --- ^^^ _multiverseid
 
   <*> (Known <$> validate_name
                  _CardObject_name)
-      -- ^ _name
+      --- ^^^ _name
 
   <*> (Known <$> validate_face _CardObject_names
                                _CardObject_layout)
-      -- ^ _face
+      --- ^^^ _face
 
   <*> (Known <$> validate_cost
                  _CardObject_manaCost)
-      -- ^ _cost
+      --- ^^^ _cost
 
   <*> (id    <$> validate_cmc
                  _CardObject_cmc)
-      -- ^ _cmc
+      --- ^^^ _cmc
 
   <*> (Known <$> validate_colors
                  _CardObject_colors)
-      -- ^ _colors
+      --- ^^^ _colors
 
   <*> (Known <$> validate_colorIdentity
                  _CardObject_colorIdentity)
-      -- ^ _colorIdentity
+      --- ^^^ _colorIdentity
 
   <*> (id    <$> validate_typeline _CardObject_supertypes
                                    _CardObject_types 
                                    _CardObject_subtypes)
-      -- ^ _typeline
+      --- ^^^ _typeline
 
   <*> (fmap Known <$> validate_numeric'
                           _CardObject_power
                           _CardObject_toughness 
                           _CardObject_loyalty)
-      -- ^ _numeric
+      --- ^^^ _numeric
 
   <*> (Known <$> validate_rarity
                  _CardObject_rarity)
-      -- ^ _rarity
+      --- ^^^ _rarity
 
   <*> (fmap Known <$> validate_watermark
                       _CardObject_watermark)
-      -- ^ _watermark
+      --- ^^^ _watermark
 
   <*> (Known <$> validate_oracle
                  _CardObject_text)
-      -- ^ _oracle
+      --- ^^^ _oracle
 
   <*> (id    <$> validate_flavor
                  _CardObject_flavor)
-      -- ^ _flavor
+      --- ^^^ _flavor
 
   <*> (id    <$> validate_artist
                  _CardObject_artist)
-      -- ^ _artist
+      --- ^^^ _artist
 
   <*> (Known <$> validate_edition'
                  setCodes)
-      -- ^ _edition
+      --- ^^^ _edition
 
   <*> (fmap Known <$> validate_printings
                       _CardObject_printings)
-      -- ^ _printings
+      --- ^^^ _printings
 
   <*> (id    <$> validate_legalities
                  _CardObject_legalities)
-      -- ^ _legalities
+      --- ^^^ _legalities
 
   <*> (fmap Known <$> validate_variations
                       _CardObject_variations)
-      -- ^ _variations
+      --- ^^^ _variations
 
   <*> (id    <$> validate_foreignVariations
                  _CardObject_foreignNames)
-      -- ^ _foreignVariations
+      --- ^^^ _foreignVariations
 
   <*> (validate_rulings
        _CardObject_rulings)
-      -- ^ _rulings
+      --- ^^^ _rulings
 
   <*> (id    <$> validate_originalText
                  _CardObject_originalText)
-      -- ^ _originalText
+      --- ^^^ _originalText
 
   <*> (id    <$> validate_originalType
                  _CardObject_originalType)
-      -- ^ _originalType
+      --- ^^^ _originalType
 
   <*> (Known <$> validate_assets
        setCodes
        cardIds)
-      -- ^ _assets
+      --- ^^^ _assets
 
   where
   cardIds = c & getCardIds

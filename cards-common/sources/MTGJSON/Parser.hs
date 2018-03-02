@@ -9,6 +9,7 @@
 module MTGJSON.Parser where
 
 import MTGJSON.Extra hiding (try)
+import MTGJSON.Constants
 --import MTGJSON.Types
 import MTGJSON.Known
 
@@ -24,6 +25,54 @@ import "trifecta" Text.Trifecta as P
 --import qualified Data.List.NonEmpty as NonEmpty
 
 --import Prelude (read)
+
+----------------------------------------  
+
+{-| simple @trifecta@ parser runner (wraps 'P.parseString').  
+
+-}
+trifecta :: Parser a -> String -> Result a
+trifecta p = P.parseString p mempty
+
+{-e.g. trifecta: https://github.com/ekmett/trifecta/blob/master/examples/rfc2616/RFC2616.hs
+
+
+-}
+
+
+
+{-
+
+{-| simple @trifecta@ parser runner (wraps 'P.parseString').
+
+Wraps the given parser @p@ in 'Unlined', used by 'pOracle', since 'OracleParagraph's are split on newlines. 
+
+-}
+trifectaUnlined
+  :: forall p a.
+    ( TokenParsing p
+    )
+  => p a -> String -> Result a
+trifectaUnlined pLined = P.parseString pUnlined mempty
+  where
+  pUnlined :: Unlined p a
+  pUnlined = Unlined pLined
+
+-- {-| simple @trifecta@ parser runner (wraps 'P.parseString').
+
+-- Wraps the given parser @p@ in 'Unlined', used by 'pOracle', since 'OracleParagraph's are split on newlines. 
+
+-- -}
+-- trifectaUnlined
+--   :: forall p a.
+--     ( TokenParsing p
+--     )
+--   => p a -> String -> Result a
+-- trifectaUnlined pLined = P.parseString pUnlined mempty
+--   where
+--   pUnlined = Unlined pLined
+
+-}
 
 ----------------------------------------
 
@@ -102,7 +151,7 @@ doctests:
 >>> oracleBallynockTrapper_explicit == oracleBallynockTrapper
 True
 
->>> parseOracle "{T}: Tap target creature.\n"Whenever you cast a white spell, you may untap Ballynock Trapper." == oracleBallynockTrapper
+>>> parseOracle "{T}: Tap target creature.\nWhenever you cast a white spell, you may untap ~." == oracleBallynockTrapper
 True
 
 
@@ -120,12 +169,35 @@ True
 -}
 parseOracle :: Parse Oracle
 parseOracle 
-  = P.parseString pOracle mempty
+  = P.parseString p mempty
+  > fmap id
   > result2maybe
+  where
+  p = pOracle 
+
+{-
+
+  = P.parseString p mempty
+  > fmap runUnlined
+  > result2maybe
+  where
+  p = Unlined pOracle 
+
+> parseOracle "{T}: Tap target creature.\nWhenever you cast a white spell, you may untap ~."
+Just (OracleFrames (OracleFrame [OracleParagraph [OracleSymbol (Right (MiscellaneousSymbol TapSymbol))]] :| []))
+*MTGJSON> 
+
+-}
 
 ----------------------------------------
 
 {-|
+
+
+@
+ P.parseString pOracle mempty "{T}: Tap target creature.\nWhenever you cast a white spell, you may untap ~."
+@
+
 
 
 -}
@@ -135,7 +207,8 @@ pOracle
     , MonadFail p
     )
   => p Oracle
-pOracle = pOracleFrame <&> (:|[]) <&> OracleFrames --TODO levelers
+pOracle = pOracleFrame
+  <&> (:|[]) <&> OracleFrames --TODO levelers
 
 {-|
 
@@ -147,8 +220,10 @@ pOracleFrame
     , MonadFail p
     )
   => p OracleFrame
-pOracleFrame = lineSep pOracleParagraph
+pOracleFrame = runUnlined $ lineSep (Unlined pOracleParagraph)
   <&> OracleFrame
+  {-NOTE the `Unlined` parser transformaer temporarily (?) disables the  automatic trailing newline (but not whitespace-in-general) consumption of the given token parser.
+  -}
 
 {-|
 
@@ -160,6 +235,13 @@ pOracleParagraph
     , MonadFail p
     )
   => p OracleParagraph
+  
+-- pOracleParagraph = pRelinedChunks
+--   <&> OracleParagraph
+--   where
+--   pRelinedChunks = runUnlined $ many pUnlinedChunk
+--   pUnlinedChunk = Unlined pOracleChunk
+
 pOracleParagraph = many pOracleChunk
   <&> OracleParagraph
 
@@ -174,29 +256,54 @@ pOracleChunk
     )
   => p OracleChunk
 pOracleChunk = choice
-  [ try $ OracleNamesake <$  pOracleNamesake
-  , try $ OracleSymbol   <$> pOracleSymbol
-  , try $ OraclePhrase   <$> pOraclePhrase
+  [ try $ OracleNamesake <$  pOracleNamesake -- is in a finite vocab
+  , try $ OracleSymbol   <$> pOracleSymbol   -- has a "{" prefix
+  , try $ OraclePhrase   <$> pOraclePhrase   -- anything non-reserved
   ]
 
 ----------------------------------------
 
 {-|
 
+>>> trifecta pOracleParagraph "{U/G}{?}: Tap or untap ~."
+Success (OracleParagraph [OracleSymbol (Right (ManaSymbol (HybridSymbol Simic))),OracleSymbol (Left "?"),OraclePhrase ":",OraclePhrase ["Tap","or","untap"],OracleNamesake,OraclePhrase ["."]])
 
 -}
 pOraclePhrase
   :: forall p.
     ( TokenParsing p
     )
+  => p [Text]
+pOraclePhrase = some pOracleWord
+
+{-|
+
+
+-}
+pOracleWord
+  :: forall p.
+    ( TokenParsing p
+    )
   => p Text
-pOraclePhrase = p <&> fromString -- T.pack
+pOracleWord = pW <&> fromString -- T.pack
  where
- p    = good `manyTill` bad
- good = satisfy (not . isSpace)
- -- anyChar 
- bad  = try (satisfy isOracleReservedCharacter)
- -- (satisfy isOracleReservedCharacter)
+ pW = token (some pC)
+ pC = satisfy isOracleTokenChar
+
+{-NOTE
+
+class CharParsing m => TokenParsing m where
+  someSpace :: m ()
+  someSpace = skipSome (satisfy isSpace)
+  token :: m a -> m a
+  token p = p <* (someSpace <|> pure ())
+
+instance TokenParsing m => TokenParsing ( CharParsing m =>  m) where
+  nesting (Unlined m) = Unlined (nesting m)
+  {-# INLINE nesting #-}
+  someSpace = skipMany (satisfy $ \c -> c /= '\n' && isSpace c)
+
+-}
 
 {-|
 
@@ -207,12 +314,22 @@ pOracleNamesake
     ( TokenParsing p
     )
   => p ()
-pOracleNamesake = () <$ go
- where
- go = choice
-     [ string "~"  -- char '~'
-     , string "CARDNAME"
-     ]
+pOracleNamesake = symbols_
+  [ "~"      
+  , "CARDNAME"
+  ]
+
+-- pOracleNamesake = symbols
+--   [ "~"      -: ()
+--   , "CARDNAME"-: ()
+--   ]
+
+-- pOracleNamesake = () <$ go
+--  where
+--  go = choice
+--      [ string "~"  -- char '~'
+--      , string "CARDNAME"
+--      ]
 
 ----------------------------------------
 
@@ -228,6 +345,8 @@ pOracleSymbol
   => p OracleSymbol
 pOracleSymbol = braces pOracleSymbol'
 
+  -- = (betweenChars&uncurry) theOracleSymbolWrappingCharacters $
+  --     pOracleSymbol'
 
 {-|
 
@@ -286,26 +405,42 @@ pMiscellaneousSymbol'
     , MonadFail p
     )
   => p MiscellaneousSymbol
-pMiscellaneousSymbol' = choice
- [ TapSymbol   <$ string "T"
- , UntapSymbol <$ string "Q"
+pMiscellaneousSymbol' = symbolics
+ [ 'T' -: TapSymbol  
+ , 'Q' -: UntapSymbol
  ]
+ 
+-- pMiscellaneousSymbol' = choice
+--  [ TapSymbol   <$ symbol "T" -- string "T"
+--  , UntapSymbol <$ symbol "Q" --string "Q"
+--  ]
 
 ----------------------------------------
 
-theOracleReservedTokens :: [String]
-theOracleReservedTokens
-   = theOracleReservedKeywords
-  ++ (theOracleReservedCharacters & fmap (:[]))
-
-theOracleReservedKeywords :: [String]
-theOracleReservedKeywords =
-  [ "CARDNAME"
+isOracleTokenChar :: Char -> Bool
+isOracleTokenChar c = any (all ($ c))
+  --NOTE a disjunction of conjunctions,
+  -- i.e. any of the groups,
+  -- all of the predicates within a group. 
+  [ [ isAlphaNum
+    ]
+  , [ not . isSpace
+    , not . (=='~') --TODO `CARDNAME`
+    , not . (=='{')
+    ]
   ]
 
-theOracleReservedCharacters :: [Char]
-theOracleReservedCharacters =
-  "~{}"
+{-
+isOracleTokenChar = not . isSpace
+
+isOracleTokenChar c = any (all ($ c))
+  [ [ isAlphaNum
+    ]
+  , [ not . isSpace
+    -- , not . (=='{')
+    ]
+  ]
+-}
 
 isOracleReservedKeyword :: String -> Bool
 isOracleReservedKeyword = (`elem` theOracleReservedKeywords)
@@ -318,13 +453,12 @@ isOracleSymbolCharacter c = any (all ($ c))
   [ [ isAlphaNum ]
   
   , [ ((||) <$> isPunctuation <*> isSymbol)
-    , (not . (`elem` "{}"))
+    , (not . (`elem` theOracleSymbolWrappers))
     ]
     
   ] --TODO make consistent with Mana cost in the upper right, and the rest of the syntax
 
 ----------------------------------------
-
 {-
 
 
@@ -333,20 +467,6 @@ isOracleSymbolCharacter c = any (all ($ c))
 
 
 -}
-
-
-----------------------------------------
-
--- | Token parser @semiSep p@ parses /zero/ or more occurrences of @p@
--- separated by 'newline'. Returns a list of values returned by @p@.
--- 
-lineSep :: TokenParsing m => m a -> m [a]
-lineSep p = sepBy p newline
-{-# INLINE lineSep #-}
-
--- -- | Parses a newline character, @\n@.
--- newline :: TokenParsing m => m ()
--- newline = char '\n' $> ()
 
 ----------------------------------------
 
@@ -750,6 +870,18 @@ error $ "Invalid mana cost " <> show s <> ": " <> show err
 
 import qualified Text.ParserCombinators.ReadP as ReadP
 import           Text.ParserCombinators.ReadP (ReadP)
+
+
+
+pOracleWord
+  :: forall p.
+    ( TokenParsing p
+    )
+  => p Text
+pOracleWord = p <&> fromString -- T.pack
+ where
+ p    = good `manyTill` bad
+ good = satisfy (not . isSpace)
 
 
 -}
