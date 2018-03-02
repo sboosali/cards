@@ -36,7 +36,7 @@ data Recognizable a
 
 data Card (f :: CHARACTERISTIC -> *) = Card 
   { _cUID           :: f UNIQUE
-  , _cMultiverseId  :: f MULTIVERSEID 
+  , _cMID           :: Maybe (f MULTIVERSEID)
     --TODO , _ids           :: {-Unique-}Identifiers
  
   -- gameplay-relevant stuff, card characteristic 
@@ -191,7 +191,7 @@ data FormatLegality f = FormatLegality
 data ForeignVariation f = ForeignVariation 
   { _Foreign_language     :: f LANGUAGE 
   , _Foreign_name         :: f NAME 
-  , _Foreign_multiverseid :: f MULTIVERSEID
+  , _Foreign_multiverseid :: Maybe (f MULTIVERSEID)
   } -- deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
 
 -- monolingual 
@@ -319,10 +319,10 @@ type MultiverseIdentifier = MID
 
 the `MagicCards.info` number is almost always identical to this,
 -}
-data MID = MID Text 
+newtype MID = MID Natural
   deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
 
-instance IsString MID where fromString = fromString > MID
+--instance IsString MID where fromString = fromString > MID
 
 ----------------------------------------
 

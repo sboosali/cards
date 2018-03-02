@@ -16,6 +16,29 @@ import Control.Lens (Wrapped(..))--, Iso')
 
 import qualified Data.Text.Lazy as T
 
+---------------------------------------
+
+data EditionType
+ = CoreSet
+ | ExpansionSet
+ | ReprintSet
+ | BoxSet
+ | UnSet
+ | FromSet
+ | PremiumSet
+ | DuelSet
+ | StarterSet
+ | CommanderSet
+ | PlanechaseSet
+ | ArchenemySet
+ | PromoSet
+ | VanguardSet
+ | MastersSet
+ | ConspiracySet
+ | MasterpieceSet
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
+
+
 ----------------------------------------
 
 type KnownFace = Face Name

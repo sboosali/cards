@@ -20,6 +20,8 @@ import MTGJSON.Printer.Finite
 import Enumerate.Function (invertInjection)
 --import Data.Validation
 
+import qualified Data.Set as Set
+
 import Data.List.NonEmpty (nonEmpty)
 
 --import Prelude.Spiros
@@ -32,7 +34,8 @@ type CardValidation = Validation CardErrors
 type CardErrors = NonEmpty CardError
 
 data CardError
- = BadName                  String
+ = OtherCardError           String
+ | BadName                  String
  | MustBeNatural            Integer
  | MustBeInteger            Double
  | UnknownColor             String
@@ -48,7 +51,10 @@ data CardError
  | BadPower                 String 
  | BadToughness             String
  | UnknownLayout            String 
- | WrongFaceArity           String [String] 
+ | UnknownLanguage          String
+ | WrongFaceArity           String [String]
+ | UnknownFormat            String
+ | UnknownLegality          String
  deriving (Show,Read,Eq,Ord,Generic,NFData)
  --deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
 
@@ -79,7 +85,7 @@ validateCardObject setCodes c@CardObject{..} = Card
                  _CardObject_id)
       --- ^^^ _uid
 
-  <*> (Known <$> validate_multiverseid
+  <*> (fmap Known <$> validate_multiverseid
                  _CardObject_multiverseid)
       --- ^^^ _multiverseid
 
@@ -255,6 +261,26 @@ validateManaCost
 
 validateDate :: Text -> CardValidation Date
 validateDate t = success t
+  
+validateLanguage :: Text -> CardValidation Language
+validateLanguage s
+  = s
+  & parseLanguage
+  & maybe2validation (UnknownLanguage $ toS s)
+
+validateFormat :: Text -> CardValidation Format
+validateFormat s
+  = s
+  & parseFormat
+  & maybe2validation (UnknownFormat $ toS s)
+
+validateLegality :: Text -> CardValidation Legality
+validateLegality s
+  = s
+  & parseLegality
+  & maybe2validation (UnknownLegality $ toS s)
+
+----------------------------------------
 
 parseEdition :: Text -> Maybe Edition
 parseEdition = toS > f --TODO text-versus-string 
@@ -274,6 +300,21 @@ parseWatermark :: Text -> Maybe Watermark
 parseWatermark = toS > f --TODO text-versus-string 
   where
   f = print2parse (displayWatermark > toS)
+
+parseLanguage :: Text -> Maybe Language
+parseLanguage = toS > f --TODO text-versus-string 
+  where
+  f = print2parse (displayLanguage > toS)
+
+parseFormat :: Text -> Maybe Format
+parseFormat = toS > f --TODO text-versus-string 
+  where
+  f = print2parse (displayFormat > toS)
+
+parseLegality :: Text -> Maybe Legality
+parseLegality = toS > f --TODO text-versus-string 
+  where
+  f = print2parse (displayLegality > toS)
 
 ----------------------------------------
 -- types
@@ -743,17 +784,54 @@ validate_printings
 validate_variations
   :: Maybe [Natural]
   -> CardValidation [MultiverseIdentifier]
-validate_variations es = _
+validate_variations
+  = maybe [] id
+  > fmap MID
+  > success
+
+----------------------------------------
 
 validate_legalities
   :: Maybe [CardFormatLegalityObject]
   -> CardValidation [FormatLegality Known]
-validate_legalities ls = _
+validate_legalities
+  = maybe [] id
+  > traverse validateFormatLegality
+
+validateFormatLegality
+  :: CardFormatLegalityObject
+  -> CardValidation (FormatLegality Known)
+validateFormatLegality CardFormatLegalityObject{..} = FormatLegality
+  <$> validateFormat  _CardFormatLegalityObject_format
+      <&> Known
+  <*> validateLegality _CardFormatLegalityObject_legality 
+      <&> Known
+
+----------------------------------------
+
+
+----------------------------------------
 
 validate_foreignVariations
   :: Maybe [CardForeignPrintingObject]
   -> CardValidation [ForeignVariation Known]
-validate_foreignVariations fs = _
+validate_foreignVariations
+  = maybe [] id
+  > traverse validateForeignVariations
+
+validateForeignVariations
+  :: CardForeignPrintingObject
+  -> CardValidation (ForeignVariation Known)
+validateForeignVariations CardForeignPrintingObject{..}
+ = ForeignVariation
+  <$> validateLanguage _CardForeignPrintingObject_language
+      <&> Known
+  <*> validate_name     _CardForeignPrintingObject_name         
+      <&> Known
+  <*> validate_multiverseid _CardForeignPrintingObject_multiverseid
+      <&> (fmap Known)
+
+----------------------------------------
 
 validate_ruling
   :: CardRulingObject
@@ -782,13 +860,35 @@ validate_uid
   = UID
   > success
 
+----------------------------------------
+
 validate_multiverseid
   :: Maybe Natural
-  -> CardValidation MID
+  -> CardValidation (Maybe MID)
 validate_multiverseid
-  = maybe "" show' --TODO 
-  > MID
-  > success
+  = traverse (validateMID > maybe2validation (OtherCardError "?"))
+
+validateMID
+  :: Natural
+  -> Maybe MID
+validateMID
+  = MID
+  > Just
+
+validateReferencedMID --TODO
+  :: Set MID
+  -> MID
+  -> Maybe MID
+validateReferencedMID declaredMIDs referncedMID
+  = referncedMID
+  & fromPredicate ((Set.member&flip) declaredMIDs)
+  -- & maybe2validation (UndeclaredMIDWasReferenced (toS referncedMID))
+  
+  -- if Set.member thisMID seenMIDs
+  -- then Just thisMID
+  -- else Nothing -- (UndeclaredMIDWaseReferenced thisMID)
+
+----------------------------------------
 
 validate_name
   :: Text
@@ -805,6 +905,15 @@ validateName
 validateName
   = Name
   > Just
+
+validateReferencedName --TODO
+  :: Set Name
+  -> Name
+  -> Maybe Name
+validateReferencedName seenNames name =
+  if Set.member name seenNames
+  then Just name
+  else Nothing -- (UndeclaredNameWaseReferenced name)
 
 ----------------------------------------
 -- text
@@ -829,4 +938,3 @@ validate_originalType
   > success
   
 ----------------------------------------
-

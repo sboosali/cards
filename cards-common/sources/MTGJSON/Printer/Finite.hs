@@ -13,6 +13,27 @@ import MTGJSON.Known
 
 ----------------------------------------
 
+displayEditionType :: Print EditionType
+displayEditionType = \case
+ CoreSet        -> "core"
+ ExpansionSet   -> "expansion"
+ ReprintSet     -> "reprint"
+ BoxSet         -> "box"
+ UnSet          -> "un"
+ FromSet        -> "from the vault"
+ PremiumSet     -> "premium deck"
+ DuelSet        -> "duel deck"
+ StarterSet     -> "starter"
+ CommanderSet   -> "commander"
+ PlanechaseSet  -> "planechase"
+ ArchenemySet   -> "archenemy"
+ PromoSet       -> "promo"
+ VanguardSet    -> "vanguard"
+ MastersSet     -> "masters"
+ ConspiracySet  -> "conspiracy"
+ MasterpieceSet -> "masterpiece"
+
+----------------------------------------
 {-|
 
 numericTarmogoyf = NumericCreature (Body (SimpleNumeric NumericWildcard) (BinaryNumeric NumericAddition (SimpleNumeric (NumericLiteral 1)) (SimpleNumeric NumericWildcard)))
@@ -300,6 +321,25 @@ displayBorder = \case
  BlackBordered    -> "black"
  WhiteBordered    -> "white"
  SilverBordered   -> "silver"
+
+----------------------------------------
+
+displayFormat :: Print Format
+displayFormat = \case
+ Standard   -> "standard"
+ Block      -> "block"
+ Extended   -> "extended"
+ Vintage    -> "vintage"
+ Classic    -> "classic"
+ Legacy     -> "legacy"
+ Modern     -> "modern"
+ Commander  -> "commander"
+
+displayLegality :: Print Legality
+displayLegality = \case
+ Legal      -> "legal"
+ Restricted -> "restricted"
+ Banned     -> "banned"
 
 ----------------------------------------
 

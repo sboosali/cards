@@ -212,6 +212,12 @@ trifectaUnlined pLined = Trifecta.parseString pUnlined mempty
 -}
 
 ----------------------------------------
+-- Sets
+
+parseEditionType :: Parse EditionType
+parseEditionType = print2parse displayEditionType
+
+----------------------------------------
 
 parseColorChar :: Parse Color
 parseColorChar = print2parse displayColorChar
@@ -401,13 +407,149 @@ trifecta pOracleParagraph "{U/G}{?}: Tap or untap ~.\nHexproof"
 ----------------------------------------
 
 
+
+{-|
+
+e.g. @Student Of Warfare@: 
+
+@
+      {
+        "artist": "Volkan Baga",
+        "cmc": 1,
+        "colorIdentity": [
+          "W"
+        ],
+        "colors": [
+          "White"
+        ],
+        "foreignNames": [
+          {
+            "language": "French",
+            "name": "Étudiante de la guerre",
+            "multiverseid": 215684
+          },
+          {
+            "language": "Russian",
+            "name": "Ученица Войны",
+            "multiverseid": 215932
+          },
+          {
+            "language": "Chinese Simplified",
+            "name": "战场修练者",
+            "multiverseid": 216180
+          },
+          {
+            "language": "Italian",
+            "name": "Studentessa della Guerra",
+            "multiverseid": 216428
+          },
+          {
+            "language": "Japanese",
+            "name": "闘争の学び手",
+            "multiverseid": 216676
+          },
+          {
+            "language": "Portuguese (Brazil)",
+            "name": "Estudante de Guerra",
+            "multiverseid": 216924
+          },
+          {
+            "language": "Spanish",
+            "name": "Estudiante de la guerra",
+            "multiverseid": 217172
+          },
+          {
+            "language": "German",
+            "name": "Student der Kriegskunst",
+            "multiverseid": 217420
+          }
+        ],
+        "id": "bc1027406aafcdc50fa60fbfec02184a65b51a71",
+        "imageName": "student of warfare",
+        "layout": "leveler",
+        "legalities": [
+          {
+            "format": "Commander",
+            "legality": "Legal"
+          },
+          {
+            "format": "Legacy",
+            "legality": "Legal"
+          },
+          {
+            "format": "Modern",
+            "legality": "Legal"
+          },
+          {
+            "format": "Vintage",
+            "legality": "Legal"
+          },
+          {
+            "format": "Zendikar Block",
+            "legality": "Legal"
+          }
+        ],
+        "manaCost": "{W}",
+        "mciNumber": "47",
+        "multiverseid": 193598,
+        "name": "Student of Warfare",
+        "number": "47",
+        "originalText": "Level up {W} ({W}: Put a level counter on this. Level up only as a sorcery.)\nLEVEL 2-6\n3/3\nFirst strike\nLEVEL 7+\n4/4\nDouble strike",
+        "originalType": "Creature — Human Knight",
+        "power": "1",
+        "printings": [
+          "ROE"
+        ],
+        "rarity": "Rare",
+        "rulings": [
+          {
+            "date": "2010-06-15",
+            "text": "The abilities a leveler grants to itself don't overwrite any other abilities it may have. In particular, they don't overwrite the creature's level up ability; it always has that."
+          },
+          {
+            "date": "2010-06-15",
+            "text": "Effects that set a leveler's power or toughness to a specific value, including the effects from a level symbol's ability, apply in timestamp order. The timestamp of each level symbol's ability is the same as the timestamp of the leveler itself, regardless of when the most recent level counter was put on it."
+          },
+          {
+            "date": "2010-06-15",
+            "text": "Effects that modify a leveler's power or toughness, such as the effects of Giant Growth or Glorious Anthem, will apply to it no matter when they started to take effect. The same is true for counters that change the creature's power or toughness (such as +1/+1 counters) and effects that switch its power and toughness."
+          },
+          {
+            "date": "2010-06-15",
+            "text": "If another creature becomes a copy of a leveler, all of the leveler's printed abilities — including those represented by level symbols — are copied. The current characteristics of the leveler, and the number of level counters on it, are not. The abilities, power, and toughness of the copy will be determined based on how many level counters are on the copy."
+          },
+          {
+            "date": "2010-06-15",
+            "text": "A creature's level is based on how many level counters it has on it, not how many times its level up ability has been activated or has resolved. If a leveler gets level counters due to some other effect (such as Clockspinning) or loses level counters for some reason (such as Vampire Hexmage), its level is changed accordingly."
+          }
+        ],
+        "subtypes": [
+          "Human",
+          "Knight"
+        ],
+        "text": "Level up {W} ({W}: Put a level counter on this. Level up only as a sorcery.)\nLEVEL 2-6\n3/3\nFirst strike\nLEVEL 7+\n4/4\nDouble strike",
+        "toughness": "1",
+        "type": "Creature — Human Knight",
+        "types": [
+          "Creature"
+        ]
+      },
+@
+
+pOracleLeveler
+  :: forall p.
+    ( TokenParsing p
+    )
+  => p Oracle
+pOracleLeveler = _
+-}
+
 {-|
 
 
 @
  Trifecta.parseString pOracle mempty "{T}: Tap target creature.\nWhenever you cast a white spell, you may untap ~."
 @
-
 
 
 -}

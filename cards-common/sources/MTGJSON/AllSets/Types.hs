@@ -1,5 +1,6 @@
-{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE OverloadedStrings #-}
 
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DataKinds #-}
 
 {-|
@@ -7,13 +8,179 @@
 -}
 module MTGJSON.AllSets.Types where
 
-{-
-
-import MTGJSON.AllSets.Kinds
 import MTGJSON.Extra
+import MTGJSON.AllSets.Schema (SetObject(..))
 import MTGJSON.Types
 
+import MTGJSON.Known
+
 ----------------------------------------  
+
+{-
+
+e.g.
+
+@
+type KnownEdition        = Edition 'Identity'
+
+type UnknownEdition      = Edition ('Const' Text)
+
+type RecognizableEdition = Edition 'Recognizable'
+@
+
+-}
+data Edition f card = Edition 
+  { _Edition_name               :: f Text
+    -- ^ "Nemesis",
+    -- The name of the set
+  , _Edition_releaseDate        :: f Date
+   -- ^ "2000-02-14"
+   -- When the set was released (YYYY-MM-DD)
+   -- For promo sets, the date the first card was released.
+  , _Edition_border             :: f Border
+   -- ^ "black",
+    -- The type of border on the cards
+  , _Edition_type               :: f EditionType
+   -- ^ 
+  , _Edition_block              :: f Block
+   -- ^ The block this set is in
+  , _Edition_booster            :: f Booster  -- ^ [ "rare", ... ],
+   -- // Booster contents for this set
+
+  , _Edition_codes              :: EditionCodes
+    -- ^ 
+  , _Edition_onlineOnly         :: WhetherOffline
+   -- ^ if the set was only released online
+
+  , _Edition_cards              :: [card]   -- ^ [ {}, {}, {}, ... ]    -- ^ 
+
+  } -- deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+
+----------------------------------------
+
+data EditionCodes = EditionCodes
+ { _Edition_primaryCode        :: Text
+   -- ^ e.g. "NMS"
+   -- The set's abbreviated code
+ , _Edition_gathererCode       :: Text
+   -- ^ e.g. "NE"
+   -- The code that Gatherer uses for the set.
+   -- Normally identical to '_Edition_primaryCode'. 
+ , _Edition_oldCode            :: Text
+  -- ^ e.g. "NEM"
+  -- The (deprecated) old-style code, used by some Magic software.
+  -- Normally identical to ' _Edition_'gathererCode' (or '_Edition_primaryCode')
+ , _Edition_magicCardsInfoCode :: Maybe Text
+  -- ^ e.g. "ne"
+  -- The code that magiccards.info uses for the set.
+  -- @Nothing@ if absent from @magiccards.info@. 
+  -- Normally identical to ' _Edition_'gathererCode' (or '_Edition_primaryCode')
+ 
+ } deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+
+instance IsString (EditionCodes ) where
+  fromString = fromString > simpleEditionCodes
+
+simpleEditionCodes :: Text -> EditionCodes
+simpleEditionCodes t = EditionCodes t t t (Just t) 
+
+getEditionCodes :: SetObject -> EditionCodes
+getEditionCodes SetObject{..} = EditionCodes{..}
+ where
+ _Edition_primaryCode        = _SetObject_code
+ 
+ _Edition_gathererCode       = _SetObject_gathererCode
+   & fromMaybe _Edition_primaryCode
+
+ _Edition_oldCode            = _SetObject_oldCode
+   & fromMaybe _Edition_gathererCode
+
+ _Edition_magicCardsInfoCode = _SetObject_magicCardsInfoCode
+   & id
+   -- TODO & fromMaybe _Edition_gathererCode
+
+----------------------------------------
+
+data WhetherOffline
+ = OfflineToo
+ | OnlineOnly
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Data,Generic,NFData,Hashable,Enumerable)
+
+toWhetherOffline :: Bool -> WhetherOffline
+toWhetherOffline = \case
+  False -> OfflineToo
+  True  -> OnlineOnly
+  
+----------------------------------------
+
+{-| 
+
+"Each item in the array is either a string representing the type of booster card or an array of strings representing possible types for that booster card" 
+
+e.g.
+
+@
+[
+      [
+        "rare",
+        "mythic rare"
+      ],
+      "uncommon",
+      "uncommon",
+      "uncommon",
+      "common",
+      "common",
+      "common",
+      "common",
+      "common",
+      "common",
+      "common",
+      "common",
+      "common",
+      "common",
+]
+@
+
+-}
+newtype Booster = Booster
+ { getBooster :: [BoosterSlot]
+ }
+ deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+
+{- | TODO 'fromList' calls 'list2booster', which only builds one case. 
+.
+
+@[]@ becomes ''.
+
+-}
+instance IsList Booster where
+  type Item Booster = BoosterSlot
+  toList   = getBooster
+  fromList = list2booster
+
+list2booster :: [BoosterSlot] -> Booster
+list2booster = Booster
+
+{-| 
+
+
+e.g.
+
+@
+[
+
+]
+@
+
+-}
+data BoosterSlot
+ = BoosterSlot
+ deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+
+
+----------------------------------------
+
+{-
 
 data Card (f :: CHARACTERISTIC -> *) = Card
   { _identifier    :: f 'IDENTIFIER

@@ -66,14 +66,14 @@ data SetObject = SetObject
   { _SetObject_name               :: Text  -- ^ "Nemesis",       // The name of the set
   , _SetObject_code               :: Text  -- ^ "NMS",           // The set's abbreviated code
   , _SetObject_gathererCode       :: Maybe Text  -- ^ "NE",            // The code that Gatherer uses for the set. Only present if different than 'code'
-  -- , _SetObject_oldCode            :: Maybe Text  -- ^ "NEM",           // An old style code used by some Magic software. Only present if different than 'gathererCode' and 'code'
+  , _SetObject_oldCode            :: Maybe Text  -- ^ "NEM",           // An old style code used by some Magic software. Only present if different than 'gathererCode' and 'code'
  , _SetObject_magicCardsInfoCode :: Maybe Text  -- ^ "ne",            // The code that magiccards.info uses for the set. Only present if magiccards.info has this set
-  -- , _SetObject_releaseDate        :: Maybe Text  -- ^ "2000-02-14"     // When the set was released (YYYY-MM-DD). For promo sets, the date the first card was released.
-  -- , _SetObject_border             :: Text  -- ^ "black",         // The type of border on the cards, either "white", "black" or "silver"
-  -- , _SetObject_type               :: Text  -- ^ "expansion",     // Type of set. One of: "core", "expansion", "reprint", "box", "un", "from the vault", "premium deck", "duel deck", "starter", "commander", "planechase", "archenemy","promo", "vanguard", "masters", "conspiracy", "masterpiece"
-  -- , _SetObject_block              :: Maybe Text  -- ^ "Masques",       // The block this set is in,
-  -- , _SetObject_onlineOnly         :: Maybe Bool  -- ^ false,           // Present and set to true if the set was only released online
-  -- , _SetObject_booster            :: Maybe MagicBoosterObject  -- ^ [ "rare", ... ], // Booster contents for this set, see below for details
+ , _SetObject_releaseDate        :: Maybe Text  -- ^ "2000-02-14"     // When the set was released (YYYY-MM-DD). For promo sets, the date the first card was released.
+ , _SetObject_border             :: Text  -- ^ "black",         // The type of border on the cards, either "white", "black" or "silver"
+ , _SetObject_type               :: Text  -- ^ "expansion",     // Type of set. One of: "core", "expansion", "reprint", "box", "un", "from the vault", "premium deck", "duel deck", "starter", "commander", "planechase", "archenemy","promo", "vanguard", "masters", "conspiracy", "masterpiece"
+ , _SetObject_block              :: Maybe Text  -- ^ "Masques",       // The block this set is in,
+ , _SetObject_onlineOnly         :: Maybe Bool  -- ^ false,           // Present and set to true if the set was only released online
+ , _SetObject_booster            :: Maybe MagicBoosterObject  -- ^ [ "rare", ... ], // Booster contents for this set, see below for details
   , _SetObject_cards              :: [CardObject]   -- ^ [ {}, {}, {}, ... ]  
   } deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable )
 instance FromJSON SetObject where
@@ -180,16 +180,6 @@ data CardForeignPrintingObject = CardForeignPrintingObject
   } deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable )
 instance FromJSON CardForeignPrintingObject where
   parseJSON = parseJSON_TypePrefix
-
-{-| 
-
--}
-data CardRulingObject = CardRulingObject 
-  { _CardRulingObject_date :: Text -- NOTE time-UTCTime / time-Day / etc have no Generic instance
-  , _CardRulingObject_text :: Text 
-  } deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable )
-instance FromJSON CardRulingObject where
-  parseJSON = parseJSON_TypePrefix
   
 {-| 
 
@@ -199,6 +189,16 @@ data CardFormatLegalityObject = CardFormatLegalityObject
   , _CardFormatLegalityObject_legality :: Text 
   } deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable )
 instance FromJSON CardFormatLegalityObject where
+  parseJSON = parseJSON_TypePrefix
+
+{-| 
+
+-}
+data CardRulingObject = CardRulingObject 
+  { _CardRulingObject_date :: Text -- NOTE time-UTCTime / time-Day / etc have no Generic instance
+  , _CardRulingObject_text :: Text 
+  } deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable )
+instance FromJSON CardRulingObject where
   parseJSON = parseJSON_TypePrefix
 
 ----------------------------------------

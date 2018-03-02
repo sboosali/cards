@@ -278,6 +278,14 @@ show' = show > toS
 
 ----------------------------------------
 
+fromPredicate
+  :: (a -> Bool)
+  -> (a -> Maybe a)
+fromPredicate p x =
+  if   p x
+  then Just x
+  else Nothing 
+
 either2validation' :: Either e a -> Validation (NonEmpty e) a
 either2validation' = validationNel
 
@@ -308,3 +316,4 @@ predicateDisjunctionOfConjunctions predicates
   = \c -> any (all ($ c)) predicates
 
 ----------------------------------------
+
