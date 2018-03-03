@@ -46,6 +46,8 @@ extra-source-files:
 ----------------------------------------
 
 data-files:
+  data/json/AllSets-x.json
+  data/json/RealSets-x.json
   data/json/RealSets-y.json
   data/json/SetList.json
   data/json/version.json
@@ -117,9 +119,14 @@ library
  exposed-modules:
 
                  -- the repl loads only the first module
+                 REPL_Cards_Common
+
                  MTGJSON
                  MTGJSON.Types
                  MTGJSON.Kinds
+                 MTGJSON.Constants
+
+                 MTGJSON.Main 
 
                  MTGJSON.Known
                  MTGJSON.Known.Types
@@ -208,14 +215,17 @@ library
              , lens
 
 -- parsing
-             , trifecta
-             , parsers
+             , parsers  >= 0.12
+             , parsec
+             , trifecta >= 1.7
+                        -- 2.0
              , Earley >= 0.12
              , frisby >=0.2
 --             , megaparsec
 
 -- other packages 
              , aeson
+             , scientific
              , binary
              , file-embed
              , time

@@ -12,7 +12,8 @@ module MTGJSON
  , module MTGJSON.SetList
  , module MTGJSON.Version
 
- , module MTGJSON.Paths   
+ , module MTGJSON.Paths
+ --, module X
  -- , module MTGJSON.Macros
  ) where
 
@@ -32,5 +33,7 @@ import MTGJSON.SetList
 
 import MTGJSON.Paths
 --import MTGJSON.Macros
+
+-- import MTGJSON.Main as X
 
 ----------------------------------------

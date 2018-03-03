@@ -3,26 +3,51 @@
 
 module MTGJSON.AllSets.Lens where
 
-{-
 
 import MTGJSON.AllSets.Types 
+import MTGJSON.AllSets.Schema 
 import MTGJSON.Extra (concatenateA) 
 
 import Control.Lens hiding ((<&>)) -- (makeLenses,makePrisms) 
 
+{-
 -}
 
 ----------------------------------------
 -- generated
 
--- concatenateA makeLenses
---   [ ''CardData
---   ]
---   --NOTE ``Expecting one more argument to ‘CardData’``
+-- Lenses
+concatenateA makeLenses
+  [ ''EditionData
+  , ''EditionCodes
+  ]
 
--- concatenateA makePrisms
---   [ ''NumericCharacteristic
---   ]  
+-- Prisms
+concatenateA makePrisms
+  [ ''WhetherOffline
+  , ''Booster
+  , ''BoosterSlot
+  , ''SlotType
+  , ''ProbabilityDistribution
+  ]  
+
+----------------------------------------
+-- generated
+
+-- Lenses
+concatenateA makeLenses
+  [ ''SetObject
+  , ''CardObject
+  , ''CardForeignPrintingObject 
+  , ''CardRulingObject
+  , ''CardFormatLegalityObject
+  ]
+
+-- Prisms
+concatenateA makePrisms
+  [ ''SetsObject
+  , ''MagicBoosterSlotObject 
+  ]  
 
 ----------------------------------------
 -- derived

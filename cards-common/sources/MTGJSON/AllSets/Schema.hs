@@ -9,6 +9,7 @@ module MTGJSON.AllSets.Schema where
 import MTGJSON.Extra -- hiding (ByteString)
 
 import MTGJSON.Aeson
+import Data.Scientific (Scientific)
 
 import Data.Aeson (eitherDecode) --, eitherDecode') 
 import Data.Aeson.Types
@@ -69,7 +70,7 @@ data SetObject = SetObject
   , _SetObject_oldCode            :: Maybe Text  -- ^ "NEM",           // An old style code used by some Magic software. Only present if different than 'gathererCode' and 'code'
  , _SetObject_magicCardsInfoCode :: Maybe Text  -- ^ "ne",            // The code that magiccards.info uses for the set. Only present if magiccards.info has this set
  , _SetObject_releaseDate        :: Maybe Text  -- ^ "2000-02-14"     // When the set was released (YYYY-MM-DD). For promo sets, the date the first card was released.
- , _SetObject_border             :: Text  -- ^ "black",         // The type of border on the cards, either "white", "black" or "silver"
+ , _SetObject_border             :: Maybe Text  -- ^ "black",         // The type of border on the cards, either "white", "black" or "silver"
  , _SetObject_type               :: Text  -- ^ "expansion",     // Type of set. One of: "core", "expansion", "reprint", "box", "un", "from the vault", "premium deck", "duel deck", "starter", "commander", "planechase", "archenemy","promo", "vanguard", "masters", "conspiracy", "masterpiece"
  , _SetObject_block              :: Maybe Text  -- ^ "Masques",       // The block this set is in,
  , _SetObject_onlineOnly         :: Maybe Bool  -- ^ false,           // Present and set to true if the set was only released online
@@ -127,7 +128,7 @@ data CardObject = CardObject
   , _CardObject_layout        :: Maybe Text 
   , _CardObject_names         :: Maybe [Text] 
   , _CardObject_manaCost      :: Maybe Text 
-  , _CardObject_cmc           :: Natural 
+  , _CardObject_cmc           :: Scientific -- Natural 
   , _CardObject_colors        :: Maybe [Text] 
   , _CardObject_colorIdentity :: Maybe [Text] 
   , _CardObject_type          :: Text 

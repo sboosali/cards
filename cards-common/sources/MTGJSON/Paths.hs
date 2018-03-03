@@ -29,7 +29,8 @@ import Prelude.Spiros --((&))
 
 -- | known data (in the @data-files: ...@ stanza of the @.cabal@).  
 data DATA_FILE
-  = CardsDataFile
+  = AllDataFile
+  | CardsDataFile
   | SetsDataFile
   | VersionDataFile
   deriving (Show)
@@ -39,10 +40,10 @@ data DATA_FILE
 -- | relative filepath for a @data-file@.
 relativeDataFilePath :: DATA_FILE -> FilePath
 relativeDataFilePath = \case
-  CardsDataFile   -> "data/json/RealSets-y.json"
+  AllDataFile     -> "data/json/AllSets-x.json"
+  CardsDataFile   -> "data/json/RealSets-x.json"
   SetsDataFile    -> "data/json/SetList.json"
   VersionDataFile -> "data/json/version.json"
-  -- "data/json/AllSets-x.json"
   
 -- | absolute filepath for a @data-file@.
 absoluteDataFilePath :: DATA_FILE -> IO FilePath
@@ -54,6 +55,8 @@ readDataFile = absoluteDataFilePath >=> B.readFile
 ---------------------------------------
 
 {-| wraps 'getDataFileName' and 'embedFile'.
+
+use as a macro.
 
 -}
 embedDataFile
