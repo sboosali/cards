@@ -501,6 +501,8 @@ myOverlaysWith = pkgs: self: super: let
 
     trifecta = prefetched_ ./trifecta.json;
     parsers = prefetched_ ./parsers.json;
+
+    foldl = prefetched_ ./foldl.json;
     
     megaparsec = github {
       owner  = "mrkkrp";

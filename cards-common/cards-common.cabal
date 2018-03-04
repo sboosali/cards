@@ -82,6 +82,11 @@ library
     --   template-haskell >= 2.9 && < 2.13
  
  ghc-options:
+  -- Optimization...
+  -flate-dmd-anal
+   -- for `foldl`'s
+
+  -- Warnings...
   -Wall
   -Wcompat
 
@@ -149,6 +154,7 @@ library
                  MTGJSON.AllSets.Types
                  MTGJSON.AllSets.Core
                  MTGJSON.AllSets.Lens 
+                 MTGJSON.AllSets.Fold 
                  
                  MTGJSON.Aeson
                  MTGJSON.Example
@@ -177,6 +183,8 @@ library
             
                  Tokenize
                  Mixfix
+
+                 Control.Foldl.Summary
  
  other-modules:
 
@@ -213,6 +221,7 @@ library
 -- ekmett 
              , exceptions
              , lens
+             , profunctors
 
 -- parsing
              , parsers  >= 0.12
@@ -231,6 +240,7 @@ library
              , time
              , thyme
              , validation >= 1
+             , foldl >= 1.3
 
 ----------------------------------------
 
