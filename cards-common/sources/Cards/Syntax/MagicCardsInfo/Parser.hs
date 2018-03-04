@@ -495,7 +495,7 @@ gStatements = mdo
     boundary
     ["o","t","a"] 
 
-  {- ^ NOTE magiccards.info itself doesn't support strict equality for oracle text.
+  {- NOTE magiccards.info itself doesn't support strict equality for oracle text.
        e.g. `o!Flying`, French vanillas creatures that have no other text besides flying.
   -}
 

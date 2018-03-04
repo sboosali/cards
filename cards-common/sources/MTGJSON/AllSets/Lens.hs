@@ -27,8 +27,9 @@ concatenateA makePrisms
   [ ''WhetherOffline
   , ''Booster
   , ''BoosterSlot
-  , ''SlotType
   , ''ProbabilityDistribution
+  , ''GenericSlot'
+  , ''GenericSlot
   ]  
 
 ----------------------------------------

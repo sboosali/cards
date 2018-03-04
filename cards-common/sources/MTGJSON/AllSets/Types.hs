@@ -29,7 +29,9 @@ type RecognizableEdition = Edition 'Recognizable'
 @
 
 -}
-data Edition f card = Edition 
+data EditionData f = EditionData
+-- data Edition f card = Edition
+
   { _Edition_name               :: f Text
     -- ^ "Nemesis",
     -- The name of the set
@@ -52,31 +54,33 @@ data Edition f card = Edition
   , _Edition_onlineOnly         :: WhetherOffline
    -- ^ if the set was only released online
 
+  {-
   , _Edition_cards              :: [card]   -- ^ [ {}, {}, {}, ... ]    -- ^ 
-
-  } -- deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+  -}
+  
+  } -- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 ----------------------------------------
 
 data EditionCodes = EditionCodes
- { _Edition_primaryCode        :: Text
-   -- ^ e.g. "NMS"
+ { _Edition_primaryCode        :: !(Text)
+   -- ^ TODO e.g. "NMS"
    -- The set's abbreviated code
- , _Edition_gathererCode       :: Text
+ , _Edition_gathererCode       :: !(Text)
    -- ^ e.g. "NE"
    -- The code that Gatherer uses for the set.
    -- Normally identical to '_Edition_primaryCode'. 
- , _Edition_oldCode            :: Text
+ , _Edition_oldCode            :: !(Text)
   -- ^ e.g. "NEM"
   -- The (deprecated) old-style code, used by some Magic software.
   -- Normally identical to ' _Edition_'gathererCode' (or '_Edition_primaryCode')
- , _Edition_magicCardsInfoCode :: Maybe Text
+ , _Edition_magicCardsInfoCode :: !(Maybe Text)
   -- ^ e.g. "ne"
   -- The code that magiccards.info uses for the set.
   -- @Nothing@ if absent from @magiccards.info@. 
   -- Normally identical to ' _Edition_'gathererCode' (or '_Edition_primaryCode')
  
- } deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+ } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 instance IsString (EditionCodes ) where
   fromString = fromString > simpleEditionCodes
@@ -97,14 +101,15 @@ getEditionCodes SetObject{..} = EditionCodes{..}
 
  _Edition_magicCardsInfoCode = _SetObject_magicCardsInfoCode
    & id
-   -- TODO & fromMaybe _Edition_gathererCode
+   -- TODO don't default on absence
+   -- & fromMaybe _Edition_gathererCode
 
 ----------------------------------------
 
 data WhetherOffline
  = OfflineToo
  | OnlineOnly
- deriving (Show,Read,Eq,Ord,Enum,Bounded,Data,Generic,NFData,Hashable,Enumerable)
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable,Enumerable)
 
 toWhetherOffline :: Bool -> WhetherOffline
 toWhetherOffline = \case
@@ -145,7 +150,7 @@ e.g.
 newtype Booster = Booster
  { getBooster :: [BoosterSlot]
  }
- deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {- | TODO 'fromList' calls 'list2booster', which only builds one case. 
 .
@@ -168,15 +173,192 @@ e.g.
 
 @
 [
-
+  "rare",
+  "mythic rare"
 ]
 @
 
--}
-data BoosterSlot
- = BoosterSlot
- deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+all unique values of booster slots, from @AllSets-x.json@:
 
+@
+["Steamflogger Boss","land"]
+["checklist","land"]
+["checklist","marketing"]
+["common"]
+["common","double faced mythic rare","double faced rare"]
+["common","timeshifted common"]
+["double faced"]
+["double faced common","double faced uncommon"]
+["draft-matters"]
+["foil","power nine"]
+["foil common","foil mythic rare","foil rare","foil uncommon"]
+["land"]
+["marketing"]
+["mythic rare","rare"]
+["rare"]
+["rare","timeshifted rare"]
+["rare","uncommon"]
+["timeshifted common"]
+["timeshifted purple"]
+["timeshifted rare","timeshifted uncommon"]
+["timeshifted uncommon","uncommon"]
+["token"]
+["uncommon"]
+["urza land"]
+@
+
+of which of these are not completely irrelevant for drafting:
+
+@
+["Steamflogger Boss","land"]
+["common"]
+["common","double faced mythic rare","double faced rare"]
+["common","timeshifted common"]
+["double faced"]
+["double faced common","double faced uncommon"]
+["draft-matters"]
+["foil","power nine"]
+["foil common","foil mythic rare","foil rare","foil uncommon"]
+["land"]
+["mythic rare","rare"]
+["rare"]
+["rare","timeshifted rare"]
+["rare","uncommon"]
+["timeshifted common"]
+["timeshifted purple"]
+["timeshifted rare","timeshifted uncommon"]
+["timeshifted uncommon","uncommon"]
+["uncommon"]
+["urza land"]
+@
+
+and of which these are actually relevant for drafting:
+
+@
+["mythic rare","rare"]
+["rare"]
+["uncommon"]
+["common"]
+["land"]
+
+["foil common","foil mythic rare","foil rare","foil uncommon"]
+
+["double faced"]
+["common","double faced mythic rare","double faced rare"]
+["double faced common","double faced uncommon"]
+
+["draft-matters"]
+
+["power nine"]
+
+["rare","timeshifted rare"]
+["uncommon","timeshifted uncommon"]
+["common","timeshifted common"]
+["timeshifted purple"]
+
+["urza land"]
+@
+
+-}
+newtype BoosterSlot = BoosterSlot
+  { getBoosterSlot :: (ProbabilityDistribution GenericSlot')
+  } 
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+
+{-| 
+
+e.g.
+
+all unique slot types, from @AllSets-x.json@:
+
+@
+"Steamflogger Boss"
+"checklist"
+"common"
+"double faced"
+"double faced common"
+"double faced mythic rare"
+"double faced rare"
+"double faced uncommon"
+"draft-matters"
+"foil"
+"foil common"
+"foil mythic rare"
+"foil rare"
+"foil uncommon"
+"land"
+"marketing"
+"mythic rare"
+"power nine"
+"rare"
+"timeshifted common"
+"timeshifted purple"
+"timeshifted rare"
+"timeshifted uncommon"
+"token"
+"uncommon"
+"urza land"
+@
+
+and of which these are actually relevant for drafting:
+
+@
+"foil"
+"mythic rare"
+"rare"
+"uncommon"
+"common"
+"land"
+
+"foil common"
+"foil mythic rare"
+"foil rare"
+"foil uncommon"
+
+"double faced"
+"double faced common"
+"double faced mythic rare"
+"double faced rare"
+"double faced uncommon"
+
+"draft-matters"
+
+"power nine"
+
+"timeshifted common"
+"timeshifted purple"
+"timeshifted rare"
+"timeshifted uncommon"
+
+"urza land"
+@
+
+
+-}
+data GenericSlot'
+  = GenericSlot GenericSlot
+  | FoilSlot    GenericSlot
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
+
+data GenericSlot
+  = RaritySlot      Rarity
+  | LandSlot        Rarity
+  | UrzaLandSlot    Rarity
+  | DoubleFacedSlot Rarity
+  | TimeshiftedSlot Rarity
+  | DraftMattersSlot 
+  | PowerNineSlot 
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,Enumerable)
+
+displayGenericSlot :: Print GenericSlot
+displayGenericSlot = \case
+  
+----------------------------------------
+
+data ProbabilityDistribution a
+ -- = ProbabilityDistribution
+ = UniformDistribution (NonEmpty a) --TODO
+ deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 ----------------------------------------
 
@@ -221,7 +403,7 @@ data Card (f :: CHARACTERISTIC -> *) = Card
   , _originalText  :: f 'TEXT
   , _originalType  :: f 'TEXT
   , _foreignNames  :: [f 'FOREIGNVARIATION]
-  } -- deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+  } -- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 ----------------------------------------
 
@@ -318,7 +500,7 @@ data CardData = CardData
   , _CardData_originalText  :: Maybe CardText 
   , _CardData_originalType  :: Maybe CardTypeLine 
   , _CardData_foreignNames  :: [CardForeignPrinting] 
-  } deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+  } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-
 
@@ -350,7 +532,7 @@ on the "south east" corner of a card.
 data NumericCharacteristic  
   = BodyCharacteristic    (Body    )
   | LoyaltyCharacteristic (Loyalty ) 
-  deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-|  
 
@@ -361,14 +543,14 @@ Body { bodyPower = Literal Wildcard, bodyToughness = Arithmetic Addition [Litera
 data Body  = Body
   { power     :: Integer
   , toughness :: Integer
-  } deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+  } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 
 data Arithmetic
   = Addition
   | Subtraction
  -- data Operator = Addition
- deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-|
 e.g. /Tarmogoyf/:
@@ -383,16 +565,16 @@ data Printed
  = Literal Integer
  | Operator Arithmetic [Printed]
  | Wildcard -- ^ e.g. @*/*+1@. the @*@'s are the same. 
- deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 data Loyalty = Loyalty
  { getLoyalty :: Integer
- } deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+ } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
   
 --   -- ^ the printed number, the most frequent case. can be negative: e.g. Char-Rumbler, which has a power of @'CardIntegerNumber' -1@. (Un-cards can have non-integer power/toughness, which we're ignoring)
 
 --   -- ^ the integer represents the modifier: @1@ is @\*+1@, @0@ is just @\*@. e.g. Tarmogoyf has a power of  @'CardWildcardNumber' 0@ and a toughness of @'CardWildcardNumber' 1@. 
---   deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable) 
+--   deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable) 
 
 ----------------------------------------
 
@@ -407,7 +589,7 @@ data CardTypes = CardTypes
   { _CardTypes_supertypes :: [CardSupertype] 
   , _CardTypes_types      :: NonEmpty CardType 
   , _CardTypes_subtypes   :: [CardSubtype] 
-  } deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+  } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-| most non-creature cards have a single card type, without supertypes or subtypes. 
 
@@ -426,7 +608,7 @@ defaultCardTypes t = CardTypes{..}
 data CardSupertype
   = KnownCardSupertype KnownCardSupertype 
   | UnknownCardSupertype Text 
-  deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-| 
 
@@ -434,7 +616,7 @@ data CardSupertype
 data CardType
  = KnownCardType KnownCardType 
  | UnknownCardType Text 
-  deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-| 
 
@@ -442,7 +624,7 @@ data CardType
 data CardSubtype 
   = KnownCardSubtype KnownCardSubtype 
   | UnknownCardSubtype Text 
-  deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 ----------------------------------------
 
@@ -450,7 +632,7 @@ data CardSubtype
 
 -}
 newtype ConvertedManaCost = ConvertedManaCost Natural 
-  deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-| the unique card identifier. 
 
@@ -458,67 +640,67 @@ for each set in @AllSets.json@, every card has an identifier that distinct from 
 
 -}
 data CardId = CardId Text 
-  deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-| 
 
 -}
 data CardName = CardName Text 
-  deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-| 
 
 -}
 data ManaCost = ManaCost Text 
-  deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-|  
 
 -}
 data CardColor = CardColor Text 
-  deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-| 
 
 -}
 data CardTypeLine = CardTypeLine Text 
-  deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-| 
 
 -}
 data OracleText = OracleText Text 
-  deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable) 
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable) 
 
 {-| 
 
 -}
 data CardText = CardText Text 
-  deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable) 
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable) 
 
 {-| 
 
 -}
 data CardColorIdentity = CardColorIdentity Text 
-  deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-| 
 
 -}
 data CardWholeName = CardWholeName Text 
-  deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-| 
 
 -}
 data CardLayout = CardLayout Text 
-  deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-| 
 
 -}
 data CardWatermark = CardWatermark Text 
-  deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 ----------------------------------------
 
@@ -531,43 +713,43 @@ data KnownCardRarity
   | Rare 
   | Mythic 
   | Timeshifted -- TODO
-  deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Data,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable)
   
 {-| 
 
 -}
 newtype CardFlavorText = CardFlavorText Text 
- deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable) 
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable) 
 
 {-| 
 
 -}
 newtype CardArtist = CardArtist Text 
-  deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-| 
 
 -}
 data CardCollectorNumber = CardCollectorNumber Text 
-  deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-| the Multiverse ID, used by `gather.wizards.com`. 
 
 -}
 data WizardsIdentifier = WizardsIdentifier Text 
-  deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-| used by `MagicCards.info`, almost always identical to '_CardData_number' 
 
 -}
 data MagicCardsInfoIdentifier = MagicCardsInfoIdentifier Text 
-  deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-| 
 
 -}
 data CardSetCode = CardSetCode Text 
-  deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 ----------------------------------------
 
@@ -578,7 +760,7 @@ data CardForeignPrinting = CardForeignPrinting
   { _CardForeignPrinting_language     :: KnownLanguage 
   , _CardForeignPrinting_name         :: CardName 
   , _CardForeignPrinting_multiverseid :: WizardsIdentifier 
-  } deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+  } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-| 
 
@@ -586,7 +768,7 @@ data CardForeignPrinting = CardForeignPrinting
 data CardRuling = CardRuling 
   { _CardRuling_date :: Text -- TODO Day needs a hashable instance 
   , _CardRuling_text :: Text 
-  } deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+  } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-| 
 
@@ -594,13 +776,13 @@ data CardRuling = CardRuling
 data CardFormatLegality = CardFormatLegality 
   { _CardFormatLegality_format   :: KnownMagicFormat 
   , _CardFormatLegality_legality :: KnownMagicLegality 
-  } deriving (Show,Read,Eq,Ord,Generic,Data,NFData,Hashable)
+  } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 {-| 
 
 -}
 data KnownMagicFormat = KnownMagicFormat Text -- TODO 
-  deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 ----------------------------------------
 
@@ -611,7 +793,7 @@ data KnownMagicLegality
   = Legal 
   | Restricted 
   | Banned 
-  deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Data,NFData,Hashable)
+  deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable)
 
 {-| 
 
@@ -619,17 +801,17 @@ data KnownMagicLegality
 data KnownLanguage
     = LanguageEN
     | LanguageES 
-    deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Data,NFData,Hashable)
+    deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable)
 
 data KnownCardSupertype 
     = TribalSupertype 
     | SnowSupertype 
-    deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Data,NFData,Hashable)
+    deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable)
 
 data KnownCardType 
     = InstantType 
     | SorceryType 
-    deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,Data,NFData,Hashable)
+    deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic,NFData,Hashable)
 
 type KnownCardSubtype = Text -- TODO 
 

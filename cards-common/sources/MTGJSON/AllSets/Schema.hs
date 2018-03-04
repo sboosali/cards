@@ -119,9 +119,20 @@ instance FromJSON MagicBoosterSlotObject where
     { sumEncoding = UntaggedValue
     }
 
+fromMagicBoosterSlotObject :: MagicBoosterSlotObject -> [Text]
+fromMagicBoosterSlotObject = \case
+ MagicBoosterSlotObjectSingle   x  -> [x] 
+ MagicBoosterSlotObjectMultiple xs -> xs
+
 ----------------------------------------
 -- CardObject
 
+{-| this schema is pretty loose,
+which is necessary to be able to parse the full @AllSets-x.json@. 
+
+generalizes CMC from Natural to Scientific for Un-sets.
+
+-}
 data CardObject = CardObject 
   { _CardObject_id            :: Text 
   , _CardObject_name          :: Text 

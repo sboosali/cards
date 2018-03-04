@@ -38,6 +38,7 @@ import           "foldl" Control.Foldl (Fold(..))
 ----------------------------------------
 -- Summarizer
 
+{-
 summarizeCards
   :: ( Foldable f
      )
@@ -52,6 +53,7 @@ type CardFold = Fold CardObject CardSummary
 
 cardFold :: Fold CardObject CardSummary
 cardFold = _ --CardSummary
+-}
 
 ----------------------------------------
 -- 

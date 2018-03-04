@@ -18,6 +18,7 @@ import              Data.List.NonEmpty as X (NonEmpty(..))
 import              Data.Aeson         as X (eitherDecode)
 import "validation" Data.Validation    as X (Validation(..))
 import              Data.Monoid        as X (First(..))
+import "scientific" Data.Scientific    as X (Scientific)
 
 ----------------------------------------
 
@@ -217,6 +218,9 @@ decoded :: (MonadFail m, J.FromJSON a) => ByteString -> m a
 decoded = J.eitherDecode > either fail return 
 
 ----------------------------------------
+
+unsafeNatural :: Integral i => i -> Natural
+unsafeNatural = fromIntegral
 
 n2i :: Natural -> Integer
 n2i = toInteger

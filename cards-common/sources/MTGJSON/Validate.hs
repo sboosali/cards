@@ -20,6 +20,8 @@ import MTGJSON.Printer.Finite
 import Enumerate.Function (invertInjection)
 --import Data.Validation
 
+import Data.Scientific
+
 import qualified Data.Set as Set
 
 import Data.List.NonEmpty (nonEmpty)
@@ -38,6 +40,7 @@ data CardError
  | BadName                  String
  | MustBeNatural            Integer
  | MustBeInteger            Double
+ | UnnaturalCMC             Scientific 
  | UnknownColor             String
  | UnknownEdition           String
  | UnknownRarity            String
@@ -689,11 +692,19 @@ validateTernaryFace f = \case
 ------------------------------------------
 
 validate_cmc
-  :: Natural
+  :: Scientific
   -> CardValidation CMC
-validate_cmc
-  = CMC
-  > success
+validate_cmc s = go s
+  where
+  go
+    = floatingOrInteger
+    > either (\(_::Double) -> Nothing) i2n
+    > maybe2validation (UnnaturalCMC s)
+    > fmap CMC
+
+-- validate_cmc
+--   = CMC
+--   > success
 
 ------------------------------------------
   
