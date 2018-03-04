@@ -101,7 +101,7 @@ options_StripTypePrefix proxy = defaultOptions
 {-| 
 
 >>> :set -XDeriveGeneric 
->>> data CardType = CardType { _CardType_theField :: ... } deriving (Generic) 
+>>> data CardType = CardType { _CardType_theField :: Bool } deriving (Generic) 
 >>> stripTypePrefixFromFieldLabel ([] :: [CardType]) "_CardType_theField"
 "theField"  
 
@@ -135,7 +135,7 @@ stripTypePrefixFromFieldLabel proxy = T.pack > go > T.unpack
 {-| 
 
 >>> :set -XDeriveGeneric 
->>> data CardType = CardType { _CardType_theField :: ... } deriving (Generic) 
+>>> data CardType = CardType { _CardType_theField :: Bool } deriving (Generic) 
 >>> dataTypeNameOf ([] :: [CardType])
 "CardType"  
 

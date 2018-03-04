@@ -34,19 +34,22 @@ displayEditionType = \case
  MasterpieceSet -> "masterpiece"
 
 ----------------------------------------
+
+-- numericTarmogoyf = NumericCreature (Body (SimpleNumeric NumericWildcard) (BinaryNumeric NumericAddition (SimpleNumeric (NumericLiteral 1)) (SimpleNumeric NumericWildcard)))
+-- displayNumeric numericTarmogoyf
+
+-- e.g.
+
+-- @
+-- > numericTarmogoyf = 'NumericCreature' ('Body' ('SimpleNumeric' 'NumericWildcard') ('BinaryNumeric' 'NumericAddition' ('SimpleNumeric' ('NumericLiteral' 1)) ('SimpleNumeric' 'NumericWildcard'))) :: 'Numeric' Int
+-- @
+
+
 {-|
 
-numericTarmogoyf = NumericCreature (Body (SimpleNumeric NumericWildcard) (BinaryNumeric NumericAddition (SimpleNumeric (NumericLiteral 1)) (SimpleNumeric NumericWildcard)))
-displayNumeric numericTarmogoyf
+e.g. @Tarmogoyf@'s power-toughness:
 
-e.g.
-
-@
-> numericTarmogoyf = 'NumericCreature' ('Body' ('SimpleNumeric' 'NumericWildcard') ('BinaryNumeric' 'NumericAddition' ('SimpleNumeric' ('NumericLiteral' 1)) ('SimpleNumeric' 'NumericWildcard'))) :: 'Numeric' Int
-@
-
->>> numericTarmogoyf = NumericCreature (Body (SimpleNumeric NumericWildcard) (BinaryNumeric NumericAddition (SimpleNumeric (NumericLiteral 1)) (SimpleNumeric NumericWildcard))) :: Numeric Int
->>> displayNumeric numericTarmogoyf
+>>> displayNumeric (NumericCreature (Body {_power = SimpleNumeric NumericWildcard, _toughness = BinaryNumeric NumericAddition (NumericConstant 1) NumericWildcard}) :: Numeric Int)
 "*/1+*"
 
 -}
@@ -384,10 +387,10 @@ language2endonym = languageInfo > _languageEndonym
 
 see 'edition2abbreviation' and 'language2abbreviation'. 
 
->>> displayQualifiedEdition $ QualifiedEdition Alpha Nothing
+>>> displayQualifiedEdition $ QualifiedEdition AL Nothing
 "al"
 
->>> displayQualifiedEdition $ QualifiedEdition Alpha (Just English)
+>>> displayQualifiedEdition $ QualifiedEdition AL (Just English)
 "al/en"
 
 -}

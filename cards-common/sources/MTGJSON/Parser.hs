@@ -148,15 +148,53 @@ trifecta
 -- trifecta :: forall a. (forall p. TokenParsing p => p a) -> String -> Result a
 trifecta p s = Trifecta.parseString p mempty s
 
-{-
 trifectaOracle
-  :: Name
+  :: Knicknames
   -> String
   -> Trifecta.Result Oracle
 -- trifecta :: forall a. (forall p. TokenParsing p => p a) -> String -> Result a
-trifectaOracle name =
-  trifecta (runReaderT pOracle name)
--}
+trifectaOracle ks =
+  trifecta (runReaderT pOracle ks)
+
+trifectaWith
+  :: e
+  -> (forall p.
+      ( TokenParsing p
+      , MonadFail p
+      , MonadReader e p, MonadPlus p
+      ) => p a
+     )
+  -> String
+  -> Trifecta.Result a
+-- trifecta :: forall a. (forall p. TokenParsing p => p a) -> String -> Result a
+trifectaWith e p =
+  trifecta (runReaderT p e)
+
+trifecta'
+  :: (forall p.
+      ( TokenParsing p
+      , MonadFail p
+      , MonadPlus p
+      -- NOTE required by a callee to satisfy `instance (TokenParsing m, MonadPlus m) => TokenParsing (ReaderT e m)`
+      ) => p a
+     )
+  -> String
+  -> Maybe a
+-- trifecta :: forall a. (forall p. TokenParsing p => p a) -> String -> Result a
+trifecta' p = trifecta p > result2maybe
+
+trifectaWith'
+  :: e
+  -> (forall p.
+      ( TokenParsing p
+      , MonadFail p
+      , MonadReader e p, MonadPlus p
+      ) => p a
+     )
+  -> String
+  -> Maybe a
+-- trifecta :: forall a. (forall p. TokenParsing p => p a) -> String -> Result a
+trifectaWith' e p = trifectaWith e p > result2maybe
 
 -- trifecta :: Parser a -> String -> Result a
 -- trifecta p = Trifecta.parseString p mempty
@@ -248,20 +286,7 @@ parseLayout = print2parse displayLayout
 
 {-|
 
-@
->>> let _BallynockTrapper = "{T}: Tap target creature.\nWhenever you cast a white spell, you may untap "
->>> parseOracle nameless (_BallynockTrapper <> "~") == parseOracle "Ballynock Trapper" (_BallynockTrapper <> "Ballynock Trapper")
-True
-@
-
-@
->>> parseOracle "{T}: Tap target creature.\nWhenever you cast a white spell, you may untap ~."
-Just (OracleFrames (OracleFrame [OracleParagraph [OracleSymbol (Right (MiscellaneousSymbol TapSymbol)),OraclePhrase [":","Tap","target","creature."]],OracleParagraph [OraclePhrase ["Whenever","you","cast","a","white","spell,","you","may","untap"],OracleNamesake,OraclePhrase ["."]]] :| []))
->>> parseOracle "Ballynock Trapper" "{T}: Tap target creature.\nWhenever you cast a white spell, you may untap Ballynock Trapper."
-@
-
-
-e.g. @Ballynock Trapper@
+e.g. @Ballynock Trapper@...
 
 oracle text:
 
@@ -277,25 +302,22 @@ a.k.a.
 Whenever you cast a white spell, you may untap ~.
 @
 
-doctests:
+links:
 
 @
--- with 'IsList' and 'IsString' sugar:
- 
+-- (doctest doesn't support hyperlinks)
+> 'OracleFrames' (('OracleFrame' ['OracleParagraph' ['OracleSymbol' "{T}", 'OraclePhrase' ": Tap target creature."], 'OracleParagraph' ['OraclePhrase' "Whenever you cast a white spell, you may untap ", 'OracleNamesake', 'OraclePhrase' "."]]) :|[])
+@
+
+doctests:
+
 >>> :set -XOverloadedLists
 >>> :set -XOverloadedStrings
->>> oracleBallynockTrapper = [['OracleSymbol' "{T}", ": Tap target creature."], ["Whenever you cast a white spell, you may untap ", 'OracleNamesake', "."]] :: Oracle
-
--- with explicit constructors:
-
->>> oracleBallynockTrapper_explicit = 'OracleFrames' (('OracleFrame' ['OracleParagraph' ['OracleSymbol' "{T}", 'OraclePhrase' ": Tap target creature."], 'OracleParagraph' ['OraclePhrase' "Whenever you cast a white spell, you may untap ", 'OracleNamesake', 'OraclePhrase' "."]]) :|[])
-
->>> oracleBallynockTrapper_explicit == oracleBallynockTrapper
+>>> let _BallynockTrapper = "{T}: Tap target creature.\nWhenever you cast a white spell, you may untap "
+>>> parseOracle knicknameless (_BallynockTrapper <> "~") == parseOracle "Ballynock Trapper" (_BallynockTrapper <> "Ballynock Trapper")
 True
-
->>> parseOracle "{T}: Tap target creature.\nWhenever you cast a white spell, you may untap ~." == oracleBallynockTrapper
-True
-
+>>> parseOracle knicknameless "{T}: Tap target creature.\nWhenever you cast a white spell, you may untap ~."
+Just (OracleFrames (OracleFrame [OracleParagraph [OracleSymbol (Right (MiscellaneousSymbol TapSymbol)),OraclePhrase [":","Tap","target","creature."]],OracleParagraph [OraclePhrase ["Whenever","you","cast","a","white","spell,","you","may","untap"],OracleNamesake,OraclePhrase ["."]]] :| []))
 
 e.g. @'vanilla'@
 
@@ -311,6 +333,14 @@ parseOracle :: Knicknames -> TParse Oracle
 parseOracle knicknames
   = parseOracleResult knicknames
   > result2maybe
+
+--   >>> oracleBallynockTrapper = [[OracleSymbol "{T}", ": Tap target creature."], ["Whenever you cast a white spell, you may untap ", OracleNamesake, "."]] :: Oracle  -- with 'IsList' and 'IsString' sugar
+-- >>> oracleBallynockTrapper_explicit = OracleFrames ((OracleFrame [OracleParagraph [OracleSymbol "{T}", OraclePhrase ": Tap target creature."], OracleParagraph [OraclePhrase "Whenever you cast a white spell, you may untap ", OracleNamesake, OraclePhrase "."]]) :|[])  -- with explicit constructors
+-- >>> oracleBallynockTrapper_explicit == oracleBallynockTrapper
+-- True
+-- >>> parseOracle "{T}: Tap target creature.\nWhenever you cast a white spell, you may untap ~." == oracleBallynockTrapper
+-- True
+
 
 {-|
 
@@ -382,7 +412,9 @@ mungeOracleText (knicknames2text -> names)
   replaceNewlines = T.replace "\n" tPseudoNewline
   
   replaceKnicknames = foldr (.) id (replaceName <$> names)
-  replaceName name = T.replace name "~" 
+  replaceName = \case
+    ""   -> id
+    name -> T.replace name "~" 
 
 -- mungeOracleText (Knicknames (Name name :| _)) --TODO
 --   = T.replace "\n" tPseudoNewline
@@ -696,8 +728,8 @@ pOracleChunk = choice
 
 {-|
 
->>> trifecta pOracleParagraph "{U/G}{?}: Tap or untap ~."
-Success (OracleParagraph [OracleSymbol (Right (ManaSymbol (HybridSymbol Simic))),OracleSymbol (Left "?"),OraclePhrase ":",OraclePhrase ["Tap","or","untap"],OracleNamesake,OraclePhrase ["."]])
+>>> trifectaWith knicknameless pOracleParagraph "{U/G}{?}: Tap or untap ~."
+Success (OracleParagraph [OracleSymbol (Right (ManaSymbol (HybridSymbol Simic))),OracleSymbol (Left "?"),OraclePhrase [":","Tap","or","untap"],OracleNamesake,OraclePhrase ["."]])
 
 -}
 pOraclePhrase
@@ -768,6 +800,7 @@ pOracleNamesakeDynamic
   => p ()
 pOracleNamesakeDynamic = do
   knicks <- ask
+  -- let knicks = "DEBUG"
   
   let dynamicNames = knicknames2text knicks <&> toS
   let pDynamicNames = dynamicNames <&> P.text
@@ -970,23 +1003,18 @@ isOracleSymbolCharacter c = any (all ($ c))
 
 {-|
 
-e.g.
+e.g. @Tarmogoyf@'s power-toughness:
 
 @
 */1+*
 */*+1
 @
 
-
-@
->>> numericTarmogoyf = NumericCreature (Body (SimpleNumeric NumericWildcard) (BinaryNumeric NumericAddition (SimpleNumeric (NumericLiteral 1)) (SimpleNumeric NumericWildcard))) :: Numeric Int
->>> parseNumeric "*/1+*" == numericTarmogoyf
-True
->>> parseNumeric "*/*+1" == numericTarmogoyf
-True
-@
+>>> parseNumeric "*/1+*" :: Maybe (Numeric Natural)
+Just (NumericCreature (Body {_power = SimpleNumeric NumericWildcard, _toughness = BinaryNumeric NumericAddition (NumericConstant 1) NumericWildcard}))
 
 -}
+
 parseNumeric
   :: (Integral i)
   => Parse (Numeric i)
@@ -1002,6 +1030,16 @@ parseLoyalty
   = Trifecta.parseString pLoyalty mempty
   > result2maybe
   > fmap NumericLoyalty
+
+{-
+@
+>>> numericTarmogoyf = NumericCreature (Body (SimpleNumeric NumericWildcard) (BinaryNumeric NumericAddition (SimpleNumeric (NumericLiteral 1)) (SimpleNumeric NumericWildcard))) :: Numeric Int
+>>> parseNumeric "*/1+*" == numericTarmogoyf
+True
+>>> parseNumeric "*/*+1" == numericTarmogoyf
+True
+@
+-}
 
 -- -- | see 'pNumericExpression'
 -- parseNumericBody
@@ -1164,56 +1202,50 @@ e.g. the following are all accepted by this parser:
 {Z}
 @
 
->>> import Text.Trifecta.Parser (Parser,parseTest,runParser)
->>> p = parseTest (pManaSymbol :: Parser (ManaSymbol Natural))
->>> p' = runParser mempty (pManaSymbol :: Parser (ManaSymbol Natural))
+-- >>> import Text.Trifecta.Parser (Parser)
+-- >>> p' = trifecta (pManaSymbol :: Parser (ManaSymbol Natural))
 
+>>> import Text.Trifecta.Parser (Parser,parseTest)
+>>> p = parseTest (pManaSymbol :: Parser (ManaSymbol Natural))
 >>> p "{PU}"
 PhyrexianSymbol Blue
-
 >>> p "{UP}"
 PhyrexianSymbol Blue
-
 >>> p "{P/U}"
 PhyrexianSymbol Blue
-
 >>> p "{U/P}"
 PhyrexianSymbol Blue
-
 >>> p "{2/U}"
 MonoHybridSymbol Blue
-
 >>> p "{U/2}"
 MonoHybridSymbol Blue
-
 >>> p "{2U}"
 MonoHybridSymbol Blue
-
 >>> p "{U2}"
 MonoHybridSymbol Blue
-
 >>> p "{U/G}"
 HybridSymbol Simic
-
 >>> p "{G/U}"
 HybridSymbol Simic
-
 >>> p "{X}"
 VariableSymbol
-
 >>> p "{Z}"
 VariableSymbol
-
 >>> p "{1}"
 GenericSymbol 1
-
 >>> p "{9}"
 GenericSymbol 9
+>>> "{G/G}" & trifecta' pManaSymbol :: Maybe (ManaSymbol Natural)
+Nothing
 
->>> p "{G/G}"
+and when printed in a terminal emulator with formatting\/colors:
+
+@
+> p "{G/G}"
 (interactive):1:3: error: expected: "}"
 {G/G}<EOF> 
   ^        
+@
 
 -}
 pManaSymbol

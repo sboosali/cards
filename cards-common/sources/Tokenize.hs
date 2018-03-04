@@ -58,11 +58,14 @@ examples:
 
 base cases:
 
+@
 >>> tokenizeByCharacterCategoryIsolatingGroupingAndQuotation ""
 []
 
->>> tokenizeByCharacterCategoryIsolatingGroupingAndQuotation [c]
+-- forall `c`
+> tokenizeByCharacterCategoryIsolatingGroupingAndQuotation [c]
 [[c]]
+@
 
 -}
 tokenizeByCharacterCategoryIsolatingGroupingAndQuotation
@@ -152,8 +155,9 @@ characterCategory c
  | isQuotation  c = Just QuotationCharacter
  | isWhitespace c = Just WhitespaceCharacter
  | isSymbolic   c = Just SymbolicCharacter
+
  | otherwise      = Nothing
- -- ^ NOTE the order (of the conditions) matters, as only the first few predicates are mutually exclusive, isSymbol being very broad
+   -- NOTE the order (of the conditions) matters, as only the first few predicates are mutually exclusive, isSymbol being very broad
 
  where
    
