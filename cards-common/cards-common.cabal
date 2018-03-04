@@ -167,33 +167,31 @@ library
                  Cards.Common.Core		
                  Cards.Common.Example   
 
-                 Cards.Syntax.Operators
-
                  Cards.Query
                  Cards.Query.Types
 
-                 Cards.Syntax.MagicCardsInfo
-                 Cards.Syntax.MagicCardsInfo.Types
-                 Cards.Syntax.MagicCardsInfo.Static     
-                 Cards.Syntax.MagicCardsInfo.Known 
-                 Cards.Syntax.MagicCardsInfo.Parser
-                 Cards.Syntax.MagicCardsInfo.Validator 
-                 Cards.Syntax.MagicCardsInfo.Compiler
-                 Cards.Syntax.MagicCardsInfo.Printer
+                 -- Cards.Syntax.MagicCardsInfo
+                 -- Cards.Syntax.MagicCardsInfo.Types
+                 -- Cards.Syntax.MagicCardsInfo.Static     
+                 -- Cards.Syntax.MagicCardsInfo.Known 
+                 -- Cards.Syntax.MagicCardsInfo.Parser
+                 -- Cards.Syntax.MagicCardsInfo.Validator 
+                 -- Cards.Syntax.MagicCardsInfo.Compiler
+                 -- Cards.Syntax.MagicCardsInfo.Printer
             
+                 Operators
                  Tokenize
                  Mixfix
 
                  Control.Foldl.Summary
  
  other-modules:
+                 Paths_cards_common
 
-                 Cards.Syntax.Extra
+                 -- Cards.Syntax.Extra
 
                  Cards.Common.Extra
---                 Cards.Common.UnicodeShow
-                 
-                 Paths_cards_common
+                 -- Cards.Common.UnicodeShow
 
  autogen-modules:
                  Paths_cards_common
