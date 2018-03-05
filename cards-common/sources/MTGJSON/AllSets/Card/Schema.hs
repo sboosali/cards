@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE DataKinds, ScopedTypeVariables #-}
 
@@ -16,6 +18,20 @@ import Data.Scientific (Scientific)
 import Data.Thyme.Calendar
 
 ----------------------------------------
+
+{-| Multiple "mechanical cards" can be different "faces" of the same "physical card".
+
+This is related to, but distinct from, 'Layout'. e.g. Levelers or Vehicles have a special visual layout, but they don't (by themselves) have multiple faces, and thus are 'NormalFace'd cards. 
+
+-}
+data Face card = Face
+ { _Face_layout      :: Layout
+ , _Face_currentFace :: card
+ , _Face_otherFaces  :: [card]
+ } deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic)
+
+instance (NFData   card) => NFData     (Face card)
+instance (Hashable card) => Hashable   (Face card)
 
 ----------------------------------------
 -- CardSchema
@@ -200,8 +216,8 @@ instance NFData     NumericSchema
 instance Hashable   NumericSchema
 
 data CreatureLike = CreatureLike
-  { _Creature_power         :: Text
-  , _Creature_toughness     :: Text
+  { _Creature_power         :: NumberLike
+  , _Creature_toughness     :: NumberLike
   } deriving (Show,Read,Eq,Ord,Generic)
 
 instance NFData     CreatureLike
@@ -221,6 +237,108 @@ data VanguardLike = VanguardLike
 
 instance NFData     VanguardLike
 instance Hashable   VanguardLike
+
+----------------------------------------
+  
+data NumberLike
+ = IntegerLike    Integer
+ | ArithmeticLike Text
+ deriving (Show,Read,Eq,Ord,Generic)
+
+instance NFData     NumberLike
+instance Hashable   NumberLike
+
+-- | 'ArithmeticLike'
+instance IsString NumberLike where
+  fromString = fromString > ArithmeticLike
+
+{- | @fromInteger = 'IntegerLike'@
+
+preserves 'IntegerLike'. 
+
+-}
+instance Num NumberLike where
+  fromInteger = IntegerLike
+
+  (+) = binaryNumberLike (+) (\x y -> x <> "+" <> y)
+
+  (*) = binaryNumberLike (*) (\x y -> x <> "*" <> y)
+
+  abs    = unaryNumberLike abs    (\x -> "|"       <> x <> "|")
+    
+  signum = unaryNumberLike signum (\x -> "signum(" <> x <> ")") -- (\_ -> "?")
+    
+  negate = unaryNumberLike negate (\x -> "-("      <> x <> ")")
+
+  {-NOTES
+
+    signum :: a -> a 
+
+    Sign of a number. The functions abs and signum should satisfy the law:
+
+    abs x * signum x == x
+
+    For real numbers, the signum is either -1 (negative), 0 (zero) or 1 (positive).
+
+  -}
+
+binaryNumberLike
+  :: (Integer    -> Integer    -> Integer)
+  -> (Text       -> Text       -> Text)
+  -> (NumberLike -> NumberLike -> NumberLike)
+binaryNumberLike operate render n₁ n₂ =
+  case likeInteger of
+      Right i -> IntegerLike    i
+      Left  _ -> ArithmeticLike a
+
+  where
+  -- likeArithmetic
+  a :: Text
+  a = t₁ `render` t₂
+
+  t₁ = asArithmeticLike n₁
+  t₂ = asArithmeticLike n₂
+    
+  likeInteger :: Either Text Integer
+  likeInteger = do
+    i₁ <- isIntegerLike n₁ 
+    i₂ <- isIntegerLike n₂
+    return $ i₁ `operate` i₂
+
+unaryNumberLike
+  :: (Integer    -> Integer)
+  -> (Text       -> Text)
+  -> (NumberLike -> NumberLike)
+unaryNumberLike operate render n
+  = integerLike
+  & bimap render operate
+  & toNumberLike
+  where
+  integerLike :: Either Text Integer
+  integerLike = isIntegerLike n
+
+toNumberLike :: Either Text Integer -> NumberLike
+toNumberLike = either ArithmeticLike IntegerLike
+
+parseNumberLike :: Text -> NumberLike
+parseNumberLike t
+  = t
+  & readInteger 
+  & maybe2either t
+  & toNumberLike
+
+isIntegerLike :: NumberLike -> Either Text Integer
+isIntegerLike = \case
+  IntegerLike    i -> Right i
+  ArithmeticLike t -> readInteger t & maybe2either t
+
+asArithmeticLike :: NumberLike -> Text 
+asArithmeticLike = \case
+  IntegerLike    i -> show' i
+  ArithmeticLike t -> t
+
+readInteger :: Text -> Maybe Integer
+readInteger t = readMay (toS t)
 
 ----------------------------------------
 

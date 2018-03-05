@@ -10,8 +10,8 @@ module MTGJSON.AllSets.Schema where
   -- ) where
 
 import MTGJSON.AllSets.Object as Object
-import MTGJSON.AllSets.Set    as Sets
---import MTGJSON.AllSets.Card   as Card
+import MTGJSON.AllSets.Set    as Edition
+import MTGJSON.AllSets.Card   as Card
 
 import Prelude.Spiros
 
@@ -34,3 +34,4 @@ getEditionCodes SetObject{..} = EditionCodes{..}
    -- & fromMaybe _Edition_gathererCode
 
 ----------------------------------------
+

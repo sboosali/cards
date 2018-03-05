@@ -8,7 +8,7 @@
 module MTGJSON.AllSets.Fold where
 
 import MTGJSON.Extra --hiding (Text)
---import MTGJSON.AllSets.Set
+import MTGJSON.AllSets.Set
 import MTGJSON.AllSets.Card
 
 --import MTGJSON.AllSets.Schema
@@ -26,9 +26,11 @@ import MTGJSON.AllSets.Card
 --import Enumerate
 
 import                   Control.Foldl.Summary
-import qualified "foldl" Control.Foldl as L
+--import qualified "foldl" Control.Foldl as L
 import           "foldl" Control.Foldl (Fold(..))
 -- --import qualified "foldl" Control.Foldl.Text as LT
+
+import "thyme" Data.Thyme.Calendar
 
 -- import qualified Data.Text as T
 -- import           Data.Text (Text)
@@ -41,11 +43,25 @@ import           "foldl" Control.Foldl (Fold(..))
 
 -- import Data.Ratio (Ratio, (%))
 
+--import GHC.Generics (Generic1)
+
 ----------------------------------------
 -- Summarizer
 
-{--}
+----------------------------------------
+-- Folder
+type Summary = ()
 
+type CardFold = Fold CardSchema CardSummary
+
+type CardFolds = CardP Fold
+
+----------------------------------------
+-- Sets
+
+data EditionSummary = EditionSummary
+
+{-
 summarizeCards
   :: ( Foldable f
      )
@@ -53,22 +69,102 @@ summarizeCards
   -> CardSummary 
 summarizeCards = L.fold cardFold
 
-----------------------------------------
--- Folder
-
-type CardFold = Fold CardSchema CardSummary
-
-type CardFolds = CardP Fold
+editionFold :: Fold Edition EditionSummary
+editionFold = _ --EditionSummary
+-}
 
 ----------------------------------------
--- 
+--
+
+data EditionP p = EditionP
+
+  { _EditionP_name               :: !(p EditionName
+                                    )
+    -- ^ "Nemesis",
+    -- The name of the set
+
+  , _EditionP_codes              :: !(p EditionCodes
+                                    )
+    -- ^ 
+
+  , _EditionP_block              :: !(p BlockName
+                                    )
+    -- ^ e.g. "Masques"
+    -- The block this set is in. 
+
+  , _EditionP_type               :: !(p EditionType
+                                    )
+    -- ^ e.g. "expansion"
+    -- The type of set.
+    -- One of: "core", "expansion", "reprint", "box", "un", "from the vault", "premium deck", "duel deck", "starter", "commander", "planechase", "archenemy","promo", "vanguard", "masters", "conspiracy", "masterpiece". 
+
+  , _EditionP_border             :: !(p Border
+                                    )
+    -- ^ "black",
+    -- The type of border on the cards,
+    -- either "white", "black" or "silver". 
+
+  , _EditionP_booster            :: !(p Booster
+                                    )
+    -- ^ e.g. @[ "rare", ... ]@ 
+    -- Booster contents for this set
+
+  , _EditionP_releaseDate        :: !(p Day
+                                    )
+    -- ^ "2000-02-14"
+    -- When the set was released (YYYY-MM-DD). 
+    -- (For promo sets, the date the first card was released).
+
+  , _EditionP_onlineOnly         :: !(p WhetherOffline
+                                    )
+    -- ^ if the set was only released online (i.e. not in paper). 
+
+  {-
+  , _EditionP_cards              :: [card]   -- ^ [ {}, {}, {}, ... ]    -- ^ 
+  -}
+  
+  } deriving (Generic)
+
+-- instance NFData     (EditionP p)
+-- instance Hashable   (EditionP p)
+
+----------------------------------------
+
+data EditionCodesP p = EditionCodesP
+
+ { _EditionP_primaryCode        :: !(p (Text))
+   -- ^ TODO e.g. "NMS"
+   -- The set's abbreviated code
+
+ , _EditionP_gathererCode       :: !(p (Text))
+   -- ^ e.g. "NE"
+   -- The code that Gatherer uses for the set.
+   -- Normally identical to '_EditionP_primaryCode'. 
+
+ , _EditionP_oldCode            :: !(p (Text))
+   -- ^ e.g. "NEM"
+   -- The (deprecated) old-style code, used by some Magic software.
+   -- Normally identical to ' _EditionP_'gathererCode' (or '_EditionP_primaryCode')
+
+ , _EditionP_magicCardsInfoCode :: !(p (Maybe Text))
+   -- ^ e.g. "ne"
+   -- The code that magiccards.info uses for the set.
+   -- @Nothing@ if absent from @magiccards.info@. 
+   -- Normally identical to ' _EditionP_'gathererCode' (or '_EditionP_primaryCode')
+ 
+ } deriving (Generic)
+
+-- instance NFData     (EditionCodesP p)
+-- instance Hashable   (EditionCodesP p)
+
+  
+----------------------------------------
+-- Cards
 
 data CardSummary = CardSummary
 
-cardFold :: Fold CardSchema CardSummary
-cardFold = _ --CardSummary
-
-type Summary = ()
+-- cardFold :: Fold CardSchema CardSummary
+-- cardFold = _ --CardSummary
 
 ----------------------------------------
 --
