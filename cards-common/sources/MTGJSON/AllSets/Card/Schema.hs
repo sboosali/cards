@@ -1,0 +1,296 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DataKinds, ScopedTypeVariables #-}
+
+{-|
+
+Refines "MTGJSON.AllSets.Object" with: @Date@s, self-documenting Bool-like enums, and by dropping redundant (non-semantic) @Maybe@s (while keeping semantically-relevant @Maybe@s).
+
+-}
+module MTGJSON.AllSets.Card.Schema where
+
+import MTGJSON.Extra
+import MTGJSON.AllSets.Orphans()
+
+import Data.Scientific (Scientific)
+
+import Data.Thyme.Calendar
+
+----------------------------------------
+
+----------------------------------------
+-- CardSchema
+
+{-|
+
+-}
+data CardSchema = CardSchema 
+  { _CardSchema_identity      :: Text 
+  , _CardSchema_name          :: Name
+  
+  , _CardSchema_multiverseid  :: Maybe MultiverseID
+  , _CardSchema_mciNumber     :: Maybe Text
+    -- ^ used by `MagicCards.info`, almost always identical to '_CardSchema_number'.
+    -- 
+
+  , _CardSchema_layout        :: Maybe Layout
+  , _CardSchema_names         :: [Text]
+
+  , _CardSchema_edition       :: EditionName 
+  , _CardSchema_variations    :: [MultiverseID] 
+  , _CardSchema_border        :: Border
+
+  , _CardSchema_manaCost      :: Maybe ManaCost
+  , _CardSchema_cmc           :: Scientific -- Ratio Natural / Either Scientific Natural
+    -- ^ Un-cards can have non-Natural converted-mana-cost. 
+    -- 
+  , _CardSchema_colors        :: [Color] 
+  , _CardSchema_colorIdentity :: [Color]
+  
+  --, _CardSchema_type          :: Text 
+  , _CardSchema_supertypes    :: [Supertype] 
+  , _CardSchema_cardtypes     :: [Cardtype]
+     -- ^ Un-cards can have no type 
+  , _CardSchema_subtypes      :: [Subtype]
+  
+  , _CardSchema_rarity        :: Rarity 
+  , _CardSchema_text          :: Oracle 
+  , _CardSchema_flavor        :: Flavor 
+  , _CardSchema_artist        :: Artist
+  , _CardSchema_ccn           :: Maybe CollectorNumber
+    -- ^ CCN
+  
+  , _CardSchema_originalText  :: Maybe Text 
+  , _CardSchema_originalType  :: Maybe Text
+   
+  , _CardSchema_reserved      :: IsReserved 
+  , _CardSchema_starter       :: IsStarter 
+  , _CardSchema_timeshifted   :: IsTimeshifted
+
+  , _CardSchema_printings     :: [EditionName]
+    -- ^ e.g. ["ICE", "CHR"]
+    -- The sets that this card was printed in, expressed as an array of set codes.
+  , _CardSchema_foreignNames  :: [ForeignPrinting] 
+
+  , _CardSchema_legalities    :: [FormatLegality]
+
+  , _CardSchema_rulings       :: [Ruling] 
+  
+  -- , _CardSchema_source        :: Maybe Text
+  --   -- ^ "For promo cards, this is where this card was originally obtained. For box sets that are theme decks, this is which theme deck the card is from. For clash packs, this is which deck it is from."
+  } deriving (Show,Eq,Ord,Generic)
+
+instance NFData     CardSchema
+instance Hashable   CardSchema
+
+----------------------------------------
+
+{-| Uniquely identify a card of some set against all other cards (only by convention, not construction).
+
+-}
+newtype UniqueID = UniqueID Text
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
+
+----------------------------------------
+
+{-| the Multiverse ID, used by `gather.wizards.com`. 
+
+the `MagicCards.info` number is almost always identical to this. 
+
+-}
+newtype MultiverseID = MultiverseID Natural
+  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+
+--instance IsString MID where fromString = fromString > MID
+
+----------------------------------------
+
+newtype ManaCost = ManaCost Text
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
+
+newtype Layout = Layout Text
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
+
+newtype Border = Border Text
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
+
+newtype Color = Color Text
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
+
+newtype EditionName = EditionName Text
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
+
+newtype Supertype = Supertype Text
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
+
+newtype Cardtype = Cardtype Text
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
+
+newtype Subtype = Subtype Text
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
+
+newtype Rarity = Rarity Text
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
+
+newtype Oracle = Oracle Text
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
+
+newtype Flavor = Flavor Text
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
+
+newtype Artist = Artist Text
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
+
+newtype CollectorNumber = CollectorNumber Text
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
+
+----------------------------------------
+
+data IsTimeshifted
+ = NotTimeshifted
+ | YesTimeshifted
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic)
+
+instance NFData     IsTimeshifted
+instance Hashable   IsTimeshifted
+instance Enumerable IsTimeshifted
+
+isTimeshifted :: Bool -> IsTimeshifted
+isTimeshifted = \case
+  False -> NotTimeshifted
+  True  -> YesTimeshifted
+
+data IsReserved
+ = NotReserved
+ | YesReserved
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic)
+
+instance NFData     IsReserved
+instance Hashable   IsReserved
+instance Enumerable IsReserved
+
+isReserved :: Bool -> IsReserved
+isReserved = \case
+  False -> NotReserved
+  True  -> YesReserved
+
+data IsStarter
+ = NotStarter
+ | YesStarter
+ deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic)
+
+instance NFData     IsStarter
+instance Hashable   IsStarter
+instance Enumerable IsStarter
+
+isStarter :: Bool -> IsStarter
+isStarter = \case
+  False -> NotStarter
+  True  -> YesStarter
+
+----------------------------------------
+
+data NumericSchema
+  = UnnumeredSchema
+  | CreatureSchema     CreatureLike
+  | PlaneswalkerSchema PlaneswalkerLike
+  | VanguardSchema     VanguardLike
+  deriving (Show,Read,Eq,Ord,Generic)
+
+instance NFData     NumericSchema
+instance Hashable   NumericSchema
+
+data CreatureLike = CreatureLike
+  { _Creature_power         :: Text
+  , _Creature_toughness     :: Text
+  } deriving (Show,Read,Eq,Ord,Generic)
+
+instance NFData     CreatureLike
+instance Hashable   CreatureLike
+
+data PlaneswalkerLike = PlaneswalkerLike
+  { _Planeswalker_loyalty   :: Natural
+  } deriving (Show,Read,Eq,Ord,Generic)
+
+instance NFData     PlaneswalkerLike
+instance Hashable   PlaneswalkerLike
+
+data VanguardLike = VanguardLike
+  { _Vanguard_hand          :: Integer  
+  , _Vanguard_life          :: Integer
+  } deriving (Show,Read,Eq,Ord,Generic)
+
+instance NFData     VanguardLike
+instance Hashable   VanguardLike
+
+----------------------------------------
+
+{-| 
+
+-}
+data ForeignPrinting = ForeignPrinting 
+  { _Foreign_language     :: Language
+  , _Foreign_name         :: Name
+  , _Foreign_multiverseid :: Maybe MultiverseID 
+  } deriving (Show,Read,Eq,Ord,Generic)
+
+instance NFData     ForeignPrinting
+instance Hashable   ForeignPrinting 
+
+newtype Language = Language Text
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
+
+newtype Name = Name Text
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
+
+----------------------------------------
+
+{-| 
+
+-}
+data FormatLegality = FormatLegality 
+  { _FormatLegality_format   :: Format
+  , _FormatLegality_legality :: Legality
+  } deriving (Show,Read,Eq,Ord,Generic)
+
+instance NFData     FormatLegality 
+instance Hashable   FormatLegality 
+
+newtype Format = Format Text
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
+
+newtype Legality = Legality Text
+ deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
+
+----------------------------------------
+
+{-| 
+
+-}
+data Ruling = Ruling 
+  { _Ruling_date :: Day
+  , _Ruling_text :: Text 
+  } deriving (Show,Eq,Ord,Generic)
+  -- NOTE `thyme-Day` has no Read instance
+
+instance NFData     Ruling
+instance Hashable   Ruling
+
+----------------------------------------
+
+----------------------------------------
+
+----------------------------------------
+
+{- boilerplate templates:
+
+
+instance NFData     
+instance Hashable   
+instance Enumerable 
+
+
+newtype = Text
+ deriving (Show,Eq,Ord,Generic,NFData,Hashable,IsString)
+
+
+-}

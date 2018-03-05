@@ -3,9 +3,8 @@
 
 module MTGJSON.AllSets.Lens where
 
-
 import MTGJSON.AllSets.Types 
-import MTGJSON.AllSets.Schema 
+import MTGJSON.AllSets.Object -- Schema 
 import MTGJSON.Extra (concatenateA) 
 
 import Control.Lens hiding ((<&>)) -- (makeLenses,makePrisms) 

@@ -8,7 +8,7 @@
 module MTGJSON.AllSets.Fold where
 
 import MTGJSON.Extra --hiding (Text)
-import MTGJSON.AllSets.Schema
+import MTGJSON.AllSets.Object -- Schema
 -- import MTGJSON.AllSets.Types
 -- import MTGJSON.Types
 
@@ -20,6 +20,9 @@ import MTGJSON.AllSets.Schema
 
 -- import "scientific" Data.Scientific
 
+import Enumerate
+
+import                   Control.Foldl.Summary
 import qualified "foldl" Control.Foldl as L
 import           "foldl" Control.Foldl (Fold(..))
 -- --import qualified "foldl" Control.Foldl.Text as LT
@@ -38,7 +41,8 @@ import           "foldl" Control.Foldl (Fold(..))
 ----------------------------------------
 -- Summarizer
 
-{-
+{--}
+
 summarizeCards
   :: ( Foldable f
      )
@@ -53,7 +57,7 @@ type CardFold = Fold CardObject CardSummary
 
 cardFold :: Fold CardObject CardSummary
 cardFold = _ --CardSummary
--}
+
 
 ----------------------------------------
 -- 
@@ -101,50 +105,134 @@ data CardSummary = CardSummary
   } deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable )
 
 ----------------------------------------
--- 
+--
 
-data CardFolds = CardFolds
-  { _CardFolds_id            :: Text 
-  , _CardFolds_name          :: Text 
-  , _CardFolds_layout        :: Maybe Text 
-  , _CardFolds_names         :: Maybe [Text] 
-  , _CardFolds_manaCost      :: Maybe Text 
-  , _CardFolds_cmc           :: Scientific 
-  , _CardFolds_colors        :: Maybe [Text] 
-  , _CardFolds_colorIdentity :: Maybe [Text] 
-  , _CardFolds_type          :: Text 
-  , _CardFolds_supertypes    :: Maybe [Text] 
-  , _CardFolds_types         :: Maybe [Text] 
-  , _CardFolds_subtypes      :: Maybe [Text] 
-  , _CardFolds_rarity        :: Text 
-  , _CardFolds_text          :: Maybe Text 
-  , _CardFolds_flavor        :: Maybe Text 
-  , _CardFolds_artist        :: Text
-  , _CardFolds_number        :: Maybe Text 
-  , _CardFolds_power         :: Maybe Text 
-  , _CardFolds_toughness     :: Maybe Text  
-  , _CardFolds_loyalty       :: Maybe Natural 
-  , _CardFolds_multiverseid  :: Maybe Natural
-  , _CardFolds_variations    :: Maybe [Natural] 
-  , _CardFolds_imageName     :: Maybe Text 
-  , _CardFolds_watermark     :: Maybe Text 
-  , _CardFolds_border        :: Maybe Text 
-  , _CardFolds_timeshifted   :: Maybe Bool 
-  , _CardFolds_hand          :: Maybe Integer  
-  , _CardFolds_life          :: Maybe Integer 
-  , _CardFolds_reserved      :: Maybe Bool 
-  , _CardFolds_releaseDate   :: Maybe Text 
-  , _CardFolds_starter       :: Maybe Bool 
-  , _CardFolds_mciNumber     :: Maybe Text  
-  , _CardFolds_rulings       :: Maybe [CardRulingObject] 
-  , _CardFolds_foreignNames  :: Maybe [CardForeignPrintingObject] 
-  , _CardFolds_printings     :: Maybe [Text]
-  , _CardFolds_originalText  :: Maybe Text 
-  , _CardFolds_originalType  :: Maybe Text
-  , _CardFolds_legalities    :: Maybe [CardFormatLegalityObject]
-  , _CardFolds_source        :: Maybe Text 
-  } deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable )
+type CardFolds = CardP Fold
 
+{-|
+
+Naming: @CardP@ means "card profunctor". 
+
+-}
+data CardP (p :: * -> * -> *) = CardP
+  { _CardFolds_id            :: !(p Text
+                                    TextualSummary)
+
+  , _CardFolds_name          :: !(p Text
+                                    TextualSummary)
+
+  , _CardFolds_layout        :: !(p (Maybe Text)
+                                    TextualSummary)
+
+  , _CardFolds_names         :: !(p (Maybe [Text])
+                                    Summary)
+
+  , _CardFolds_manaCost      :: !(p (Maybe Text)
+                                    TextualSummary)
+
+  , _CardFolds_cmc           :: !(p Scientific
+                                    (NumericSummary Scientific))
+
+  , _CardFolds_colors        :: !(p (Maybe [Text])
+                                    Summary)
+
+  , _CardFolds_colorIdentity :: !(p (Maybe [Text])
+                                    Summary)
+
+  , _CardFolds_type          :: !(p Text
+                                    TextualSummary)
+
+  , _CardFolds_supertypes    :: !(p (Maybe [Text])
+                                    Summary)
+
+  , _CardFolds_types         :: !(p (Maybe [Text])
+                                    Summary)
+
+  , _CardFolds_subtypes      :: !(p (Maybe [Text])
+                                    Summary)
+
+  , _CardFolds_rarity        :: !(p Text
+                                    TextualSummary)
+
+  , _CardFolds_text          :: !(p (Maybe Text)
+                                    TextualSummary)
+
+  , _CardFolds_flavor        :: !(p (Maybe Text)
+                                    TextualSummary)
+
+  , _CardFolds_artist        :: !(p Text
+                                    TextualSummary)
+
+  , _CardFolds_number        :: !(p (Maybe Text)
+                                    TextualSummary)
+
+  , _CardFolds_power         :: !(p (Maybe Text)
+                                    TextualSummary)
+
+  , _CardFolds_toughness     :: !(p (Maybe Text )
+                                    TextualSummary)
+
+  , _CardFolds_loyalty       :: !(p (Maybe Natural)
+                                   (NumericSummary Natural))
+
+  , _CardFolds_multiverseid  :: !(p (Maybe Natural)
+                                    (NumericSummary Natural))
+
+  , _CardFolds_variations    :: !(p (Maybe [Natural])
+                                    Summary)
+
+  , _CardFolds_imageName     :: !(p (Maybe Text)
+                                    TextualSummary)
+
+  , _CardFolds_watermark     :: !(p (Maybe Text)
+                                    TextualSummary)
+
+  , _CardFolds_border        :: !(p (Maybe Text)
+                                    TextualSummary)
+
+  , _CardFolds_timeshifted   :: !(p (Maybe Bool)
+                                    (EnumSummary Bool))
+
+  , _CardFolds_hand          :: !(p (Maybe Integer )
+                                    (NumericSummary Integer))
+
+  , _CardFolds_life          :: !(p (Maybe Integer)
+                                    (NumericSummary Integer))
+
+  , _CardFolds_reserved      :: !(p (Maybe Bool)
+                                    (EnumSummary Bool))
+
+  , _CardFolds_releaseDate   :: !(p (Maybe Text)
+                                    Summary)
+
+  , _CardFolds_starter       :: !(p (Maybe Bool)
+                                    (EnumSummary Bool))
+
+  , _CardFolds_mciNumber     :: !(p (Maybe Text)
+                                    TextualSummary)
+
+  , _CardFolds_rulings       :: !(p [CardRulingObject]
+                                    Summary)
+
+  , _CardFolds_foreignNames  :: !(p [CardForeignPrintingObject]
+                                    Summary)
+
+  , _CardFolds_printings     :: !(p (Maybe [Text])
+                                    Summary)
+
+  , _CardFolds_originalText  :: !(p (Maybe Text)
+                                    TextualSummary)
+
+  , _CardFolds_originalType  :: !(p (Maybe Text)
+                                    TextualSummary)
+
+  , _CardFolds_legalities    :: !(p [CardFormatLegalityObject]
+                                    Summary)
+
+  , _CardFolds_source        :: !(p (Maybe Text)
+                                    TextualSummary)
+                                
+  } deriving (Show,Read,Eq,Ord,Data,Generic,NFData,Hashable)
 
 ----------------------------------------  
 

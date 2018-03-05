@@ -9,7 +9,7 @@
 module MTGJSON.AllSets.Types where
 
 import MTGJSON.Extra
-import MTGJSON.AllSets.Schema (SetObject(..))
+import MTGJSON.AllSets.Object (SetObject(..))
 import MTGJSON.Types
 
 import MTGJSON.Known

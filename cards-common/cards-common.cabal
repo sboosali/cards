@@ -116,7 +116,7 @@ library
                      LambdaCase EmptyCase TypeOperators PostfixOperators
                      ViewPatterns BangPatterns KindSignatures
                      NamedFieldPuns RecordWildCards TupleSections
-                     MultiWayIf DoAndIfThenElse EmptyDataDecls
+                     MultiWayIf DoAndIfThenElse EmptyDataDecls InstanceSigs 
                      MultiParamTypeClasses FlexibleContexts FlexibleInstances
                      TypeFamilies FunctionalDependencies
                      ScopedTypeVariables StandaloneDeriving
@@ -149,19 +149,30 @@ library
 
                  MTGJSON.Version
                  MTGJSON.SetList
-                 MTGJSON.AllSets               
-                 MTGJSON.AllSets.Schema
+                 MTGJSON.AllSets
+                 MTGJSON.AllSets.Orphans 
+
                  MTGJSON.AllSets.Types
                  MTGJSON.AllSets.Core
                  MTGJSON.AllSets.Lens 
                  MTGJSON.AllSets.Fold 
-                 
+                 MTGJSON.AllSets.Object
+                 MTGJSON.AllSets.Schema
+
+                 MTGJSON.AllSets.Set
+                 MTGJSON.AllSets.Set.Schema 
+                 MTGJSON.AllSets.Set.Lens 
+
+                 MTGJSON.AllSets.Card
+                 MTGJSON.AllSets.Card.Schema 
+                 MTGJSON.AllSets.Card.Lens
+               
                  MTGJSON.Aeson
                  MTGJSON.Example
                  MTGJSON.Paths 
                  MTGJSON.Macros
                  MTGJSON.Extra                 
-                 
+
                  Cards.Common
                  Cards.Common.Types
                  Cards.Common.Core		
@@ -237,8 +248,9 @@ library
              , file-embed
              , time
              , thyme
-             , validation >= 1
-             , foldl >= 1.3
+             , validation >= 1 && <= 2
+             , foldl >= 1.3 && <= 2
+             , distribution >= 1.1 && <= 2
 
 ----------------------------------------
 

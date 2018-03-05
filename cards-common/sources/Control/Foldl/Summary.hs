@@ -30,6 +30,8 @@ import           Data.Set (Set)
 -- import qualified Data.HashMap.Strict as Hash
 -- import           Data.HashMap.Strict (HashMap)
 
+import Enumerate
+  
 import Data.Ratio (Ratio, (%))
 
 import Prelude.Spiros hiding (Text)
@@ -60,6 +62,79 @@ textuallySummarize
   => LazyText -- NOTE a pseudo `Foldable f => f Text`
   -> TextualSummary 
 textuallySummarize = LT.fold textualFold
+
+----------------------------------------
+-- Enum Summaries
+
+type EnumFold a = Fold a (EnumSummary a)
+
+data EnumSummary a = EnumSummary
+ { _first             :: a
+ , _last              :: a
+ , _completeHistogram :: Map a Int
+ -- , _ :: a
+ }
+
+enumFold :: (Num a, Ord a, Enumerable a) => EnumFold a
+enumFold = EnumSummary
+  <$> lMinimum1
+  <*> lMaximum1
+  <*> lCompleteHistogram
+
+lCompleteHistogram
+  :: (Ord a, Enumerable a)
+  => Fold a (Map a Int)
+lCompleteHistogram = Fold step zeroes id
+  where
+  step m a = Map.insertWith (+) a 1 m
+  zeroes = Map.fromList (zip enumerated (repeat 0))
+
+-- | 'minBound' by default
+lSmallest1 :: (Ord a, Bounded a) => Fold a a
+lSmallest1 = lCompare1 maxBound (<=)
+
+-- | 'maxBound' by default
+lLargest1 :: (Ord a, Bounded a) => Fold a a
+lLargest1 = lCompare1 minBound (>=)
+
+{- |
+
+>>> :set -XPackageImports
+>>> import qualified "foldl" Control.Foldl as L
+>>> L.fold (lCompare1 (minBound::Natural) (>=)) [1..5]
+5
+>>> L.fold (lCompare1 (minBound::Natural) (>=)) []
+0
+
+-}
+lCompare1 :: (Ord a) => a -> (a -> a -> Bool) -> Fold a a
+lCompare1 initial comparator = Fold step initial id
+  where
+  step old new
+    = if old `comparator` new then old else new
+    -- left-biased
+
+-- -- | 'mempty' by default
+-- lCompare1 :: (Ord a) => (a -> a -> Bool) -> Fold a a
+-- lCompare1 comparator = Fold step mempty id
+--   where
+--   step old new
+--    = if old `comparator` new then old else new
+--     -- left-biased
+
+-- lCompare :: (Ord a) => (a -> a -> Bool) -> Fold a a
+-- lCompare comparator = Fold step Nothing id
+--   where
+--   step old new
+--    = if old `comparator` new then old else new
+--     -- left-biased
+--    --right-biased = if new `comparator` old then new else old
+
+-- lSmallest :: (Ord a, Monoid a) => Fold a a
+-- lSmallest = 
+
+-- lLargest :: (Ord a, Monoid a) => Fold a a
+-- lLargest = 
 
 ----------------------------------------
 -- Generic Summaries
@@ -117,7 +192,8 @@ nullableFold :: (Monoid m, Eq m) => NullableFold m
 nullableFold = NullableSummary
   <$> lEmptyRatio
 
-lEmptyRatio :: (Monoid m, Eq m, Integral n) => Fold m (Ratio n)
+lEmptyRatio
+  :: ( Monoid m, Eq m, Integral n) => Fold m (Ratio n)
 lEmptyRatio = (%) <$> lEmpties <*> L.genericLength
 --lNullRatio :: (Foldable f) => Fold (f x) Rational  
 --lNullRatio :: Fold (Maybe a) Rational
@@ -199,7 +275,6 @@ textualFold = TextualSummary
         lmap = premap
         rmap = fmap
    -}
-
 
 -- |
 lNonAscii :: Fold Text (Set Text)

@@ -1,0 +1,80 @@
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE PolyKinds #-}
+
+{-|
+
+
+-}
+module MTGJSON.AllSets.Card.Lens where
+
+import MTGJSON.Extra (concatenateA)
+
+import MTGJSON.AllSets.Card.Schema
+
+import Control.Lens hiding ((<&>))
+
+----------------------------------------
+-- Lenses (generated)
+
+concatenateA makeLenses
+  [ ''CardSchema
+
+    -- records
+  , ''NumericSchema
+  , ''CreatureLike
+  , ''PlaneswalkerLike
+  , ''VanguardLike
+
+    -- records
+  , ''ForeignPrinting 
+  , ''FormatLegality
+  , ''Ruling
+  
+  ]
+
+----------------------------------------
+-- Prisms (generated)
+
+concatenateA makePrisms
+  [ ''UniqueID
+  , ''MultiverseID
+
+    -- newtypes
+  , ''ManaCost
+  , ''Layout
+  , ''Border
+  , ''Color
+  , ''EditionName
+  , ''Supertype
+  , ''Cardtype
+  , ''Subtype
+  , ''Rarity
+  , ''Oracle
+  , ''Flavor
+  , ''Artist
+  , ''CollectorNumber
+
+    -- newtypes
+  , ''Language
+  , ''Name
+  , ''Format
+  , ''Legality
+
+    -- enums
+  , ''IsTimeshifted
+  , ''IsReserved
+  , ''IsStarter
+  
+  -- , ''WhetherOffline
+  -- , ''Booster
+  -- , ''BoosterSlot
+  -- , ''ProbabilityDistribution
+  -- , ''GenericSlot'
+  -- , ''GenericSlot
+  ]  
+
+----------------------------------------
+-- Optics (derived)
+
+
+----------------------------------------

@@ -12,7 +12,7 @@ module MTGJSON.Validate where
 import MTGJSON.Extra
 import MTGJSON.Types
 import MTGJSON.Known
-import MTGJSON.AllSets.Schema
+import MTGJSON.AllSets.Object -- Schema
 
 import MTGJSON.Parser
 import MTGJSON.Printer.Finite
