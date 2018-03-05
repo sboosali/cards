@@ -50,6 +50,6 @@ import Control.Lens   as X hiding
   ((<&>))
 
 import Prelude.Spiros as X hiding
- (Strict, index, at, snoc, uncons)
+ (Strict, index, at, snoc, uncons,Format)
 
 ----------------------------------------

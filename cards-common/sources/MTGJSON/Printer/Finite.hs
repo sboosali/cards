@@ -13,7 +13,7 @@ import MTGJSON.Known
 
 ----------------------------------------
 
-displayEditionType :: Print EditionType
+displayEditionType :: Print KnownEditionType
 displayEditionType = \case
  CoreSet        -> "core"
  ExpansionSet   -> "expansion"

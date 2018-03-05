@@ -252,7 +252,7 @@ trifectaUnlined pLined = Trifecta.parseString pUnlined mempty
 ----------------------------------------
 -- Sets
 
-parseEditionType :: Parse EditionType
+parseEditionType :: Parse KnownEditionType
 parseEditionType = print2parse displayEditionType
 
 ----------------------------------------

@@ -18,7 +18,7 @@ import Control.Lens hiding ((<&>)) -- (makeLenses,makePrisms)
 -- Lenses
 concatenateA makeLenses
   [ ''EditionData
-  , ''EditionCodes
+  , ''EditionCodes'
   ]
 
 -- Prisms

@@ -56,7 +56,7 @@ concatenateA makePrisms
 
     -- newtypes
   , ''Language
-  , ''Name
+  , ''CardName
   , ''Format
   , ''Legality
 

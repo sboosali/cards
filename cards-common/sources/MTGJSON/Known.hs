@@ -46,8 +46,8 @@ type family KnownType (u :: CHARACTERISTIC) where
 
  KnownType ORACLE         = Oracle
 
- KnownType COLOR          = Color {-KnownColor-}
- KnownType CHROMA         = Chroma {-KnownChroma-}
+ KnownType COLOR          = KnownColor {-Color-}
+ KnownType CHROMA         = KnownChroma {-Chroma-}
 
  KnownType COLORS         = KnownColors {-Colors-}
  KnownType COST           = KnownCost {-Cost-}

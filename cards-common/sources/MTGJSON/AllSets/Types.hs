@@ -42,14 +42,14 @@ data EditionData f = EditionData
   , _Edition_border             :: f Border
    -- ^ "black",
     -- The type of border on the cards
-  , _Edition_type               :: f EditionType
+  , _Edition_type               :: f KnownEditionType
    -- ^ 
   , _Edition_block              :: f Block
    -- ^ The block this set is in
   , _Edition_booster            :: f Booster  -- ^ [ "rare", ... ],
    -- // Booster contents for this set
 
-  , _Edition_codes              :: EditionCodes
+  , _Edition_codes              :: EditionCodes'
     -- ^ 
   , _Edition_onlineOnly         :: WhetherOffline
    -- ^ if the set was only released online
@@ -62,7 +62,7 @@ data EditionData f = EditionData
 
 ----------------------------------------
 
-data EditionCodes = EditionCodes
+data EditionCodes' = EditionCodes'
  { _Edition_primaryCode        :: !(Text)
    -- ^ TODO e.g. "NMS"
    -- The set's abbreviated code
@@ -82,14 +82,14 @@ data EditionCodes = EditionCodes
  
  } deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
-instance IsString (EditionCodes ) where
-  fromString = fromString > simpleEditionCodes
+instance IsString (EditionCodes' ) where
+  fromString = fromString > simpleEditionCodes'
 
-simpleEditionCodes :: Text -> EditionCodes
-simpleEditionCodes t = EditionCodes t t t (Just t) 
+simpleEditionCodes' :: Text -> EditionCodes'
+simpleEditionCodes' t = EditionCodes' t t t (Just t) 
 
-getEditionCodes :: SetObject -> EditionCodes
-getEditionCodes SetObject{..} = EditionCodes{..}
+getEditionCodes' :: SetObject -> EditionCodes'
+getEditionCodes' SetObject{..} = EditionCodes'{..}
  where
  _Edition_primaryCode        = _SetObject_code
  

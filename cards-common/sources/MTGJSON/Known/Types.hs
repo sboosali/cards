@@ -18,7 +18,7 @@ import qualified Data.Text.Lazy as T
 
 ---------------------------------------
 
-data EditionType
+data KnownEditionType
  = CoreSet
  | ExpansionSet
  | ReprintSet

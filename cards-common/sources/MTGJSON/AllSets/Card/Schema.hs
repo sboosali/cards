@@ -25,7 +25,7 @@ import Data.Thyme.Calendar
 -}
 data CardSchema = CardSchema 
   { _CardSchema_identity      :: Text 
-  , _CardSchema_name          :: Name
+  , _CardSchema_name          :: CardName
   
   , _CardSchema_multiverseid  :: Maybe MultiverseID
   , _CardSchema_mciNumber     :: Maybe Text
@@ -229,7 +229,7 @@ instance Hashable   VanguardLike
 -}
 data ForeignPrinting = ForeignPrinting 
   { _Foreign_language     :: Language
-  , _Foreign_name         :: Name
+  , _Foreign_name         :: CardName
   , _Foreign_multiverseid :: Maybe MultiverseID 
   } deriving (Show,Read,Eq,Ord,Generic)
 
@@ -239,7 +239,7 @@ instance Hashable   ForeignPrinting
 newtype Language = Language Text
  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
 
-newtype Name = Name Text
+newtype CardName = CardName Text
  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
 
 ----------------------------------------
