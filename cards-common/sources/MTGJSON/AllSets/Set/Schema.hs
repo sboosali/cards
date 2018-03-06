@@ -25,7 +25,7 @@ import           "distribution" Data.Distribution (Distribution,Probability)
 
 -}
 newtype Editions = Editions [Edition]
-  deriving (Show,Eq,Ord,Generic) -- IsList) 
+  deriving (Show,Eq,Ord,Generic,NFData,Hashable) -- IsList) 
 
 ----------------------------------------
 
@@ -61,9 +61,10 @@ data Edition = Edition
   , _Edition_codes              :: EditionCodes
     -- ^ 
 
-  , _Edition_block              :: BlockName
+  , _Edition_block              :: Maybe BlockName
     -- ^ e.g. "Masques"
-    -- The block this set is in. 
+    -- The block this set is in.
+    -- Some sets have no block, like the Core Sets.  
 
   , _Edition_type               :: EditionType
     -- ^ e.g. "expansion"

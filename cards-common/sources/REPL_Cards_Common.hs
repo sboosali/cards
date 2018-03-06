@@ -1,10 +1,54 @@
 -- {-# LANGUAGE OverloadedStrings #-}
 
-{-|
+{-| Internal module.
+
+Exports definitions and utitilies for interactive development in the REPL. 
+
+
+examples:
+
+@
+Right (SetsObject os) <- readDataFile AllDataFile >>= (pSetsObject>return) >>= evaluate 
+
+@
+
 
 sessions:
 
 @
+
+
+
+
+
+
+Just os <- parseSetsFile
+
+
+valids ^. _Editions . to length
+74
+
+(invalids, valids) = validateEditions os
+
+vs = valids ^.. _Editions . traverse . edition_name . _EditionName
+vs & traverse_ (toS > putStrLn)
+
+length invalids
+146
+
+invalids ^.. traverse . setObject_name
+
+is = invalids & traverse . setObject_cards .~ []
+is & traverse_ print
+
+isRealEdition t = t `elem` (realEditionNames ^.. traverse . _EditionName)  -- :: Text -> Bool 
+rs = is ^.. traverse . filtered (view (setObject_name . to isRealEdition))
+rs & traverse_ (\x -> print x >> putStrLn "")
+
+
+
+
+
 
 :set -XOverloadedStrings
 :set +t
@@ -21,6 +65,16 @@ slottables = boosters & concat & Set.fromList & Set.toList :: [Text]
 
 
 @
+
+
+
+
+
+
+
+
+
+
 
 results:
 
@@ -45,6 +99,8 @@ module REPL_Cards_Common
 
 import MTGJSON      as X
 import MTGJSON.Main as X
+
+import Control.Exception as X (evaluate)
 
 import Control.Lens   as X hiding
   ((<&>))

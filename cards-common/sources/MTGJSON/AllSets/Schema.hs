@@ -6,9 +6,7 @@
 
 -}
 module MTGJSON.AllSets.Schema where
-
-  -- ( module Schema
-  -- ) where
+import MTGJSON.Extra
 
 import MTGJSON.AllSets.Object as Object
 import MTGJSON.AllSets.Set    as Edition
@@ -18,13 +16,29 @@ import "thyme"      Data.Thyme
 import "old-locale" System.Locale (defaultTimeLocale)
 --import qualified "attoparsec" Data.Attoparsec.ByteString as Attoparsec
 
-import Data.Monoid
-import Prelude.Spiros
+-- import Data.Monoid
+-- import Prelude.Spiros
 
 ----------------------------------------
 
-strictlyValidateEditions :: [SetObject] -> Maybe Editions
-strictlyValidateEditions 
+{-|
+
+@
+Editions es <- validateEditionsStrictlyM os
+@
+
+-}
+validateEditionsStrictlyM
+  :: ( MonadThrow m
+     )
+  => [SetObject]
+  -> m Editions
+validateEditionsStrictlyM
+ = validateEditionsStrictly
+ > maybe2throw 
+
+validateEditionsStrictly :: [SetObject] -> Maybe Editions
+validateEditionsStrictly 
  = traverse validateEdition
  > fmap Editions
 
@@ -32,6 +46,62 @@ strictlyValidateEditions
 
 @
 (invalids, valids) = validateEdition _
+@
+
+
+@
+
+Tenth Edition
+Unlimited Edition
+Revised Edition
+Fourth Edition
+Fifth Edition
+Classic Sixth Edition
+Seventh Edition
+Eighth Edition
+Ninth Edition
+Archenemy
+Arabian Nights
+Antiquities
+Commander 2013 Edition
+Commander 2014
+Commander 2015
+Commander 2016
+Commander 2017
+Magic: The Gathering-Commander
+Conspiracy: Take the Crown
+Magic: The Gathering—Conspiracy
+The Dark
+Eternal Masters
+Fallen Empires
+Homelands
+Planechase
+Iconic Masters
+Limited Edition Alpha
+Limited Edition Beta
+Legends
+Magic 2010
+Magic 2011
+Magic 2012
+Magic 2013
+Magic 2014 Core Set
+Magic 2015 Core Set
+Modern Masters 2015 Edition
+Modern Masters 2017 Edition
+Modern Masters
+Magic Origins
+Planechase 2012 Edition
+Portal Second Age
+Portal
+Portal Three Kingdoms
+Rivals Quick Start Set
+Tempest Remastered
+Unglued
+Unhinged
+Unstable
+Vanguard
+Vintage Masters
+
 @
 
 -}
@@ -165,8 +235,8 @@ validateEdition _SetObject@SetObject{..} = do
   releaseDate          <- _SetObject_releaseDate
   _Edition_releaseDate <- parseDay releaseDate 
 
-  block                <- _SetObject_block 
-  let _Edition_block = BlockName block
+  -- block                <- _SetObject_block 
+  -- let _Edition_block = BlockName block
   
   pure$ Edition{..}
  
@@ -175,6 +245,7 @@ validateEdition _SetObject@SetObject{..} = do
  _Edition_codes       = _SetObject              &  getEditionCodes
  _Edition_type        = _SetObject_type         &  EditionType
  _Edition_border      = _SetObject_border       &  maybe blackBorder Border
+ _Edition_block       = _SetObject_block       <&> BlockName 
  _Edition_booster     = _SetObject_booster      &  maybe defaultBooster toUniformBooster
  -- _Edition_releaseDate = _SetObject_releaseDate <&> (parseDay > join)
  _Edition_onlineOnly  = _SetObject_onlineOnly   &  maybe OfflineToo fromOnlineOnly

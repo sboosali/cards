@@ -17,10 +17,9 @@ import Control.Lens hiding ((<&>))
 -- Lenses (generated)
 
 concatenateA makeLenses
-  [ ''Editions
+  [ ''Edition
   
     -- records
-  , ''Edition
   , ''EditionCodes
   ]
 
@@ -28,7 +27,7 @@ concatenateA makeLenses
 -- Prisms (generated)
 
 concatenateA makePrisms
-  [ ''Edition
+  [ ''Editions
 
     -- newtypes
   , ''BlockName

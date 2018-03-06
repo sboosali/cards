@@ -321,3 +321,17 @@ predicateDisjunctionOfConjunctions predicates
 
 ----------------------------------------
 
+-- | specialized 'concat'. 
+concat' :: [[a]] -> [a]
+concat' = concat
+
+----------------------------------------
+
+maybe2throw :: (MonadThrow m) => Maybe a -> m a
+maybe2throw = maybe (throwS "[maybe2throw]") return
+  where
+  -- throwS = userError > throwM
+
+--NOTES userError :: String -> IOError
+
+----------------------------------------

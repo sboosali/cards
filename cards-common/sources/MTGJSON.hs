@@ -2,6 +2,8 @@
 module MTGJSON
  ( module MTGJSON.Version 
  , module MTGJSON.SetList
+ 
+ , module MTGJSON.AllSets.Constants
 
  , module MTGJSON.AllSets.Schema
 -- , module MTGJSON.AllSets
@@ -36,6 +38,7 @@ import MTGJSON.Validate
 import MTGJSON.Version
 import MTGJSON.SetList
 
+import MTGJSON.AllSets.Constants
 import MTGJSON.AllSets.Schema
 
 import MTGJSON.AllSets.Object

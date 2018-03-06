@@ -129,7 +129,6 @@ library
                  MTGJSON
                  MTGJSON.Types
                  MTGJSON.Kinds
-                 MTGJSON.Constants
 
                  MTGJSON.Main 
 
@@ -149,7 +148,9 @@ library
 
                  MTGJSON.Version
                  MTGJSON.SetList
+                 
                  MTGJSON.AllSets
+                 MTGJSON.AllSets.Constants
                  MTGJSON.AllSets.Orphans 
 
                  MTGJSON.AllSets.Types
@@ -163,8 +164,6 @@ library
                  MTGJSON.AllSets.Object.Lens
 
                  MTGJSON.AllSets.Set
-                 MTGJSON.AllSets.Constants 
-
                  MTGJSON.AllSets.Set.Schema 
                  MTGJSON.AllSets.Set.Lens 
 
