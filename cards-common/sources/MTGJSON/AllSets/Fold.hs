@@ -11,7 +11,9 @@ import MTGJSON.Extra --hiding (Text)
 import MTGJSON.AllSets.Set
 import MTGJSON.AllSets.Card
 
---import MTGJSON.AllSets.Schema
+import MTGJSON.AllSets.Enums
+import MTGJSON.AllSets.Booster
+
 -- import MTGJSON.AllSets.Types
 -- import MTGJSON.Types
 

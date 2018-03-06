@@ -19,6 +19,7 @@ import              Data.Aeson         as X (eitherDecode)
 import "validation" Data.Validation    as X (Validation(..))
 import              Data.Monoid        as X (First(..))
 import "scientific" Data.Scientific    as X (Scientific)
+import "lens"       Control.Lens       as X (makeLenses, makePrisms)
 
 ----------------------------------------
 

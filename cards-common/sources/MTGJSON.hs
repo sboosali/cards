@@ -6,6 +6,7 @@ module MTGJSON
  , module MTGJSON.AllSets.Constants
 
  , module MTGJSON.AllSets.Schema
+-- , module MTGJSON.AllSets.Lens
 -- , module MTGJSON.AllSets
  
  , module MTGJSON.AllSets.Object
@@ -39,6 +40,7 @@ import MTGJSON.Version
 import MTGJSON.SetList
 
 import MTGJSON.AllSets.Constants
+--import MTGJSON.AllSets.Lens
 import MTGJSON.AllSets.Schema
 
 import MTGJSON.AllSets.Object

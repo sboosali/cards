@@ -98,6 +98,7 @@ library
   -Wincomplete-record-updates
   -Widentities
   -Wmissing-methods
+  -Wmissing-fields
 
   -- raise a warning into an error
   --TODO -Werror=missing-fields
@@ -152,12 +153,15 @@ library
                  MTGJSON.AllSets
                  MTGJSON.AllSets.Constants
                  MTGJSON.AllSets.Orphans 
+                 MTGJSON.AllSets.Lens
 
                  MTGJSON.AllSets.Types
                  MTGJSON.AllSets.Core
                  MTGJSON.AllSets.Fold 
                  MTGJSON.AllSets.Schema
  --                 MTGJSON.AllSets.Lens 
+
+                 MTGJSON.AllSets.Booster 
 
                  MTGJSON.AllSets.Object
                  MTGJSON.AllSets.Object.Schema
@@ -171,6 +175,26 @@ library
                  MTGJSON.AllSets.Card.Schema 
                  MTGJSON.AllSets.Card.Lens
                
+                 MTGJSON.AllSets.Enums
+                 MTGJSON.AllSets.Enums.Block
+                 MTGJSON.AllSets.Enums.Border
+                 MTGJSON.AllSets.Enums.Cardtype
+                 MTGJSON.AllSets.Enums.Color
+                 MTGJSON.AllSets.Enums.Edition
+                 MTGJSON.AllSets.Enums.Format
+                 MTGJSON.AllSets.Enums.Frame
+                 MTGJSON.AllSets.Enums.Keyword
+                 MTGJSON.AllSets.Enums.Language
+                 MTGJSON.AllSets.Enums.Layout
+                 MTGJSON.AllSets.Enums.Legality
+                 MTGJSON.AllSets.Enums.Mana
+                 MTGJSON.AllSets.Enums.Name
+                 MTGJSON.AllSets.Enums.Rarity
+                 MTGJSON.AllSets.Enums.Subtype
+                 MTGJSON.AllSets.Enums.Supertype
+                 MTGJSON.AllSets.Enums.Symbol
+                 MTGJSON.AllSets.Enums.Watermark
+
                  MTGJSON.Aeson
                  MTGJSON.Example
                  MTGJSON.Paths 

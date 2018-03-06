@@ -8,6 +8,9 @@
 module MTGJSON.AllSets.Schema where
 import MTGJSON.Extra
 
+import MTGJSON.AllSets.Enums
+import MTGJSON.AllSets.Booster
+
 import MTGJSON.AllSets.Object as Object
 import MTGJSON.AllSets.Set    as Edition
 import MTGJSON.AllSets.Card   as Card
@@ -255,10 +258,13 @@ validateEdition _SetObject@SetObject{..} = do
  
 ----------------------------------------
 
--- validateCard :: CardObject -> Maybe CardSchema
--- validateCard CardObject{..} = _
+validateCard :: CardObject -> Maybe CardSchema
+validateCard CardObject{..} = do
+  
+  pure$ CardSchema{..}
+  where
+  
 
 ----------------------------------------
 
 --fromMaybe ""
-

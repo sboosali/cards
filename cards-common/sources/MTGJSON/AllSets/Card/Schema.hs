@@ -13,6 +13,8 @@ module MTGJSON.AllSets.Card.Schema where
 import MTGJSON.Extra
 import MTGJSON.AllSets.Orphans()
 
+import MTGJSON.AllSets.Enums
+
 import Data.Scientific (Scientific)
 
 import Data.Thyme.Calendar
@@ -120,33 +122,6 @@ newtype MultiverseID = MultiverseID Natural
 
 ----------------------------------------
 
-newtype ManaCost = ManaCost Text
- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
-
-newtype Layout = Layout Text
- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
-
-newtype Border = Border Text
- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
-
-newtype Color = Color Text
- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
-
-newtype EditionName = EditionName Text
- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
-
-newtype Supertype = Supertype Text
- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
-
-newtype Cardtype = Cardtype Text
- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
-
-newtype Subtype = Subtype Text
- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
-
-newtype Rarity = Rarity Text
- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
-
 newtype Oracle = Oracle Text
  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
 
@@ -158,14 +133,6 @@ newtype Artist = Artist Text
 
 newtype CollectorNumber = CollectorNumber Text
  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
-
-----------------------------------------
-
--- | @= 'blackBorder'@
-instance Default Border where def = blackBorder
-
-blackBorder :: Border
-blackBorder = "black"
 
 ----------------------------------------
 
@@ -362,12 +329,6 @@ data ForeignPrinting = ForeignPrinting
 instance NFData     ForeignPrinting
 instance Hashable   ForeignPrinting 
 
-newtype Language = Language Text
- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
-
-newtype CardName = CardName Text
- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
-
 ----------------------------------------
 
 {-| 
@@ -380,12 +341,6 @@ data FormatLegality = FormatLegality
 
 instance NFData     FormatLegality 
 instance Hashable   FormatLegality 
-
-newtype Format = Format Text
- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
-
-newtype Legality = Legality Text
- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
 
 ----------------------------------------
 
@@ -400,10 +355,6 @@ data Ruling = Ruling
 
 instance NFData     Ruling
 instance Hashable   Ruling
-
-----------------------------------------
-
-----------------------------------------
 
 ----------------------------------------
 

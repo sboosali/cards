@@ -40,25 +40,24 @@ concatenateA makePrisms
   , ''MultiverseID
 
     -- newtypes
-  , ''ManaCost
-  , ''Layout
-  , ''Border
-  , ''Color
-  , ''EditionName
-  , ''Supertype
-  , ''Cardtype
-  , ''Subtype
-  , ''Rarity
+  -- , ''ManaCost
+  -- , ''Border
+  -- , ''Color
+  -- , ''EditionName
+  -- , ''Supertype
+  -- , ''Cardtype
+  -- , ''Subtype
+  -- , ''Rarity
   , ''Oracle
   , ''Flavor
   , ''Artist
   , ''CollectorNumber
 
     -- newtypes
-  , ''Language
-  , ''CardName
-  , ''Format
-  , ''Legality
+  -- , ''Language
+  -- , ''CardName
+  -- , ''Format
+  -- , ''Legality
 
     -- enums
   , ''IsTimeshifted

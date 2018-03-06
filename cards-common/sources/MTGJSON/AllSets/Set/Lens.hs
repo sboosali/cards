@@ -30,12 +30,12 @@ concatenateA makePrisms
   [ ''Editions
 
     -- newtypes
-  , ''BlockName
-  , ''EditionType
+  --, ''BlockName
+  --, ''EditionType
 
     -- newtypes
-  , ''Booster
-  , ''BoosterSlot
+  --, ''Booster
+  --, ''BoosterSlot
    
     -- enums
   , ''WhetherOffline

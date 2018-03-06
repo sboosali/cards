@@ -13,17 +13,17 @@ module MTGJSON.AllSets.Constants where
 
 import MTGJSON.Extra
 
+import MTGJSON.AllSets.Enums
+
 -- import MTGJSON.AllSets.Object as Object
 -- import MTGJSON.AllSets.Set    as Edition
-
-import qualified MTGJSON.AllSets.Card as Card
 
 ----------------------------------------
 
 {-|
 
 -}
-allEditionNames :: [Card.EditionName]
+allEditionNames :: [EditionName]
 allEditionNames = concat'
   [ realEditionNames
   , fakeEditionNames
@@ -32,7 +32,7 @@ allEditionNames = concat'
 {-|
 
 -}
-fakeEditionNames :: [Card.EditionName]
+fakeEditionNames :: [EditionName]
 fakeEditionNames = concat'
   [ 
   ]
@@ -42,7 +42,7 @@ fakeEditionNames = concat'
 {-|
 
 -}
-realEditionNames :: [Card.EditionName]
+realEditionNames :: [EditionName]
 realEditionNames = concat'
   [ seriousEditionNames
   , sillyEditionNames
@@ -51,7 +51,7 @@ realEditionNames = concat'
 {-| the @Un-sets@. 
 
 -}
-sillyEditionNames :: [Card.EditionName]
+sillyEditionNames :: [EditionName]
 sillyEditionNames =
   [ "Unglued"
   , "Unhinged"
@@ -61,7 +61,7 @@ sillyEditionNames =
 {-|
 
 -}
-seriousEditionNames :: [Card.EditionName]
+seriousEditionNames :: [EditionName]
 seriousEditionNames = concat'
   [ standardEditionNames
   , supplementalEditionNames
@@ -72,7 +72,7 @@ seriousEditionNames = concat'
 {-|
 
 -}
-supplementalEditionNames :: [Card.EditionName]
+supplementalEditionNames :: [EditionName]
 supplementalEditionNames = concat'
   [ portalSetNames
   , mastersSetNames
@@ -89,7 +89,7 @@ supplementalEditionNames = concat'
 {-|
 
 -}
-commanderSetNames :: [Card.EditionName]
+commanderSetNames :: [EditionName]
 commanderSetNames =
   [ "Magic: The Gathering-Commander"
   , "Commander 2013 Edition"
@@ -102,7 +102,7 @@ commanderSetNames =
 {-|
 
 -}
-archenemySetNames :: [Card.EditionName]
+archenemySetNames :: [EditionName]
 archenemySetNames =
   [ "Archenemy"
   ]
@@ -110,7 +110,7 @@ archenemySetNames =
 {-|
 
 -}
-conspiracySetNames :: [Card.EditionName]
+conspiracySetNames :: [EditionName]
 conspiracySetNames =
   [ "Magic: The Gathering—Conspiracy"
   , "Conspiracy: Take the Crown"
@@ -119,7 +119,7 @@ conspiracySetNames =
 {-|
 
 -}
-mastersSetNames :: [Card.EditionName]
+mastersSetNames :: [EditionName]
 mastersSetNames =
   [ "Vintage Masters"
   , "Eternal Masters"
@@ -132,7 +132,7 @@ mastersSetNames =
 {-|
 
 -}
-vanguardSetNames :: [Card.EditionName]
+vanguardSetNames :: [EditionName]
 vanguardSetNames =
   [ "Vanguard"
   ]
@@ -140,7 +140,7 @@ vanguardSetNames =
 {-|
 
 -}
-portalSetNames :: [Card.EditionName]
+portalSetNames :: [EditionName]
 portalSetNames =
   [ "Portal"
   , "Portal Second Age"
@@ -150,7 +150,7 @@ portalSetNames =
 {-|
 
 -}
-planechaseSetNames :: [Card.EditionName]
+planechaseSetNames :: [EditionName]
 planechaseSetNames =
   [ "Planechase"
   , "Planechase 2012 Edition"
@@ -159,7 +159,7 @@ planechaseSetNames =
 {-|
 
 -}
-miscellaneousReprintEditionNames :: [Card.EditionName]
+miscellaneousReprintEditionNames :: [EditionName]
 miscellaneousReprintEditionNames =
   [ "Tempest Remastered"
   ]
@@ -169,7 +169,7 @@ miscellaneousReprintEditionNames =
 {-|
 
 -}
-standardEditionNames :: [Card.EditionName]
+standardEditionNames :: [EditionName]
 standardEditionNames = concat'
   [ expansionSetNames
   , coreSetNames
@@ -179,7 +179,7 @@ standardEditionNames = concat'
 {-|
 
 -}
-coreSetNames :: [Card.EditionName]
+coreSetNames :: [EditionName]
 coreSetNames =
   [ "Limited Edition Alpha"
   , "Limited Edition Beta"
@@ -206,7 +206,7 @@ coreSetNames =
 {-|
 
 -}
-miscellaneousStandardEditionNames :: [Card.EditionName]
+miscellaneousStandardEditionNames :: [EditionName]
 miscellaneousStandardEditionNames =
   [ "Time Spiral \"Timeshifted\""
   ]
@@ -214,7 +214,7 @@ miscellaneousStandardEditionNames =
 {-|
 
 -}
-expansionSetNames :: [Card.EditionName]
+expansionSetNames :: [EditionName]
 expansionSetNames =
   [ "Aether Revolt"
   , "Alara Reborn"
