@@ -239,15 +239,21 @@ library
                         -- 2.0
              , Earley >= 0.12
              , frisby >=0.2
+--             , attoparsec
 --             , megaparsec
 
--- other packages 
-             , aeson
-             , scientific
-             , binary
-             , file-embed
+-- (time)               
              , time
              , thyme
+             , old-locale
+
+-- (json)               
+             , aeson
+             , scientific
+
+-- other packages 
+             , binary
+             , file-embed
              , validation >= 1 && <= 2
              , foldl >= 1.3 && <= 2
              , distribution >= 1.1 && <= 2

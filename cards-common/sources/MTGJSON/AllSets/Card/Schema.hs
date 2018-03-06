@@ -161,6 +161,14 @@ newtype CollectorNumber = CollectorNumber Text
 
 ----------------------------------------
 
+-- | @= 'blackBorder'@
+instance Default Border where def = blackBorder
+
+blackBorder :: Border
+blackBorder = "black"
+
+----------------------------------------
+
 data IsTimeshifted
  = NotTimeshifted
  | YesTimeshifted

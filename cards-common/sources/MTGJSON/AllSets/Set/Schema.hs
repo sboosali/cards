@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings, OverloadedLists #-}
+
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE DataKinds, ScopedTypeVariables #-}
 
@@ -152,10 +154,11 @@ instance Enumerable WhetherOffline
 fromOnlineOnly :: Bool -> WhetherOffline
 fromOnlineOnly = not > toWhetherOffline
 
+-- | naming: "whether 'OfflineToo' is @True@". 
 toWhetherOffline :: Bool -> WhetherOffline
 toWhetherOffline = \case
-  False -> OfflineToo
-  True  -> OnlineOnly
+  False -> OnlineOnly
+  True  -> OfflineToo
 
 ----------------------------------------
 
@@ -194,12 +197,57 @@ newtype Booster = Booster
 instance NFData     Booster
 instance Hashable   Booster
 
-{-| 
+{-| @fromList@ is 'defaultBooster' on @[]@ and 'list2booster' otherwise. 
 -}
 instance IsList Booster where
   type Item Booster = BoosterSlot
   toList   = getBooster
-  fromList = list2booster
+  fromList = \case
+    [] -> defaultBooster
+    xs -> list2booster xs
+
+{-| 15 'BoosterSlot's total:
+
+* 1 'rareSlot' (biased towards @"rare"@ over @"mythic"@)
+* 3 'uncommonSlot's (uniform\/singluar)
+* 11 'commonSlot's (uniform\/singluar)
+
+The distributions of the officially printed boosters vary from this simplification, and for each set. Factors include:
+
+* the size of the set;
+* sampling without replacement (which is related to the following);
+* the configuration of the "print sheet", e.g. @Ravenous Chupacabra@ and @Golden Demise@ aren't on the same print sheet (afaik?) and thus shouldn't share two of the three 'uncommonSlot's;
+* the presence of newer raritities, like @"mythic"@; 
+* the presence of special raritities, like for @Wastes@;
+* the presence of special slots, e.g. @foil@, @double-faced@, or @timeshifted@ cards,
+which each take one slot per pack; 
+* etc.
+
+
+
+-}
+defaultBooster :: Booster
+defaultBooster = list2booster $ (concat :: forall a. [[a]] -> [a])
+ [ replicate 1  rareSlot
+ , replicate 3  uncommonSlot
+ , replicate 11 commonSlot
+ ]
+
+rareSlot :: BoosterSlot
+rareSlot =
+  [ "rare"   -: 7
+  , "mythic" -: 1
+  ]
+
+uncommonSlot :: BoosterSlot
+uncommonSlot =
+  [ "uncommon" -: 1
+  ]
+
+commonSlot :: BoosterSlot
+commonSlot =
+  [ "common" -: 1
+  ]
 
 list2booster :: [BoosterSlot] -> Booster
 list2booster = Booster

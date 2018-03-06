@@ -69,41 +69,60 @@ textuallySummarize = LT.fold textualFold
 type EnumFold a = Fold a (EnumSummary a)
 
 data EnumSummary a = EnumSummary
- { _first             :: a
- , _last              :: a
+ { _smallest          :: Maybe a
+ , _largest           :: Maybe a
  , _completeHistogram :: Map a Int
  -- , _ :: a
  }
 
-enumFold :: (Num a, Ord a, Enumerable a) => EnumFold a
+enumFold :: (Default a, Ord a, Enumerable a) => EnumFold a
 enumFold = EnumSummary
-  <$> lMinimum1
-  <*> lMaximum1
+  <$> lSmallest
+  <*> lLargest
   <*> lCompleteHistogram
 
 lCompleteHistogram
-  :: (Ord a, Enumerable a)
+  :: ( Ord a
+     , Enumerable a
+     )
   => Fold a (Map a Int)
 lCompleteHistogram = Fold step zeroes id
   where
   step m a = Map.insertWith (+) a 1 m
   zeroes = Map.fromList (zip enumerated (repeat 0))
 
+-- | 
+lSmallest :: (Ord a) => Fold a (Maybe a)
+lSmallest = lCompare (<=) 
+
+-- | 
+lLargest :: (Ord a) => Fold a (Maybe a)
+lLargest = lCompare (>=)
+
+-- | 'def' by default
+lSmallest1 :: (Ord a, Default a) => Fold a a
+lSmallest1 = lSmallest <&> fromMaybe def
+
+-- | 'def' by default
+lLargest1 :: (Ord a, Default a) => Fold a a
+lLargest1 = lLargest <&> fromMaybe def
+
 -- | 'minBound' by default
-lSmallest1 :: (Ord a, Bounded a) => Fold a a
-lSmallest1 = lCompare1 maxBound (<=)
+lSmallestBounded :: (Ord a, Bounded a) => Fold a a
+lSmallestBounded = lCompare1 maxBound (<=)
 
 -- | 'maxBound' by default
-lLargest1 :: (Ord a, Bounded a) => Fold a a
-lLargest1 = lCompare1 minBound (>=)
+lLargestBounded :: (Ord a, Bounded a) => Fold a a
+lLargestBounded = lCompare1 minBound (>=)
 
 {- |
 
 >>> :set -XPackageImports
 >>> import qualified "foldl" Control.Foldl as L
->>> L.fold (lCompare1 (minBound::Natural) (>=)) [1..5]
+>>> import Data.Word (Word8)
+>>> L.fold (lCompare1 (minBound::Word8) (>=)) [1..5]
 5
->>> L.fold (lCompare1 (minBound::Natural) (>=)) []
+>>> L.fold (lCompare1 (minBound::Word8) (>=)) []
 0
 
 -}
@@ -112,6 +131,15 @@ lCompare1 initial comparator = Fold step initial id
   where
   step old new
     = if old `comparator` new then old else new
+    -- left-biased
+
+lCompare :: (Ord a) => (a -> a -> Bool) -> Fold a (Maybe a)
+lCompare comparator = Fold step Nothing id
+  where
+  step Nothing    new = Just new
+  step (Just old) new = Just (go old new)
+  
+  go old new = if old `comparator` new then old else new
     -- left-biased
 
 -- -- | 'mempty' by default
