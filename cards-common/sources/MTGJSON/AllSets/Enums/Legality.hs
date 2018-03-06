@@ -20,6 +20,9 @@ newtype Legality = Legality Text
 
 makePrisms ''Legality
 
+-- | @= 'legal'@
+instance Default Legality where def = legal
+
 ----------------------------------------
 
 legal :: Legality

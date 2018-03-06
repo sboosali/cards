@@ -48,7 +48,6 @@ concatenateA makePrisms
   -- , ''Cardtype
   -- , ''Subtype
   -- , ''Rarity
-  , ''Oracle
   , ''Flavor
   , ''Artist
   , ''CollectorNumber

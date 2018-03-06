@@ -20,6 +20,9 @@ newtype Cardtype = Cardtype Text
 
 makePrisms ''Cardtype
 
+-- | @= 'instantType'@
+instance Default Cardtype where def = instantType
+
 ----------------------------------------
 
 instantType :: Cardtype

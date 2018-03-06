@@ -263,6 +263,48 @@ validateCard CardObject{..} = do
   
   pure$ CardSchema{..}
   where
+  _CardSchema_identity      = _CardObject_identity
+  _CardSchema_name          = _CardObject_name
+  
+  _CardSchema_multiverseid  = _CardObject_multiverseid
+  _CardSchema_mciNumber     = _CardObject_mciNumber
+
+  _CardSchema_layout        = _CardObject_layout
+  _CardSchema_names         = _CardObject_names
+
+  _CardSchema_edition       = _CardObject_edition
+  _CardSchema_variations    = _CardObject_variations
+  _CardSchema_border        = _CardObject_border
+
+  _CardSchema_manaCost      = _CardObject_manaCost
+  _CardSchema_cmc           = _CardObject_cmc
+  _CardSchema_colors        = _CardObject_colors
+  _CardSchema_colorIdentity = _CardObject_colorIdentity
+  
+  _CardSchema_supertypes    = _CardObject_supertypes
+  _CardSchema_cardtypes     = _CardObject_cardtypes
+  _CardSchema_subtypes      = _CardObject_subtypes
+
+  _CardSchema_oracle        = _CardObject_text
+
+  _CardSchema_rarity        = _CardObject_rarity
+  _CardSchema_flavor        = _CardObject_flavor
+  _CardSchema_artist        = _CardObject_artist
+  _CardSchema_ccn           = _CardObject_ccn
+  
+  _CardSchema_originalText  = _CardObject_originalText
+  _CardSchema_originalType  = _CardObject_originalType
+   
+  _CardSchema_reserved      = _CardObject_reserved
+  _CardSchema_starter       = _CardObject_starter
+  _CardSchema_timeshifted   = _CardObject_timeshifted
+
+  _CardSchema_printings     = _CardObject_printings
+  _CardSchema_foreignNames  = _CardObject_foreignNames
+
+  _CardSchema_legalities    = _CardObject_legalities
+
+  _CardSchema_rulings       = _CardObject_rulings
   
 
 ----------------------------------------

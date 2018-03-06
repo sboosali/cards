@@ -32,7 +32,8 @@ import Control.Lens (makeLenses, makePrisms)
 newtype Language = Language Text
  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
 
-makePrisms ''Language
+-- | @= 'english'@
+instance Default Language where def = english
 
 ----------------------------------------
 
@@ -44,7 +45,25 @@ data LanguageInfo = LanguageInfo
 instance NFData   LanguageInfo
 instance Hashable LanguageInfo
 
-makeLenses ''LanguageInfo
+-- | @= 'englishInfo'@
+instance Default LanguageInfo where def = englishInfo
+
+----------------------------------------
+
+knownLanguages :: Set Language
+knownLanguages =
+  [ english
+  , german
+  , french
+  , italian
+  , spanish
+  , portuguese
+  , japanese
+  , chinese
+  , russian
+  , taiwanese
+  , korean
+  ]
 
 ----------------------------------------
 
@@ -215,5 +234,11 @@ languageInfo = \case
  Language "Korean"     -> return $ LanguageInfo "ko" "한국어"
  Language language     -> throwT $ "unknown language " <> language
 -}
+
+----------------------------------------
+
+makePrisms ''Language
+
+makeLenses ''LanguageInfo
 
 ----------------------------------------

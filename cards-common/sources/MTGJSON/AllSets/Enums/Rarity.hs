@@ -20,6 +20,9 @@ newtype Rarity = Rarity Text
 
 makePrisms ''Rarity
 
+-- | @= 'common'@
+instance Default Rarity where def = common
+
 ----------------------------------------
 
 mythic :: Rarity

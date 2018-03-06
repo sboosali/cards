@@ -14,6 +14,7 @@ import MTGJSON.Extra
 import MTGJSON.AllSets.Orphans()
 
 import MTGJSON.AllSets.Enums
+import MTGJSON.AllSets.Oracle
 
 import Data.Scientific (Scientific)
 
@@ -71,7 +72,7 @@ data CardSchema = CardSchema
   , _CardSchema_subtypes      :: [Subtype]
   
   , _CardSchema_rarity        :: Rarity 
-  , _CardSchema_text          :: Oracle 
+  , _CardSchema_oracle        :: Oracle Text
   , _CardSchema_flavor        :: Flavor 
   , _CardSchema_artist        :: Artist
   , _CardSchema_ccn           :: Maybe CollectorNumber
@@ -121,9 +122,6 @@ newtype MultiverseID = MultiverseID Natural
 --instance IsString MID where fromString = fromString > MID
 
 ----------------------------------------
-
-newtype Oracle = Oracle Text
- deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
 
 newtype Flavor = Flavor Text
  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
@@ -181,7 +179,7 @@ isStarter = \case
 ----------------------------------------
 
 data NumericSchema
-  = UnnumeredSchema
+  = NumberlessSchema
   | CreatureSchema     CreatureLike
   | PlaneswalkerSchema PlaneswalkerLike
   | VanguardSchema     VanguardLike

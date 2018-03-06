@@ -161,6 +161,8 @@ library
                  MTGJSON.AllSets.Schema
  --                 MTGJSON.AllSets.Lens 
 
+                 MTGJSON.AllSets.Oracle
+
                  MTGJSON.AllSets.Booster 
 
                  MTGJSON.AllSets.Object

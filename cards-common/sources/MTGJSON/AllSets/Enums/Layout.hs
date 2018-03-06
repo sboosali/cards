@@ -20,6 +20,10 @@ newtype Layout = Layout Text
  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
 
 makePrisms ''Layout
+
+-- | @= 'normalLayout'@
+instance Default Layout where def = normalLayout
+
 ----------------------------------------
 
 {-|

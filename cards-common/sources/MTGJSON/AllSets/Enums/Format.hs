@@ -20,6 +20,9 @@ newtype Format = Format Text
 
 makePrisms ''Format
 
+-- | @= 'vintageFormat'@
+instance Default Format where def = vintageFormat
+
 ----------------------------------------
 
 standardFormat :: Format

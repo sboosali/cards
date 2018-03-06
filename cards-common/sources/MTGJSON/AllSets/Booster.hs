@@ -11,7 +11,7 @@
 module MTGJSON.AllSets.Booster where
 
 import MTGJSON.Extra 
---import MTGJSON.AllSets.Enums.Rarity
+import MTGJSON.AllSets.Enums.Rarity
 
 import qualified "distribution" Data.Distribution as D 
 import           "distribution" Data.Distribution (Distribution,Probability)
@@ -66,6 +66,9 @@ instance IsList Booster where
   fromList = \case
     [] -> defaultBooster
     xs -> toBooster xs
+
+-- | @= 'defaultBooster'@
+instance Default Booster where def = defaultBooster
 
 ----------------------------------------
 
@@ -135,6 +138,9 @@ instance Hashable   BoosterSlot where
 
 -- instance NFData     BoosterSlot
 -- instance Hashable   BoosterSlot
+
+-- | @= 'defaultBoosterSlot'@
+instance Default BoosterSlot where def = defaultBoosterSlot
 
 ----------------------------------------
 
@@ -258,6 +264,11 @@ uniformBoosterSlot = D.uniform > BoosterSlot
 singletonBoosterSlot :: Text -> BoosterSlot
 singletonBoosterSlot x = toBoosterSlot [(x,1)]
 
+defaultBoosterSlot :: BoosterSlot
+defaultBoosterSlot = BoosterSlot $ D.always t
+  where
+  Rarity t = common
+
 ----------------------------------------
 
 makePrisms ''Booster
@@ -323,5 +334,3 @@ of which of these are not completely irrelevant for drafting:
 @
 
 -}
-
-  
