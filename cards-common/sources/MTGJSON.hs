@@ -3,11 +3,10 @@ module MTGJSON
  ( module MTGJSON.Version 
  , module MTGJSON.SetList
 
-  , module MTGJSON.AllSets.Object
--- , module MTGJSON.AllSets
-
- 
  , module MTGJSON.AllSets.Schema
+-- , module MTGJSON.AllSets
+ 
+ , module MTGJSON.AllSets.Object
  , module MTGJSON.AllSets.Card
  , module MTGJSON.AllSets.Set
 
@@ -36,9 +35,10 @@ import MTGJSON.Validate
 
 import MTGJSON.Version
 import MTGJSON.SetList
-import MTGJSON.AllSets.Object
 
 import MTGJSON.AllSets.Schema
+
+import MTGJSON.AllSets.Object
 import MTGJSON.AllSets.Card
 import MTGJSON.AllSets.Set
 

@@ -1,35 +1,16 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE PolyKinds #-}
 
-module MTGJSON.AllSets.Lens where
+module MTGJSON.AllSets.Object.Lens where
 
-import MTGJSON.AllSets.Types 
-import MTGJSON.AllSets.Object -- Schema 
+--import MTGJSON.AllSets.Types 
+import MTGJSON.AllSets.Object.Schema 
 import MTGJSON.Extra (concatenateA) 
 
 import Control.Lens hiding ((<&>)) -- (makeLenses,makePrisms) 
 
 {-
 -}
-
-----------------------------------------
--- generated
-
--- Lenses
-concatenateA makeLenses
-  [ ''EditionData
-  , ''EditionCodes'
-  ]
-
--- Prisms
-concatenateA makePrisms
-  [ ''WhetherOffline
-  , ''Booster
-  , ''BoosterSlot
-  , ''ProbabilityDistribution
-  , ''GenericSlot'
-  , ''GenericSlot
-  ]  
 
 ----------------------------------------
 -- generated
