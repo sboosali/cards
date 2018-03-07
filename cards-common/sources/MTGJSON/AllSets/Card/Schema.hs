@@ -43,16 +43,16 @@ instance (Hashable card) => Hashable   (Face card)
 
 -}
 data CardSchema = CardSchema 
-  { _CardSchema_identity      :: Text 
+  { _CardSchema_identity      :: UniqueID 
   , _CardSchema_name          :: CardName
   
-  , _CardSchema_multiverseid  :: Maybe MultiverseID
+  , _CardSchema_multiverseid  :: MultiverseID
   , _CardSchema_mciNumber     :: Maybe Text
     -- ^ used by `MagicCards.info`, almost always identical to '_CardSchema_number'.
     -- 
 
-  , _CardSchema_layout        :: Maybe Layout
-  , _CardSchema_names         :: [Text]
+  , _CardSchema_layout        :: Layout
+  , _CardSchema_names         :: [CardName]
 
   , _CardSchema_edition       :: EditionName 
   , _CardSchema_variations    :: [MultiverseID] 
@@ -71,11 +71,13 @@ data CardSchema = CardSchema
      -- ^ Un-cards can have no type 
   , _CardSchema_subtypes      :: [Subtype]
   
+  , _CardSchema_numeric       :: NumericSchema
+
   , _CardSchema_rarity        :: Rarity 
   , _CardSchema_oracle        :: Oracle Text
   , _CardSchema_flavor        :: Flavor 
   , _CardSchema_artist        :: Artist
-  , _CardSchema_ccn           :: Maybe CollectorNumber
+  , _CardSchema_ccn           :: CollectorNumber
     -- ^ CCN
   
   , _CardSchema_originalText  :: Maybe Text 
@@ -126,6 +128,13 @@ newtype MultiverseID = MultiverseID Natural
 newtype Flavor = Flavor Text
  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
 
+instance Default Flavor where def = flavorless
+
+flavorless :: Flavor
+flavorless = ""
+
+----------------------------------------
+
 newtype Artist = Artist Text
  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
 
@@ -143,10 +152,14 @@ instance NFData     IsTimeshifted
 instance Hashable   IsTimeshifted
 instance Enumerable IsTimeshifted
 
+instance Default IsTimeshifted where def = NotTimeshifted
+
 isTimeshifted :: Bool -> IsTimeshifted
 isTimeshifted = \case
   False -> NotTimeshifted
   True  -> YesTimeshifted
+
+----------------------------------------
 
 data IsReserved
  = NotReserved
@@ -157,10 +170,14 @@ instance NFData     IsReserved
 instance Hashable   IsReserved
 instance Enumerable IsReserved
 
+instance Default IsReserved where def = NotReserved
+
 isReserved :: Bool -> IsReserved
 isReserved = \case
   False -> NotReserved
   True  -> YesReserved
+
+----------------------------------------
 
 data IsStarter
  = NotStarter
@@ -170,6 +187,8 @@ data IsStarter
 instance NFData     IsStarter
 instance Hashable   IsStarter
 instance Enumerable IsStarter
+
+instance Default IsStarter where def = NotStarter
 
 isStarter :: Bool -> IsStarter
 isStarter = \case
@@ -315,19 +334,23 @@ readInteger t = readMay (toS t)
 
 ----------------------------------------
 
+type ForeignPrintings = [ForeignPrinting]  
+
 {-| 
 
 -}
 data ForeignPrinting = ForeignPrinting 
   { _Foreign_language     :: Language
   , _Foreign_name         :: CardName
-  , _Foreign_multiverseid :: Maybe MultiverseID 
+  , _Foreign_multiverseid :: MultiverseID 
   } deriving (Show,Read,Eq,Ord,Generic)
 
 instance NFData     ForeignPrinting
 instance Hashable   ForeignPrinting 
 
 ----------------------------------------
+
+type FormatLegalities = [FormatLegality]  
 
 {-| 
 
@@ -341,6 +364,8 @@ instance NFData     FormatLegality
 instance Hashable   FormatLegality 
 
 ----------------------------------------
+
+type Rulings = [Ruling]
 
 {-| 
 

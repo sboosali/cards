@@ -22,6 +22,11 @@ makePrisms ''Color
 
 ----------------------------------------
 
+toColors :: Maybe [Text] -> [Color]
+toColors = maybe [] (fmap Color)
+
+----------------------------------------
+
 white :: Color
 white = "White"
 

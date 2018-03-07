@@ -164,6 +164,10 @@ data CardObject = CardObject
   , _CardObject_toughness     :: Maybe Text  
   , _CardObject_loyalty       :: Maybe Natural 
   , _CardObject_multiverseid  :: Maybe Natural
+   -- ^ The multiverseid of the card on Wizard's Gatherer web page.
+   -- Cards from sets that do not exist on Gatherer will NOT have a multiverseid.
+   -- Sets not on Gatherer are: ATH, ITP, DKM, RQS, DPA and all sets with a 4 letter code that starts with a lowercase 'p'.
+    
   , _CardObject_variations    :: Maybe [Natural] 
 --  , _CardObject_imageName     :: Maybe Text 
   , _CardObject_watermark     :: Maybe Text 

@@ -29,6 +29,15 @@ makePrisms ''ManaSymbol
 
 ----------------------------------------
 
+--TODO  
+toManaCost :: Maybe Text -> ManaCost
+toManaCost = maybe noManaCost ManaCost
+
+noManaCost :: ManaCost
+noManaCost = ""
+
+----------------------------------------
+
 whiteSymbol :: ManaSymbol
 whiteSymbol = "W"
 

@@ -14,6 +14,8 @@ import MTGJSON.Extra
 
 import Control.Lens (makePrisms)
 
+import qualified Data.Text.Lazy as T
+
 ----------------------------------------
 
 {-| 
@@ -70,6 +72,15 @@ instance IsList (OracleParagraph t) where
 -}
 vanilla :: Oracle t
 vanilla = []
+
+toOracle :: Maybe Text -> Oracle Text
+toOracle = maybe vanilla splitParagraphs
+
+splitParagraphs :: Text -> Oracle Text
+splitParagraphs
+  = T.split (=='\n')
+  > fmap ((:[]) > OracleParagraph)
+  > Oracle
 
 ----------------------------------------
 

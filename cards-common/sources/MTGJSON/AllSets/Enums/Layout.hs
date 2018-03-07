@@ -26,6 +26,11 @@ instance Default Layout where def = normalLayout
 
 ----------------------------------------
 
+toLayout :: Maybe Text -> Layout
+toLayout = maybe def Layout
+
+----------------------------------------
+
 {-|
 -}
 aftermathLayout :: Layout

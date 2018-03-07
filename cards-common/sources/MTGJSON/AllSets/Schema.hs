@@ -10,6 +10,7 @@ import MTGJSON.Extra
 
 import MTGJSON.AllSets.Enums
 import MTGJSON.AllSets.Booster
+import MTGJSON.AllSets.Oracle
 
 import MTGJSON.AllSets.Object as Object
 import MTGJSON.AllSets.Set    as Edition
@@ -229,8 +230,26 @@ parseTime l spec = either (const Nothing) Just
 
 -}
 
+
 ----------------------------------------
 
+{-|
+
+
+
+
+-}
+validateSet :: SetObject -> (Maybe Edition, [CardSchema])
+validateSet _SetObject@SetObject{..} = (Nothing, [])
+
+----------------------------------------
+
+{-|
+
+
+
+
+-}
 validateEdition :: SetObject -> Maybe Edition
 validateEdition _SetObject@SetObject{..} = do
 
@@ -258,55 +277,138 @@ validateEdition _SetObject@SetObject{..} = do
  
 ----------------------------------------
 
-validateCard :: CardObject -> Maybe CardSchema
-validateCard CardObject{..} = do
+{-|
+
+
+
+
+-}
+validateCard
+  :: EditionName -> Border 
+  -> CardObject -> Maybe CardSchema
+validateCard (_CardSchema_edition) (_CardSchema_border) CardObject{..} = do
+
+  (MultiverseID -> _CardSchema_multiverseid) <- _CardObject_multiverseid
+
+  (CollectorNumber -> _CardSchema_ccn) <-_CardObject_number
+
+  _CardSchema_numeric <- validateNumeric
+    (_CardObject_power, _CardObject_toughness)
+    _CardObject_loyalty
+    (_CardObject_hand, _CardObject_life)
+
+  _CardSchema_foreignNames  <- _CardObject_foreignNames
+    & fromMaybe []
+    & traverse toForeignPrinting
+
+  _CardSchema_legalities    <- _CardObject_legalities
+    & fromMaybe []
+    & traverse toFormatLegality
+
+  _CardSchema_rulings       <- _CardObject_rulings
+    & fromMaybe []
+    & traverse toRuling
   
   pure$ CardSchema{..}
+
   where
-  _CardSchema_identity      = _CardObject_identity
-  _CardSchema_name          = _CardObject_name
-  
-  _CardSchema_multiverseid  = _CardObject_multiverseid
+  _CardSchema_identity      = _CardObject_id   & UniqueID
+  _CardSchema_name          = _CardObject_name & CardName
+
   _CardSchema_mciNumber     = _CardObject_mciNumber
 
-  _CardSchema_layout        = _CardObject_layout
+  _CardSchema_layout        = _CardObject_layout & toLayout
   _CardSchema_names         = _CardObject_names
+    & maybe [] (fmap CardName)
 
-  _CardSchema_edition       = _CardObject_edition
   _CardSchema_variations    = _CardObject_variations
-  _CardSchema_border        = _CardObject_border
+    & maybe [] (fmap MultiverseID)
+  -- _CardSchema_border        = _CardObject_border & toBorder 
 
-  _CardSchema_manaCost      = _CardObject_manaCost
-  _CardSchema_cmc           = _CardObject_cmc
-  _CardSchema_colors        = _CardObject_colors
-  _CardSchema_colorIdentity = _CardObject_colorIdentity
+  _CardSchema_cmc           = _CardObject_cmc           & id
+  _CardSchema_manaCost      = _CardObject_manaCost      & fmap ManaCost --
+  _CardSchema_colors        = _CardObject_colors        & toColors
+  _CardSchema_colorIdentity = _CardObject_colorIdentity & toColors
   
-  _CardSchema_supertypes    = _CardObject_supertypes
-  _CardSchema_cardtypes     = _CardObject_cardtypes
-  _CardSchema_subtypes      = _CardObject_subtypes
+  _CardSchema_supertypes    = _CardObject_supertypes & maybe [] (fmap Supertype)
+  _CardSchema_cardtypes     = _CardObject_types      & maybe [] (fmap Cardtype)
+  _CardSchema_subtypes      = _CardObject_subtypes   & maybe [] (fmap Subtype)
 
-  _CardSchema_oracle        = _CardObject_text
+  _CardSchema_oracle        = _CardObject_text & toOracle
 
-  _CardSchema_rarity        = _CardObject_rarity
-  _CardSchema_flavor        = _CardObject_flavor
-  _CardSchema_artist        = _CardObject_artist
-  _CardSchema_ccn           = _CardObject_ccn
+  _CardSchema_rarity        = _CardObject_rarity & Rarity
+  _CardSchema_flavor        = _CardObject_flavor & maybe def Flavor
+  _CardSchema_artist        = _CardObject_artist & Artist
   
   _CardSchema_originalText  = _CardObject_originalText
   _CardSchema_originalType  = _CardObject_originalType
    
-  _CardSchema_reserved      = _CardObject_reserved
-  _CardSchema_starter       = _CardObject_starter
-  _CardSchema_timeshifted   = _CardObject_timeshifted
+  _CardSchema_reserved      = _CardObject_reserved    & maybe def isReserved
+  _CardSchema_starter       = _CardObject_starter     & maybe def isStarter
+  _CardSchema_timeshifted   = _CardObject_timeshifted & maybe def isTimeshifted
 
   _CardSchema_printings     = _CardObject_printings
-  _CardSchema_foreignNames  = _CardObject_foreignNames
-
-  _CardSchema_legalities    = _CardObject_legalities
-
-  _CardSchema_rulings       = _CardObject_rulings
+    & maybe [] (fmap EditionName)
   
+----------------------------------------
+
+toForeignPrinting :: CardForeignPrintingObject -> Maybe ForeignPrinting
+toForeignPrinting CardForeignPrintingObject{..} = do
+  (MultiverseID -> _Foreign_multiverseid) <- _CardForeignPrintingObject_multiverseid 
+  
+  pure ForeignPrinting{..}
+  where
+  _Foreign_language     = _CardForeignPrintingObject_language & Language
+  _Foreign_name         = _CardForeignPrintingObject_name     & CardName
+
+toFormatLegality :: CardFormatLegalityObject -> Maybe FormatLegality
+toFormatLegality CardFormatLegalityObject{..} = do
+  pure FormatLegality{..}
+  where
+  _FormatLegality_format   = _CardFormatLegalityObject_format   & Format
+  _FormatLegality_legality = _CardFormatLegalityObject_legality & Legality
+  
+toRuling :: CardRulingObject -> Maybe Ruling
+toRuling CardRulingObject{..} = do
+  _Ruling_date <- parseDay _CardRulingObject_date
+  
+  pure$ Ruling{..}
+  where
+  _Ruling_text = _CardRulingObject_text & id
 
 ----------------------------------------
 
---fromMaybe ""
+validateNumeric
+  :: (Maybe Text, Maybe Text)
+  -> Maybe Natural
+  -> (Maybe Integer, Maybe Integer)
+  -> Maybe NumericSchema
+-- validateNumeric (power,toughness) loyalty (hand,life) = do
+
+validateNumeric (Just power, Just toughness) Nothing (Nothing,Nothing)
+  = Just $ CreatureSchema CreatureLike{..}
+  where
+  _Creature_power     = parseNumberLike power
+  _Creature_toughness = parseNumberLike toughness
+
+validateNumeric (Nothing,Nothing) (Just loyalty) (Nothing,Nothing)
+  = Just $ PlaneswalkerSchema (PlaneswalkerLike loyalty)
+    
+validateNumeric (Nothing,Nothing) Nothing (Just hand, Just life)
+  = Just $ VanguardSchema VanguardLike{..}
+  where
+  _Vanguard_hand = hand
+  _Vanguard_life = life
+
+validateNumeric _ _ _ = Nothing
+
+{-
+
+  | CreatureSchema     CreatureLike
+  | PlaneswalkerSchema PlaneswalkerLike
+  | VanguardSchema     VanguardLike
+
+-}
+
+
+----------------------------------------

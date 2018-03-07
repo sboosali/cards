@@ -50,7 +50,7 @@ import Control.Monad.Fail (MonadFail)
 import Data.Coerce
 --import Data.Monoid (First(..))
 
-import Prelude.Spiros
+import Prelude.Spiros hiding (Format)
 
 ----------------------------------------
 

@@ -25,6 +25,11 @@ instance Default Border where def = blackBorder
 
 ----------------------------------------
 
+toBorder :: Maybe Text -> Border
+toBorder = maybe def Border
+
+----------------------------------------
+
 blackBorder :: Border
 blackBorder = "black"
 
