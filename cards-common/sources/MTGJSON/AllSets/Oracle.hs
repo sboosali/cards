@@ -30,7 +30,7 @@ type SimpleOracle = Oracle Text
 newtype Oracle t = Oracle
   { getOracle :: [OracleParagraph t]
   }
-  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 -- | @= 'vanilla'@
 instance Default (Oracle t) where def = vanilla
@@ -52,7 +52,7 @@ instance IsList (Oracle t) where
 newtype OracleParagraph t = OracleParagraph
   { getOracleParagraph :: [t]
   }
-  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable)
+  deriving (Functor,Foldable,Traversable,Show,Read,Eq,Ord,Generic,NFData,Hashable)
 
 -- | 
 instance IsList (OracleParagraph t) where

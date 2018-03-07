@@ -5,7 +5,7 @@
 {-|
 
 -}
-module MTGJSON.AllSets.Schema where
+module MTGJSON.AllSets.Validate where
 import MTGJSON.Extra
 
 import MTGJSON.AllSets.Enums
@@ -16,6 +16,8 @@ import MTGJSON.AllSets.Object as Object
 import MTGJSON.AllSets.Set    as Edition
 import MTGJSON.AllSets.Card   as Card
 
+import Data.Fuzzy
+
 import "thyme"      Data.Thyme
 import "old-locale" System.Locale (defaultTimeLocale)
 --import qualified "attoparsec" Data.Attoparsec.ByteString as Attoparsec
@@ -23,6 +25,50 @@ import "old-locale" System.Locale (defaultTimeLocale)
 -- import Data.Monoid
 -- import Prelude.Spiros
 
+----------------------------------------
+  
+{-|
+
+@
+
+@
+
+-}
+validateSets
+  :: [SetObject]
+  -> (Map Fuzzy (Edition, [CardObject], [CardSchema]))
+validateSets = _
+
+{-|
+
+e.g.
+
+@
+((edition, cards) : _) <- validateSetsM xs
+@
+
+
+@
+:set -XOverloadedStrings
+import Control.Lens
+
+isRIX = \edition -> (edition ^. edition_code) == "RIX" || T.toCaseFold (edition ^. edition_name) == T.toCaseFold "Rivals of Ixalan"
+
+ys <- validateSetsM xs
+(rixEdition, rixCards) <- ys ^?! (filtered isRIX)
+
+
+@
+
+-}
+validateSetsM
+  :: (MonadThrow m)
+  => [SetObject]
+  -> m [(Edition, [CardSchema])]
+validateSetsM = _
+
+-- Just (rixEdition, rixCards) <- ys ^? (traverse . filtered . edition_code )
+  
 ----------------------------------------
 
 {-|
@@ -164,84 +210,35 @@ getEditionCodes SetObject{..} = EditionCodes{..}
    -- & fromMaybe _Edition_gathererCode
 
 ----------------------------------------
+
+{-|
+
+'validateEdition', and if the set metadata is valid, 'validateCard' each card, returning as many valid cards as possible. 
+
+@
+(edition,successes,failures) <- 'validateSetM' s
+@
+
+-}
+validateSet :: SetObject -> Maybe (Edition, [CardObject], [CardSchema])
+validateSet _SetObject@SetObject{..} = do
+  
+  edition@Edition{..} <- validateEdition _SetObject
+  
+  let (successes,failures) = _SetObject_cards
+        & validateCards _Edition_name _Edition_border
+        
+  return (edition,successes,failures)
+
+{-|
+
+-}
+validateSetM
+  :: (MonadThrow m)
+  => SetObject
+  -> m (Edition, [CardObject], [CardSchema])
+validateSetM = validateSet > maybe2throw
  
-{-|
-
-formatting:
-
-@
-YYYY-MM-DD or YYYY-MM or YYYY
-@
-
-examples:
-
-@
-"2010-07-22" or "2010-07" or "2010"
-@
-
->>> :set -XOverloadedStrings
->>> parseDay "2010-07-22"
-Just 2010-07-22
->>> parseDay "2010-07"
-Just 2010-07-01
->>> parseDay "2010"
-Just 2010-01-01
->>> parseDay "  2010-07-22  "
-Just 2010-07-22
-
--}
-parseDay :: Text -> Maybe Day
-parseDay = getFirst . parseDayViaFormat
-  [ "%Y-%m-%d"
-  , "%Y-%m"
-  , "%Y"
-  ]
-
-parseDayViaFormat :: [String] -> Text -> First Day
-parseDayViaFormat acceptableTimeFormats t = firstValidParse
-  where
-  firstValidParse
-    = mconcat allParses
-  allParses
-    = parseVia <$> acceptableTimeFormats  
-  parseVia aTimeFormat
-    = parseTime defaultTimeLocale aTimeFormat (toS t)
-    & First
-
--- parseDay = toS > parse
---   where
---   parse = Attoparsec.parseOnly p > either2maybe
---   p = timeParser defaultTimeLocale "YYYY-MM-DD"
---
---parseDay = toS > readMay
---
---parseDay = toS > parseTime defaultTimeLocale "YYYY-MM-DD"
--- T.unpack
-
-{-NOTES
-
-timeParser :: TimeLocale -> String -> Parser TimeParse
-
-parseTime :: (ParseTime t) => TimeLocale -> String -> String -> Maybe t
-parseTime l spec = either (const Nothing) Just
-        . P.parseOnly parser . utf8String where
-    parser = buildTime <$ P.skipSpace <*> timeParser l spec
-        <* P.skipSpace <* P.endOfInput
-
--}
-
-
-----------------------------------------
-
-{-|
-
-
-
-
--}
-validateSet :: SetObject -> (Maybe Edition, [CardSchema])
-validateSet _SetObject@SetObject{..} = (Nothing, [])
-
 ----------------------------------------
 
 {-|
@@ -253,7 +250,6 @@ validateSet _SetObject@SetObject{..} = (Nothing, [])
 validateEdition :: SetObject -> Maybe Edition
 validateEdition _SetObject@SetObject{..} = do
 
- -- _Edition_releaseDate <- _SetObject_releaseDate <&> parseDay
   releaseDate          <- _SetObject_releaseDate
   _Edition_releaseDate <- parseDay releaseDate 
 
@@ -268,13 +264,75 @@ validateEdition _SetObject@SetObject{..} = do
  _Edition_type        = _SetObject_type         &  EditionType
  _Edition_border      = _SetObject_border       &  maybe blackBorder Border
  _Edition_block       = _SetObject_block       <&> BlockName 
- _Edition_booster     = _SetObject_booster      &  maybe defaultBooster toUniformBooster
- -- _Edition_releaseDate = _SetObject_releaseDate <&> (parseDay > join)
- _Edition_onlineOnly  = _SetObject_onlineOnly   &  maybe OfflineToo fromOnlineOnly
+
+ _Edition_booster     = _SetObject_booster
+   &  maybe defaultBooster toUniformBooster
+
+ _Edition_onlineOnly  = _SetObject_onlineOnly
+   &  maybe OfflineToo fromOnlineOnly
+
+-- _Edition_releaseDate = _SetObject_releaseDate <&> (parseDay > join)
 
 -- validateEdition :: SetObject -> Edition
 -- validateEdition _SetObject@SetObject{..} = Edition{..}
  
+----------------------------------------
+
+{-|
+
+@
+(successes,failures) <- 'validateCards' edition border cards
+@
+
+-}
+validateCards
+  :: EditionName -> Border 
+  -> [CardObject]
+  -> ([CardObject], [CardSchema])
+validateCards edition border cards = (failures, successes)
+  where
+  (failures, successes) = partitionEithers (fmap go cards)
+  
+  go :: CardObject -> Either CardObject CardSchema
+  go c = c &
+    ( validateCard edition border
+    > maybe2either c
+    )
+
+{-|
+
+@
+successes <- 'validateCardsM' edition border cards
+@
+
+-}
+validateCardsM
+  :: (MonadThrow m)
+  => EditionName
+  -> Border 
+  -> [CardObject]
+  -> m [CardSchema]
+validateCardsM edition border cards = do
+
+  case failures of
+    
+    [] -> return successes
+    
+    cs -> failWith cs
+  
+  where
+  (failures, successes) = go cards
+
+  go = validateCards edition border
+
+  failWith cs = throwS message
+    where
+    es = cs <&> _CardObject_name :: [Text]
+    sItems  = show es
+    sTotal  = show $ length es
+    message =
+            "[validateCardsM] these cards (" <> sTotal <> "total) were invalid: " <> sItems
+
 ----------------------------------------
 
 {-|
@@ -410,5 +468,71 @@ validateNumeric _ _ _ = Nothing
 
 -}
 
+----------------------------------------
+ 
+{-|
+
+formatting:
+
+@
+YYYY-MM-DD or YYYY-MM or YYYY
+@
+
+examples:
+
+@
+"2010-07-22" or "2010-07" or "2010"
+@
+
+>>> :set -XOverloadedStrings
+>>> parseDay "2010-07-22"
+Just 2010-07-22
+>>> parseDay "2010-07"
+Just 2010-07-01
+>>> parseDay "2010"
+Just 2010-01-01
+>>> parseDay "  2010-07-22  "
+Just 2010-07-22
+
+-}
+parseDay :: Text -> Maybe Day
+parseDay = getFirst . parseDayViaFormat
+  [ "%Y-%m-%d"
+  , "%Y-%m"
+  , "%Y"
+  ]
+
+parseDayViaFormat :: [String] -> Text -> First Day
+parseDayViaFormat acceptableTimeFormats t = firstValidParse
+  where
+  firstValidParse
+    = mconcat allParses
+  allParses
+    = parseVia <$> acceptableTimeFormats  
+  parseVia aTimeFormat
+    = parseTime defaultTimeLocale aTimeFormat (toS t)
+    & First
+
+-- parseDay = toS > parse
+--   where
+--   parse = Attoparsec.parseOnly p > either2maybe
+--   p = timeParser defaultTimeLocale "YYYY-MM-DD"
+--
+--parseDay = toS > readMay
+--
+--parseDay = toS > parseTime defaultTimeLocale "YYYY-MM-DD"
+-- T.unpack
+
+{-NOTES
+
+timeParser :: TimeLocale -> String -> Parser TimeParse
+
+parseTime :: (ParseTime t) => TimeLocale -> String -> String -> Maybe t
+parseTime l spec = either (const Nothing) Just
+        . P.parseOnly parser . utf8String where
+    parser = buildTime <$ P.skipSpace <*> timeParser l spec
+        <* P.skipSpace <* P.endOfInput
+
+-}
 
 ----------------------------------------
