@@ -18,7 +18,7 @@ import MTGJSON.AllSets.Card   as Card
 
 --
 
-import Data.Fuzzy
+--import Data.Fuzzy
 
 --
 
@@ -28,7 +28,7 @@ import "old-locale" System.Locale (defaultTimeLocale)
 
 --
 
-import qualified Data.Map as Map
+--import qualified Data.Map as Map
 
 --
 
@@ -36,18 +36,62 @@ import qualified Data.Map as Map
 -- import Prelude.Spiros
 
 ----------------------------------------
-  
+
+data ValidationExceptionForSetOrCard
+  = ValidationExceptionForSetOrCard (Either SetObject CardObject)
+
+instance Exception ValidationExceptionForSetOrCard
+
+-- | non-@Read@able instance for 'Exception' (i.e. human-readable but not machine-readable). 
+instance Show ValidationExceptionForSetOrCard where
+  show (ValidationExceptionForSetOrCard _SetOrCard)
+    = case _SetOrCard of
+        Left  SetObject{..}  -> toS _SetObject_name
+        Right CardObject{..} -> toS _CardObject_name
+
+----------------------------------------
+
+type ValidatedSetsAndCards = [(Edition, [CardSchema])]
+
+type ValidationResultsForSetsAndTheirCards 
+   = ( [ SetObject
+       ]
+     , [ ( Edition
+         , [CardObject]
+         , [CardSchema]
+         )
+       ]
+     )
+
 {-|
 
 @
-
+(failedSets, validatedSetsWithCardResults) = validateSets sets
 @
 
 -}
 validateSets
   :: [SetObject]
-  -> Map Query (Edition, [CardObject], [CardSchema])
-validateSets sets = Map.empty
+  
+  -> ( [ SetObject
+       ]
+     , [ ( Edition
+         , [CardObject]
+         , [CardSchema]
+         )
+       ]
+     )
+
+validateSets
+  = fmap go
+  > partitionEithers
+  where
+  go :: SetObject -> Either SetObject
+         ( Edition
+         , [CardObject]
+         , [CardSchema]
+         )
+  go set = validateSet set & maybe2either set
 
 {-|
 
@@ -75,10 +119,69 @@ validateSetsM
   :: (MonadThrow m)
   => [SetObject]
   -> m [(Edition, [CardSchema])]
-validateSetsM sets = return []
+validateSetsM sets = do
+
+  case invalidSets of
+    
+    [] -> do
+      successes <- traverse go validSetsWithCards --TODO
+      return successes
+    
+    ss -> failWith ss
+  
+  where
+  (invalidSets, validSetsWithCards) = validateSets sets
+
+  go = \case
+    (validSet, [], validCards)  -> return (validSet, validCards)
+    (validSet, invalidCards, _) -> throwS message
+        where
+        EditionName (toS -> sName) = validSet & _Edition_name 
+        es = invalidCards <&> _CardObject_name :: [Text]
+        sItems  = show es
+        sTotal  = show $ length es
+        message =
+                "[validateSetsM] in the set `"<> sName <>"`, these cards (" <> sTotal <> " total) were invalid: " <> sItems
+
+  failWith ss = throwS message
+    where
+    es = ss <&> _SetObject_name :: [Text]
+    sItems  = show es
+    sTotal  = show $ length es
+    message =
+            "[validateSetsM] these sets (" <> sTotal <> " total) were invalid (or had invalid cards): " <> sItems
+
+
+
+{-
+
+validateSet _SetObject@SetObject{..} = do
+  
+  edition@Edition{..} <- validateEdition _SetObject
+  
+  let (successes,failures) = _SetObject_cards
+        & validateCards _Edition_name _Edition_border
+        
+validateCardsM edition border cards
+
+
+
+validateSets sets = (failedSets, validatedSetsWithCardResults) 
+  where
+  (failedSets, validatedSetsWithCardResults)
+    = partitionEithers $ fmap go sets
+  go set = validateSet set & maybe2either set
+
+
+isRIX = \edition -> (edition ^. edition_code) == "RIX" || T.toCaseFold (edition ^. edition_name) == T.toCaseFold "Rivals of Ixalan"
+
+ys <- validateSetsM xs
+(rixEdition, rixCards) <- ys ^?! (filtered isRIX)
 
 -- Just (rixEdition, rixCards) <- ys ^? (traverse . filtered . edition_code )
-  
+
+-}
+
 ----------------------------------------
 
 {-|
@@ -230,7 +333,9 @@ getEditionCodes SetObject{..} = EditionCodes{..}
 @
 
 -}
-validateSet :: SetObject -> Maybe (Edition, [CardObject], [CardSchema])
+validateSet
+  :: SetObject
+  -> Maybe (Edition, [CardObject], [CardSchema])
 validateSet _SetObject@SetObject{..} = do
   
   edition@Edition{..} <- validateEdition _SetObject
@@ -341,7 +446,7 @@ validateCardsM edition border cards = do
     sItems  = show es
     sTotal  = show $ length es
     message =
-            "[validateCardsM] these cards (" <> sTotal <> "total) were invalid: " <> sItems
+            "[validateCardsM] these cards (" <> sTotal <> " total) were invalid: " <> sItems
 
 ----------------------------------------
 

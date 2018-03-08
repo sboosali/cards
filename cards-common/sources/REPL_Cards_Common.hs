@@ -76,6 +76,10 @@ slottables = boosters & concat & Set.fromList & Set.toList :: [Text]
 
 
 
+
+
+
+
 results:
 
 @

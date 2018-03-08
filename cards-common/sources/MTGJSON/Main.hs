@@ -209,12 +209,37 @@ parseSetsFile
 (invalids, valids) <- validateSetsFile
 @
 
+
+:set -XOverloadedStrings
+:set +t
+sets <- parseSetsFile
+let [roe] = sets ^.. _Right . _SetsObject . at "ROE" . _Just
+
+@
+((edition, cards) : _) <- validateSetsM xs
+@
+
+
+@
+
+:set -XOverloadedStrings
+import Control.Lens
+
+ys <- validateSetsFile 
+
+isRIX = \edition -> (edition ^. edition_code) == "RIX" || T.toCaseFold (edition ^. edition_name) == T.toCaseFold "Rivals of Ixalan"
+
+(rixEdition, rixCards) <- ys ^?! (filtered isRIX)
+@
+
+
 -}
-validateSetsFile :: IO ([SetObject], Editions)
+validateSetsFile :: IO ValidatedSetsAndCards
 validateSetsFile
     = parseSetsFile
   >>= maybe2throw
-  >>= (go > forceIO)
+  >>= go
+  >>= forceIO
   where
-  go = validateEditions
+  go = validateSetsM
 
