@@ -10,7 +10,12 @@ module Data.Fuzzy where
 
 import "enumerate" Enumerate
 
-import "spiros" Prelude.Spiros
+import qualified Data.Text as T
+import           Data.Text (Text)
+
+--[List-Not-Seq] import qualified Data.Sequence as Seq
+
+import "spiros" Prelude.Spiros hiding (Text)
 
 ----------------------------------------
 
@@ -19,7 +24,7 @@ import "spiros" Prelude.Spiros
 See 'SearchConfig' and 'fuzzySearch'. 
 
 -}
-newtype Fuzzy = Fuzzy Text
+newtype Query = Query Text
  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
 
 ----------------------------------------
@@ -154,7 +159,7 @@ instance Default MatchingStrategy where def = MatchAffix
 
 ----------------------------------------
 
-wildcard :: Fuzzy
+wildcard :: Query
 wildcard = ""
 
 ----------------------------------------
@@ -175,7 +180,7 @@ NoMatch
 >>> toMatchResult "a"
 UnambiguousMatch 'a'
 >>> toMatchResult "abc"
-AmbiguousMatches ('a':|"bc")
+AmbiguousMatches ('a' :| "bc")
 
 -}
 toMatchResult :: [a] -> MatchResult a
@@ -208,10 +213,23 @@ fuzzySearch config query munge candidates
 
 Example usage:
 
-@
->>> fuzzySearch def (Fuzzy "bc") (\(x,y) -> [x,y]) [("abc","xyz"), ("cba","zyz")]
+>>> :set -XOverloadedStrings
+>>> fuzzySearch def (Query "_") (\(x,y) -> Just [x,y]) [("abc","xyz"), ("",""), ("cba","zyx")]
+NoMatch
+>>> fuzzySearch def (Query "bc") (\(x,y) -> Just [x,y]) [("abc","xyz"), ("",""), ("cba","zyx")]
 UnambiguousMatch ("abc","xyz")
-@
+>>> fuzzySearch def (Query "z") (\(x,y) -> Just [x,y]) [("abc","xyz"), ("",""), ("cba","zyx")]
+AmbiguousMatches (("abc","xyz") :| [("cba","zyx")])
+>>> fuzzySearch def{ _maxResults = Just 1} (Query "z") (\(x,y) -> Just [x,y]) [("abc","xyz"), ("",""), ("cba","zyx")]
+UnambiguousMatch ("abc","xyz")
+>>> fuzzySearch def (Query "BC") (\(x,y) -> Just [x,y]) [("abc","xyz"), ("",""), ("cba","zyx")]
+UnambiguousMatch ("abc","xyz")
+>>> fuzzySearch def{ _caseSensitivity = CaseSensitive } (Query "BC") (\(x,y) -> Just [x,y]) [("abc","xyz"), ("",""), ("cba","zyx")]
+NoMatch
+>>> fuzzySearch def{ _matchingStrategy = MatchExactly } (Query "ab") (\(x,y) -> Just [x,y]) [("abc","xyz"), ("",""), ("cba","zyx")]
+NoMatch
+>>> fuzzySearch def{ _matchingStrategy = MatchPrefix } (Query "ab") (\(x,y) -> Just [x,y]) [("abc","xyz"), ("",""), ("cba","zyx")]
+UnambiguousMatch ("abc","xyz")
 
 Some laws:
 
@@ -243,6 +261,8 @@ xs = fuzzySearch _ _ (const $ Just []) xs
 
 Notes:
 
+Calls 'fuzzyMatch' on each @Text@ of each @munge@d item.
+
 Calls @foldr@, like this (but not):
 
 @
@@ -253,40 +273,158 @@ Calls @foldr@, like this (but not):
  -> 'MatchResult' a
 @
 
-@foldr@, being right-associative i.e. "productive", may terminate on infinite input; but only if '_maxResults' is @('Just' n)@. 
+@foldr@, being right-associative i.e. "productive", may terminate on infinite input; but only if the consumer is lazy enough too.
+
+TODO use 'apo'? Works when '_maxResults' is @('Just' n)@. 
 
 -}
 fuzzySearch
   :: forall a f. (Functor f, Foldable f)
   => SearchConfig
-  -> Fuzzy
+  -> Query
   -> (a -> Maybe [Text])
   -> f a
   -> MatchResult a
-fuzzySearch SearchConfig{..} (Fuzzy query) munge candidates
+fuzzySearch SearchConfig{..} query munge candidates
   = candidates
-  & fmap (id &&& munge)
+  & fmap (id &&&! munge)
   & foldr go []
-  & reverse              -- `foldr` returns in "reverse" order
+  & shrink -- toList              -- with list cons, `foldr` would return in "reverse" order?
   & toMatchResult
   where
-  go :: (a, Maybe [Text]) -> [a] -> [a]
-  go (_, Nothing) xs = xs
-  go (x, Just ts) xs = if all match' ts
-    then (x:xs)
+  --[List-Not-Seq] go :: Pair a (Maybe [Text]) -> Seq a -> Seq a
+  go :: Pair a (Maybe [Text]) -> List a -> List a  
+  
+  go (Pair _ Nothing)   xs = xs
+  go (Pair x (Just ts)) xs =
+    {- let
+    isSmallOrUnbounded = _maxResults' & maybe True (\n -> Seq.length xs `lessThan` n)
+    doesAnyPartMatch   = any match' ts
+    in-}
+    
+    -- to append something: [1] the matches must be small enough, and [2] the query must match it. 
+    --[List-Not-Seq] if isSmallOrUnbounded && doesAnyPartMatch
+    if any match' ts
+    then x:xs  --[List-Not-Seq] (x Seq.<| xs) -- unlike `[]`, `Seq` has constant-time left-cons. 
     else xs
 
+  --[List-Not-Seq] _maxResults' = _maxResults <&> fromIntegral
+
+  shrink = _maxResults & maybe id (\(fromIntegral -> n) -> take n)
+  
   match' = fuzzyMatch _caseSensitivity _matchingStrategy query
+
+{-# SPECIALIZE fuzzySearch :: SearchConfig -> Query -> (Text -> Maybe [Text]) -> [Text] -> MatchResult Text #-}
 
 -- -- internal FuzzySearchAccumulator
 -- data Accumulator a = Accumulator !(Seq a) 
 
-fuzzyMatch :: CaseSensitivity -> MatchingStrategy -> Text -> Text -> Bool
-fuzzyMatch casing strategy tQuery tCandidate = _
+fuzzyMatch :: CaseSensitivity -> MatchingStrategy -> Query -> Text -> Bool
+fuzzyMatch casing strategy (Query query) = \candidate ->
+  let t = fCase candidate
+  in q `fMatch` t
 
-{-# SPECIALIZE fuzzySearch :: SearchConfig -> Fuzzy -> (Text -> Maybe [Text]) -> [Text] -> MatchResult Text #-}
+  where
+  q = fCase query
 
+  fCase  = fromCaseSensitivity  casing
+  fMatch = fromMatchingStrategy strategy
+
+fromCaseSensitivity :: CaseSensitivity -> (Text -> Text)
+fromCaseSensitivity = \case
+  CaseSensitive   -> id
+  CaseInsensitive -> T.toCaseFold
+
+fromMatchingStrategy :: MatchingStrategy -> Text -> (Text -> Bool)
+fromMatchingStrategy strategy query = predicate
+
+ where
+ predicate = go strategy
+
+ go = \case
+   MatchExactly     -> (==)         query
+   MatchPrefix      -> T.isPrefixOf query
+   MatchAffix       -> T.isInfixOf  query
+   MatchSubsequence -> __ERROR__ "TODO" -- _ -- T.
+   MatchSubset      -> __ERROR__ "TODO" -- _ -- T.
+   MatchAlphabet    -> __ERROR__ "TODO" -- _ -- T.
+
+{-
+ where
+ predicate = go strategy query
+
+ go = \case
+   MatchExactly     -> (==) 
+   MatchPrefix      -> T.isPrefixOf
+   MatchAffix       -> T.isInfixOf
+   MatchSubsequence -> _ -- T.
+   MatchSubset      -> _ -- T.
+   MatchAlphabet    -> _ -- T.
+-}
+
+----------------------------------------
+
+-- | strict pair
+data Pair a b = Pair {-# UNPACK #-} !a {-# UNPACK #-} !b
+
+(&&&!) :: (a -> b) -> (a -> c) -> a -> Pair b c
+f &&&! g = \x -> Pair (f x) (g x)
+    
+----------------------------------------
 {-NOTES
+
+
+
+APO
+
+apo
+ :: (a -> Base t (Either t a))
+ -> (a -> t)
+
+
+ELGOT
+
+elgot :: Functor f => (f a -> a) -> (b -> Either a (f b)) -> b -> a
+
+elgot @Identity :: (Identity a -> a) -> (b -> Either a (Identity b)) -> b -> a
+
+simpleElgot :: forall a b. (b -> Either a b) -> (b -> a)
+simpleElgot f = elgot getIdentity (f >>> Identity)
+
+simpleElgot (\_ -> Left a) _ = a
+
+
+TAKE
+
+simpleElgot @[a] @[a] :: ([a] -> Either [a] [a]) -> ([a] -> [a])
+
+simpleElgot @[a] @(Natural,[a]) :: ((Natural,[a]) -> Either [a] (Natural,[a])) -> ((Natural,[a]) -> [a])
+
+take :: Natural -> ([a] -> [a])
+take k xs = reverse ys
+ --NOTE the `reverse` is necessary,
+ -- because foldr-style recursion appends items to the accumulator in a queue-like way. 
+
+ where
+ (_,_,ys) = simpleElgot go initial
+
+ initial :: (Natural,[a],[a])
+ initial = (k, xs, [])
+
+ go :: (Natural,[a],[a]) -> Either [a] (Natural,[a],[a])
+ go (0,  _,     ys) = Left ys -- halt if output got long enough
+ go (_, [],     ys) = Left ys -- halt if input is too short
+ go (i, (x:xs), ys) = Right (i-1, xs, (x:ys)) -- otherwise, append and continue
+
+
+ go :: Natural -> [a] -> [a] -> Either [a] (Natural,[a],[a])
+
+type TakeAccumulator a = HList [Natural, [a], Seq a]
+
+
+
+
+FOLDR
 
 foldr :: (a -> MatchResult a -> MatchResult a) -> (MatchResult a) -> f a -> (MatchResult a)
 

@@ -13,6 +13,10 @@ module MTGJSON
  , module MTGJSON.AllSets.Card
  , module MTGJSON.AllSets.Set
 
+ , module MTGJSON.AllSets.Booster
+ , module MTGJSON.AllSets.Oracle
+ , module MTGJSON.AllSets.Enums 
+
  --, module MTGJSON.Types
  , module MTGJSON.Kinds
  --, module MTGJSON.Known
@@ -25,7 +29,6 @@ module MTGJSON
  --, module X
  -- , module MTGJSON.Macros
 
- , module Data.Fuzzy
  ) where
 
 ----------------------------------------
@@ -49,10 +52,13 @@ import MTGJSON.AllSets.Object
 import MTGJSON.AllSets.Card
 import MTGJSON.AllSets.Set
 
+import MTGJSON.AllSets.Booster
+import MTGJSON.AllSets.Oracle
+import MTGJSON.AllSets.Enums
+
 import MTGJSON.Paths
 --import MTGJSON.Macros
 
 -- import MTGJSON.Main as X
-import Data.Fuzzy
 
 ----------------------------------------

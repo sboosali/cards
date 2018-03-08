@@ -100,10 +100,16 @@ module REPL_Cards_Common
 import MTGJSON      as X
 import MTGJSON.Main as X
 
-import Control.Exception as X (evaluate)
+import Data.Fuzzy as X
+
+--
 
 import Control.Lens   as X hiding
   ((<&>))
+
+--
+
+import Control.Exception as X (evaluate)
 
 import Prelude.Spiros as X hiding
  (Strict, index, at, snoc, uncons,Format)

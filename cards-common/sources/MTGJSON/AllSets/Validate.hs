@@ -16,11 +16,21 @@ import MTGJSON.AllSets.Object as Object
 import MTGJSON.AllSets.Set    as Edition
 import MTGJSON.AllSets.Card   as Card
 
+--
+
 import Data.Fuzzy
+
+--
 
 import "thyme"      Data.Thyme
 import "old-locale" System.Locale (defaultTimeLocale)
 --import qualified "attoparsec" Data.Attoparsec.ByteString as Attoparsec
+
+--
+
+import qualified Data.Map as Map
+
+--
 
 -- import Data.Monoid
 -- import Prelude.Spiros
@@ -36,8 +46,8 @@ import "old-locale" System.Locale (defaultTimeLocale)
 -}
 validateSets
   :: [SetObject]
-  -> (Map Fuzzy (Edition, [CardObject], [CardSchema]))
-validateSets = _
+  -> (Map Query (Edition, [CardObject], [CardSchema]))
+validateSets sets = Map.empty
 
 {-|
 
@@ -65,7 +75,7 @@ validateSetsM
   :: (MonadThrow m)
   => [SetObject]
   -> m [(Edition, [CardSchema])]
-validateSetsM = _
+validateSetsM sets = return []
 
 -- Just (rixEdition, rixCards) <- ys ^? (traverse . filtered . edition_code )
   

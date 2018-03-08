@@ -127,6 +127,8 @@ instance IsList BoosterSlot where
 instance NFData     BoosterSlot where
   rnf :: BoosterSlot -> ()
   rnf (BoosterSlot d) = (rnf (D.toMap d))
+    --NOTE `D.toMap` is the actual accessor, thus it should return a reference to the internal Map itself. 
+    
     -- where
     -- m = D.toMap d
     -- m' = rnf m
@@ -221,8 +223,8 @@ e.g.
 
 >>> :set -XOverloadedStrings
 >>> :set -XOverloadedLists
->>> makeBoosterSlotProbabilities [ "mythic"-: 1, "rare"-: 7 ]
-fromList [(romList ["rare", "mythic"], BoosterSlot (fromList [("mythic", 1 % 8),("rare", 7 % 8)])]
+>>> makeBoosterSlotProbabilities [ ["common"-: 1], [ "mythic"-: 1, "rare"-: 7 ] ]
+fromList [(fromList ["common"],BoosterSlot {getBoosterSlot = fromList [("common",1 % 1)]}),(fromList ["mythic","rare"],BoosterSlot {getBoosterSlot = fromList [("mythic",1 % 8),("rare",7 % 8)]})]
 
 -}
 makeBoosterSlotProbabilities

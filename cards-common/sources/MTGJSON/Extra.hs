@@ -102,8 +102,6 @@ maybe2validation e = maybe (failure e) success
 
 ----------------------------------------
 
-type List = []
-
 ----------------------------------------
 
 type Association k v = [(k,v)]
