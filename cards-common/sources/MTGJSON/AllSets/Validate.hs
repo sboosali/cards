@@ -46,7 +46,7 @@ import qualified Data.Map as Map
 -}
 validateSets
   :: [SetObject]
-  -> (Map Query (Edition, [CardObject], [CardSchema]))
+  -> Map Query (Edition, [CardObject], [CardSchema])
 validateSets sets = Map.empty
 
 {-|

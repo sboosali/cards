@@ -282,6 +282,10 @@ library
              , aeson
              , scientific
 
+-- (memoization)               
+             , MemoTrie
+             , memo
+
 -- other packages 
              , binary
              , file-embed

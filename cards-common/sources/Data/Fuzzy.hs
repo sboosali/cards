@@ -8,12 +8,22 @@
 -}
 module Data.Fuzzy where
 
+--
+
+--import           "memo" Memoize.Types
+--import qualified "memo" Memoize     as Memo  
+import qualified "memo" Memoize.Map as Memo  
+
 import "enumerate" Enumerate
+
+--
 
 import qualified Data.Text as T
 import           Data.Text (Text)
 
 --[List-Not-Seq] import qualified Data.Sequence as Seq
+
+--
 
 import "spiros" Prelude.Spiros hiding (Text)
 
@@ -27,6 +37,31 @@ See 'SearchConfig' and 'fuzzySearch'.
 newtype Query = Query Text
  deriving (Show,Read,Eq,Ord,Generic,NFData,Hashable,IsString)
 
+----------------------------------------
+
+{-| A queryable set of things.
+
+Can be cached. 
+
+Often paired with a container.
+
+e.g.
+
+@
+-- queryable :: Queryable a
+-- results :: MatchResult a
+results = runQueryable queryable def (Query "...")
+@
+
+-}
+newtype Queryable a = Queryable
+  { runQueryable :: SearchConfig -> Query -> MatchResult a
+  }
+  deriving (Functor,Generic,NFData)
+
+-- instance Functor Queryable where
+--   fmap f (Queryable g) = Queryable (f . g)
+  
 ----------------------------------------
 
 -- newtype SearchConfig = SearchConfig (Set ())
@@ -203,6 +238,52 @@ strictestSearchConfig = SearchConfig CaseSensitive MatchExactly (Just 1)
 
 {-|
 
+Wraps 'fuzzySearch'. 
+
+Parameters:
+
+@
+cachedQueryable munge candidates
+@
+
+-}
+cachedQueryable
+  :: forall a f.
+    ( Ord a
+    , Functor f, Foldable f
+    )
+  => (a -> Maybe [Text])
+  -> f a
+  -> Queryable a
+cachedQueryable munge candidates = Queryable go
+
+  where
+  go :: SearchConfig -> Query -> MatchResult a
+  go =
+    Memo.memo $ \config ->
+        (Memo.memo $ \query ->
+            search config query)
+
+  search config query = fuzzySearch config query munge candidates
+
+showQueryable
+  :: forall a f.
+    ( Show a, Ord a
+    , Functor f, Foldable f
+    )
+  => f a
+  -> Queryable a
+showQueryable = cachedQueryable (show > T.pack > (:[]) > Just)
+
+----------------------------------------
+
+runQueryableDefault :: Queryable a -> Query -> MatchResult a
+runQueryableDefault queryable = (runQueryable queryable) def
+
+----------------------------------------
+
+{-|
+
 Parameters:
 
 @
@@ -369,7 +450,7 @@ data Pair a b = Pair {-# UNPACK #-} !a {-# UNPACK #-} !b
 
 (&&&!) :: (a -> b) -> (a -> c) -> a -> Pair b c
 f &&&! g = \x -> Pair (f x) (g x)
-    
+
 ----------------------------------------
 {-NOTES
 
