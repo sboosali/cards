@@ -28,6 +28,7 @@ import qualified Data.Set as Set
 
 import Prelude.Spiros hiding (P)
 import Data.List (groupBy)
+import Data.Char (GeneralCategory(..))
 
 ----------------------------------------
 

@@ -119,7 +119,7 @@ validateSetsM
   :: (MonadThrow m)
   => [SetObject]
   -> m [(Edition, [CardSchema])]
-validateSetsM sets = do
+validateSetsM sets = _ {-do
 
   case invalidSets of
     
@@ -137,7 +137,7 @@ validateSetsM sets = do
     (validSet, invalidCards, _) -> throwS message
         where
         EditionName (toS -> sName) = validSet & _Edition_name 
-        es = invalidCards <&> _CardObject_name :: [Text]
+         es = invalidCards <&> _CardObject_name :: [Text]
         sItems  = show es
         sTotal  = show $ length es
         message =
@@ -151,6 +151,7 @@ validateSetsM sets = do
     message =
             "[validateSetsM] these sets (" <> sTotal <> " total) were invalid (or had invalid cards): " <> sItems
 
+-}
 
 
 {-

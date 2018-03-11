@@ -100,6 +100,16 @@ failure = (:|[]) > Failure
 maybe2validation :: e -> Maybe a -> Validation (NonEmpty e) a
 maybe2validation e = maybe (failure e) success
 
+-- validation2throw' :: (MonadThrow m) => (e -> String) -> Validation e a -> m a
+-- validation2throw' display = \case
+--   Failure e -> ErrorCall $ display e
+--   Success a -> return a
+
+validation2throw' :: (MonadThrow m) => (e -> String) -> Validation e a -> m a
+validation2throw' display = \case
+  Failure e -> throwS $ display e
+  Success a -> return a
+  
 ----------------------------------------
 
 ----------------------------------------
@@ -218,8 +228,8 @@ decoded = J.eitherDecode > either fail return
 
 ----------------------------------------
 
-unsafeNatural :: Integral i => i -> Natural
-unsafeNatural = fromIntegral
+-- unsafeNatural :: Integral i => i -> Natural
+-- unsafeNatural = fromIntegral
 
 n2i :: Natural -> Integer
 n2i = toInteger

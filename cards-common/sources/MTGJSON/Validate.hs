@@ -217,8 +217,8 @@ validateCardObject setCodes c@CardObject{..} = Card
 
 ----------------------------------------
 
-validateNatural :: Int -> CardValidation Natural
-validateNatural (toInteger -> i)
+validateNaturalNumber :: Int -> CardValidation Natural
+validateNaturalNumber (toInteger -> i)
   = i2n i
   & maybe (failure e) success 
   where
@@ -226,8 +226,8 @@ validateNatural (toInteger -> i)
 
     -- mconcat [schemaFieldName, " must be a natural (non-negative integer): ", show' i]
 
--- validateNatural :: String -> Int -> V CardErrors Natural
--- validateNatural schemaFieldName (toInteger -> i)
+-- validateNaturalNumber :: String -> Int -> V CardErrors Natural
+-- validateNaturalNumber schemaFieldName (toInteger -> i)
 --   = i2n i
 --   & maybe (failure e) success 
 --   where

@@ -1,0 +1,7 @@
+
+{
+  "url": "https://github.com/haskell/deepseq",
+  "rev": "0b22c9825ef79c1ee41d2f19e7c997f5cdc93494",
+  "sha256": "0abda745bwz1g15c33jsgw88ij88na20nm63yfqmjp37zgprz9b9",
+  "fetchSubmodules": true
+}

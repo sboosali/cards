@@ -60,7 +60,9 @@ let
 
 # :: Bool
 develop = 
-  getEnv "DEVELOP" != ""; 
+  true;
+  # getEnv "DEVELOP" != ""; 
+
    # check whether the environment variable is set
 
 # $ echo "$DEVELOP"
@@ -327,6 +329,9 @@ myOverlaysWith = pkgs: self: super: let
    ########################################
    # Add Haskell Packages Below           #
    ######################################## 
+ 
+    reflex-dom-core = loosen super.reflex-dom-core; 
+    reflex-dom      = loosen super.reflex-dom; 
 
 #     reflex-dom-core = loosen (nix_
 #       ./vendor/reflex-dom/reflex-dom-core); 
@@ -376,7 +381,12 @@ myOverlaysWith = pkgs: self: super: let
     #   # latest needs ghc-8.2.2
     #   # rev "2b7517f27242863ba153bc045dd269b348df05aa" 
 
-    spiros = local_ ../spiros;
+    # deepseq = loosen (prefetched_ ./deepseq-1.4.3.json); # fails
+    # deepseq = hackage_ "deepseq" "1.4.3";
+
+    spiros = cabal2nix_ "spiros" ../spiros;
+    # spiros = local_ ../spiros;
+
     enumerate          = loosen (local_ ../enumerate/enumerate);
     enumerate-function = loosen (local_ ../enumerate/enumerate-function);
 

@@ -16,6 +16,7 @@ import qualified Data.Set as Set
 
 import Prelude.Spiros 
 import Data.List (groupBy)--, sortOn)
+import Data.Char (GeneralCategory(..))
 
 ----------------------------------------
 

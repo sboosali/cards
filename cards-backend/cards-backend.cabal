@@ -111,7 +111,7 @@ library
 -- project
              , cards-common
 -- mine 
-             , spiros
+             , spiros             >=0.2
 --              , enumerate 
 
 -- ghcjs
